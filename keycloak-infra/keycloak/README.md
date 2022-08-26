@@ -15,3 +15,9 @@ http://localhost:8080
 Credentials: `admin/Pa55w0rd`
 
 >Note: any changes done in the theme/pac folder directly visible in the keycloak UI post refresh.
+
+### Cleanup the environment
+
+```shell
+docker compose down -v
+```
