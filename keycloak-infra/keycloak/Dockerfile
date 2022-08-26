@@ -1,3 +1,4 @@
-FROM quay.io/keycloak/keycloak:18.0.2
+ARG KEYCLOAK_BASE_IMAGE
+FROM ${KEYCLOAK_BASE_IMAGE}
 
 COPY theme/ /opt/keycloak/themes/

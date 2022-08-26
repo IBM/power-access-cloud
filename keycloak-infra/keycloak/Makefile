@@ -1,7 +1,12 @@
-KEYCLOCK_IMAGE=quay.io/keycloak/keycloak:18.0.2
+KEYCLOCK_IMAGE_NAME := quay.io/keycloak/keycloak
+KEYCLOCK_IMAGE_TAG := $(shell cat KEYCLOAK_VERSION)
+KEYCLOCK_IMAGE := $(KEYCLOCK_IMAGE_NAME):$(KEYCLOCK_IMAGE_TAG)
+REGISTRY := ghcr.io/pdexchange
+IMG := keycloak
+VERSION ?= dev
 
-
-sync-theme: cleanup
+.PHONY: sync-theme
+sync-theme: clean
 	$(eval UUID=$(shell docker run --entrypoint bash -itd --name keycloak_themes ${KEYCLOCK_IMAGE}))
 	docker exec $(UUID) bash -c "mkdir -p /tmp/extract; cp -f /opt/keycloak/lib/lib/main/org.keycloak.keycloak-themes* /tmp/extract/keycloak-themes.jar"
 	docker cp $(UUID):/tmp/extract/keycloak-themes.jar .
@@ -9,7 +14,12 @@ sync-theme: cleanup
 	rm -rf META-INF
 	rm -rf keycloak-themes.jar
 
-cleanup:
+.PHONY: clean
+clean:
 	-docker rm -f keycloak_themes
 	-rm -rf keycloak-themes.jar
 	-rm -rf META-INF
+
+.PHONY: docker-build
+docker-build:
+	docker build --build-arg KEYCLOAK_BASE_IMAGE=$(KEYCLOCK_IMAGE) -t $(REGISTRY)/$(IMG):$(VERSION)-$(KEYCLOCK_IMAGE_TAG) .
