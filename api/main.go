@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	appv1alpha1 "github.com/PDeXchange/pac/api/v1alpha1"
-	"github.com/PDeXchange/pac/controllers"
+	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
+	"github.com/PDeXchange/pac/controllers/app"
 	//+kubebuilder:scaffold:imports
 )
 

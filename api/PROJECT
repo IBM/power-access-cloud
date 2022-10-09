@@ -1,6 +1,7 @@
 domain: pac.io
 layout:
 - go.kubebuilder.io/v3
+multigroup: true
 projectName: pac
 repo: github.com/PDeXchange/pac
 resources:

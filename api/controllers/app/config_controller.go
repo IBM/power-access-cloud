@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	appv1alpha1 "github.com/PDeXchange/pac/api/v1alpha1"
+	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
 )
 
 // ConfigReconciler reconciles a Config object
