@@ -1,0 +1,16 @@
+domain: pac.io
+layout:
+- go.kubebuilder.io/v3
+projectName: pac
+repo: github.com/PDeXchange/pac
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: pac.io
+  group: app
+  kind: Config
+  path: github.com/PDeXchange/pac/api/v1alpha1
+  version: v1alpha1
+version: "3"
