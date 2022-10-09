@@ -32,7 +32,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
-	"github.com/PDeXchange/pac/controllers/app"
+	manageiqv1alpha1 "github.com/PDeXchange/pac/apis/manageiq/v1alpha1"
+	controllers "github.com/PDeXchange/pac/controllers/app"
+	manageiqcontrollers "github.com/PDeXchange/pac/controllers/manageiq"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -45,6 +47,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(appv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(manageiqv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -94,6 +97,13 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Config")
+		os.Exit(1)
+	}
+	if err = (&manageiqcontrollers.ServiceReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Service")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

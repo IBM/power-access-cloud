@@ -1,0 +1,12 @@
+apiVersion: manageiq.pac.io/v1alpha1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: service
+    app.kubernetes.io/instance: service-sample
+    app.kubernetes.io/part-of: pac
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: pac
+  name: service-sample
+spec:
+  # TODO(user): Add fields here

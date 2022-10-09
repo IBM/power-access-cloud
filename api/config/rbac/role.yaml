@@ -31,3 +31,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - manageiq.pac.io
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - manageiq.pac.io
+  resources:
+  - services/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - manageiq.pac.io
+  resources:
+  - services/status
+  verbs:
+  - get
+  - patch
+  - update
