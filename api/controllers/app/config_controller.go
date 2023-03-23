@@ -176,10 +176,6 @@ func (r *ConfigReconciler) reconcileSecret(ctx context.Context, req ctrl.Request
 		return nil, err
 	}
 
-	defer func() {
-		err = r.Update(ctx, secret)
-	}()
-
 	if _, ok := secret.Data["miq-password"]; !ok {
 		return nil, fmt.Errorf("miq-password not found in the secret: %s", config.Spec.CredentialSecret.Name)
 	}
