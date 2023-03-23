@@ -53,6 +53,11 @@ func (s *Client) CreateLoadBalancerListener(options *vpcv1.CreateLoadBalancerLis
 	return s.vpcService.CreateLoadBalancerListener(options)
 }
 
+// CreateLoadBalancerPool creates the LoadBalancer Pool
+func (s *Client) CreateLoadBalancerPool(options *vpcv1.CreateLoadBalancerPoolOptions) (*vpcv1.LoadBalancerPool, *core.DetailedResponse, error) {
+	return s.vpcService.CreateLoadBalancerPool(options)
+}
+
 type Options struct {
 	Region string
 }

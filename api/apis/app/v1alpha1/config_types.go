@@ -17,19 +17,64 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type ConfigType string
+
+var (
+	ConfigTypePowerVS ConfigType = "powervs"
+)
+
+type PowerVSConfig struct {
+	Zone            string `json:"zone"`
+	CloudInstanceID string `json:"cloudInstanceID"`
+}
+
+type VPCConfig struct {
+	Region string `json:"region"`
+	//TODO: remove if not required
+	Zone           string `json:"zone"`
+	ID             string `json:"ID"`
+	LoadBalancerID string `json:"loadBalancerID"`
+}
+
 // ConfigSpec defines the desired state of Config
+// TODO: Add appropriate kubebuilder markers for the field
 type ConfigSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Config. Edit config_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// MIQURL used for talking to Manage IQ
+	MIQURL string `json:"MIQURL"`
+
+	// MIQUserName is the user name used for talking ManageIQ
+	MIQUserName string `json:"MIQUserName"`
+
+	// MIQClientID is the client ID created in the keycloak server for talking to ManageIQ
+	MIQClientID string `json:"MIQClientID"`
+
+	// KeycloakURL used for talking to keycloak server
+	KeycloakURL string `json:"keycloakURL"`
+
+	// KeycloakRealm  is the realm used for the manageiq
+	KeycloakRealm string `json:"keycloakRealm"`
+
+	// CredentialSecret is the secret contains the credential like MIQ password, ClientSecret
+	// Secret contains the following data:
+	// miq-password: <ManageIQ Password>
+	// miq-client-password: <ManageIQ Client Password>
+	CredentialSecret corev1.LocalObjectReference `json:"credentialSecret"`
+
+	Type ConfigType `json:"type"`
+
+	PowerVS PowerVSConfig `json:"powerVS"`
+
+	VPC VPCConfig `json:"vpc"`
 }
 
 // ConfigStatus defines the observed state of Config

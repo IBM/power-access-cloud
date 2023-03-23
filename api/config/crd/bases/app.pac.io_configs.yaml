@@ -33,12 +33,76 @@ spec:
           metadata:
             type: object
           spec:
-            description: ConfigSpec defines the desired state of Config
+            description: 'ConfigSpec defines the desired state of Config TODO: Add
+              appropriate kubebuilder markers for the field'
             properties:
-              foo:
-                description: Foo is an example field of Config. Edit config_types.go
-                  to remove/update
+              MIQClientID:
+                description: MIQClientID is the client ID created in the keycloak
+                  server for talking to ManageIQ
                 type: string
+              MIQURL:
+                description: MIQURL used for talking to Manage IQ
+                type: string
+              MIQUserName:
+                description: MIQUserName is the user name used for talking ManageIQ
+                type: string
+              credentialSecret:
+                description: 'CredentialSecret is the secret contains the credential
+                  like MIQ password, ClientSecret Secret contains the following data:
+                  miq-password: <ManageIQ Password> miq-client-password: <ManageIQ
+                  Client Password>'
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              keycloakRealm:
+                description: KeycloakRealm  is the realm used for the manageiq
+                type: string
+              keycloakURL:
+                description: KeycloakURL used for talking to keycloak server
+                type: string
+              powerVS:
+                properties:
+                  cloudInstanceID:
+                    type: string
+                  zone:
+                    type: string
+                required:
+                - cloudInstanceID
+                - zone
+                type: object
+              type:
+                type: string
+              vpc:
+                properties:
+                  ID:
+                    type: string
+                  loadBalancerID:
+                    type: string
+                  region:
+                    type: string
+                  zone:
+                    description: 'TODO: remove if not required'
+                    type: string
+                required:
+                - ID
+                - loadBalancerID
+                - region
+                - zone
+                type: object
+            required:
+            - MIQClientID
+            - MIQURL
+            - MIQUserName
+            - credentialSecret
+            - keycloakRealm
+            - keycloakURL
+            - powerVS
+            - type
+            - vpc
             type: object
           status:
             description: ConfigStatus defines the observed state of Config

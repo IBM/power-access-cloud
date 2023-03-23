@@ -15,7 +15,28 @@ spec:
     singular: service
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: Time duration since creation of Service
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - description: When the service is created at
+      jsonPath: .spec.createdAt
+      name: Created At
+      type: date
+    - description: Service retired
+      jsonPath: .status.retired
+      name: Retired
+      type: string
+    - description: Service deleted
+      jsonPath: .status.deleted
+      name: Deleted
+      type: string
+    - description: Service Ready to consume
+      jsonPath: .status.ready
+      name: Ready
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Service is the Schema for the services API
@@ -35,12 +56,20 @@ spec:
           spec:
             description: ServiceSpec defines the desired state of Service
             properties:
+              ID:
+                description: ManageIQ ID
+                type: string
+              createdAt:
+                type: string
               type:
                 description: Type of service
                 type: string
               virtualMachine:
                 description: VirtualMachine spec
                 properties:
+                  ID:
+                    description: ID of the vm
+                    type: string
                   cloudInstanceID:
                     description: CloudInstanceID is a PowerVS cloud instance ID
                     type: string
@@ -50,7 +79,20 @@ spec:
                   ports:
                     description: Ports
                     items:
-                      type: integer
+                      properties:
+                        backendPool:
+                          type: string
+                        number:
+                          description: Port number
+                          type: integer
+                        target:
+                          type: integer
+                        type:
+                          type: string
+                      required:
+                      - number
+                      - type
+                      type: object
                     type: array
                   vpc:
                     description: VPC information
@@ -70,8 +112,12 @@ spec:
                     description: Zone in which PowerVS cloud instance exist
                     type: string
                 required:
+                - ID
                 - name
                 type: object
+            required:
+            - ID
+            - createdAt
             type: object
           status:
             description: ServiceStatus defines the observed state of Service
@@ -121,8 +167,14 @@ spec:
                   - type
                   type: object
                 type: array
+              deleted:
+                description: Deleted will be true if service not found
+                type: boolean
               ready:
                 description: Ready is true when the service is ready.
+                type: boolean
+              retired:
+                description: Retired will be true when service is retired
                 type: boolean
               virtualMachine:
                 description: VirtualMachine status spec
@@ -134,26 +186,31 @@ spec:
                   instanceID:
                     description: InstanceID is the virtual machine instance id
                     type: string
+                  loadbalancer:
+                    type: string
                   network:
+                    type: string
+                  ports:
                     items:
                       properties:
                         backendPool:
                           type: string
-                        port:
+                        number:
+                          description: Port number
                           type: integer
-                        targetPort:
+                        target:
                           type: integer
                         type:
-                          description: 'TODO: Add check'
                           type: string
                       required:
-                      - port
+                      - number
                       - type
                       type: object
                     type: array
-                  networkName:
-                    type: string
                 type: object
+            required:
+            - deleted
+            - retired
             type: object
         type: object
     served: true

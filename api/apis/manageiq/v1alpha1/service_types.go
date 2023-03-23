@@ -45,8 +45,11 @@ type VirtualMachine struct {
 	// Name of the virtual machine
 	Name string `json:"name"`
 
+	// ID of the vm
+	ID string `json:"ID"`
+
 	// Ports
-	Ports []uint `json:"ports,omitempty"`
+	Ports []Port `json:"ports,omitempty"`
 
 	// CloudInstanceID is a PowerVS cloud instance ID
 	CloudInstanceID string `json:"cloudInstanceID,omitempty"`
@@ -66,38 +69,46 @@ type VPC struct {
 
 // ServiceSpec defines the desired state of Service
 type ServiceSpec struct {
+	// ManageIQ ID
+	ID string `json:"ID"`
+
+	CreatedAt string `json:"createdAt"`
 
 	// Type of service
 	Type ServiceType `json:"type,omitempty"`
 
 	// VirtualMachine spec
-	VirtualMachine VirtualMachine `json:"virtualMachine,omitempty"`
+	// +optional
+	VirtualMachine *VirtualMachine `json:"virtualMachine,omitempty"`
 }
 
 type Port struct {
 	// Port number
 	Number uint `json:"number"`
 
-	// Target port
-	Target uint `json:"target,omitempty"`
+	Type        string `json:"type"`
+	Target      uint   `json:"target,omitempty"`
+	BackendPool string `json:"backendPool,omitempty"`
 }
 
-type NetworkStatus struct {
-	Port uint `json:"port"`
-	// TODO: Add check
-	Type        PortType `json:"type"`
-	TargetPort  uint     `json:"targetPort,omitempty"`
-	BackendPool string   `json:"backendPool,omitempty"`
-}
+//type NetworkStatus struct {
+//	Port uint `json:"port"`
+//	// TODO: Add check
+//	Type                 PortType `json:"type"`
+//	TargetPort           uint     `json:"targetPort,omitempty"`
+//	BackendPool          string   `json:"backendPool,omitempty"`
+//	LoadbalancerHostname string   `json:"loadbalancerHostname,omitempty"`
+//}
 
 type VirtualMachineStatus struct {
 	// InstanceID is the virtual machine instance id
 	InstanceID string `json:"instanceID,omitempty"`
 
-	MACAddress  string          `json:"MACAddress,omitempty"`
-	NetworkName string          `json:"networkName,omitempty"`
-	IPAddress   string          `json:"IPAddress,omitempty"`
-	Networks    []NetworkStatus `json:"network,omitempty"`
+	MACAddress   string `json:"MACAddress,omitempty"`
+	Network      string `json:"network,omitempty"`
+	IPAddress    string `json:"IPAddress,omitempty"`
+	Loadbalancer string `json:"loadbalancer,omitempty"`
+	Ports        []Port `json:"ports,omitempty"`
 }
 
 // ServiceStatus defines the observed state of Service
@@ -105,6 +116,12 @@ type ServiceStatus struct {
 	// Ready is true when the service is ready.
 	// +optional
 	Ready bool `json:"ready"`
+
+	// Retired will be true when service is retired
+	Retired bool `json:"retired"`
+
+	// Deleted will be true if service not found
+	Deleted bool `json:"deleted"`
 
 	// Conditions defines current service state of the service
 	// +optional
@@ -134,13 +151,18 @@ func (s *ServiceStatus) SetVirtualMachineStatusMACAddress(in *models.PVMInstance
 		}
 
 		s.VirtualMachine.MACAddress = nw.MacAddress
-		s.VirtualMachine.NetworkName = nw.NetworkName
+		s.VirtualMachine.Network = nw.NetworkName
 
 	}
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="Time duration since creation of Service"
+//+kubebuilder:printcolumn:name="Created At",type="date",JSONPath=".spec.createdAt",description="When the service is created at"
+//+kubebuilder:printcolumn:name="Retired",type="string",JSONPath=".status.retired",description="Service retired"
+//+kubebuilder:printcolumn:name="Deleted",type="string",JSONPath=".status.deleted",description="Service deleted"
+//+kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready",description="Service Ready to consume"
 
 // Service is the Schema for the services API
 type Service struct {
@@ -149,6 +171,30 @@ type Service struct {
 
 	Spec   ServiceSpec   `json:"spec,omitempty"`
 	Status ServiceStatus `json:"status,omitempty"`
+}
+
+func (in *Service) SetRetired() {
+	in.Status.Retired = true
+}
+
+func (in *Service) IsRetired() bool {
+	return in.Status.Retired
+}
+
+func (in *Service) SetNotReady() {
+	in.Status.Ready = false
+}
+
+func (in *Service) IsReady() bool {
+	return in.Status.Ready
+}
+
+func (in *Service) SetDeleted() {
+	in.Status.Deleted = true
+}
+
+func (in *Service) IsDeleted() bool {
+	return in.Status.Deleted
 }
 
 //+kubebuilder:object:root=true

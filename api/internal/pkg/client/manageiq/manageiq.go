@@ -1,0 +1,5 @@
+package manageiq
+
+func NewClient() {
+
+}

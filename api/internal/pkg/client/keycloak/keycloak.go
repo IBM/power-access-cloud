@@ -1,0 +1,5 @@
+package keycloak
+
+func NewClient() {
+
+}
