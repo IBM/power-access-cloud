@@ -42,6 +42,7 @@ var (
 type ConfigReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+	Debug  bool
 }
 
 //+kubebuilder:rbac:groups=app.pac.io,resources=configs,verbs=get;list;watch;create;update;patch;delete

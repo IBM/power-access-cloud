@@ -35,6 +35,7 @@ func (s *Client) GetDHCPServer(id string) (*models.DHCPServerDetail, error) {
 type Options struct {
 	CloudInstanceID string
 	Zone            string
+	Debug           bool
 }
 
 func NewClient(ctx context.Context, options Options) (*Client, error) {
@@ -52,6 +53,7 @@ func NewClient(ctx context.Context, options Options) (*Client, error) {
 		Authenticator: auth,
 		UserAccount:   account,
 		Zone:          options.Zone,
+		Debug:         options.Debug,
 	}
 	session, err := ibmpisession.NewIBMPISession(opt)
 	if err != nil {

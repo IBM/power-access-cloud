@@ -53,6 +53,7 @@ var (
 type ServiceReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+	Debug  bool
 }
 
 //+kubebuilder:rbac:groups=manageiq.pac.io,resources=services,verbs=get;list;watch;create;update;patch;delete
@@ -439,7 +440,8 @@ func reconcileIPAddress(ctx context.Context, r *ServiceReconciler, service *mana
 	}
 	client, err := powervs.NewClient(ctx, powervs.Options{
 		CloudInstanceID: service.Spec.VirtualMachine.CloudInstanceID,
-		Zone:            service.Spec.VirtualMachine.Zone})
+		Zone:            service.Spec.VirtualMachine.Zone,
+		Debug:           r.Debug})
 	if err != nil {
 		return err
 	}
@@ -472,14 +474,17 @@ func reconcileNetwork(ctx context.Context, r *ServiceReconciler, service *manage
 	l.V(4).Info("in the reconcileNetwork")
 	client, err := powervs.NewClient(ctx, powervs.Options{
 		CloudInstanceID: service.Spec.VirtualMachine.CloudInstanceID,
-		Zone:            service.Spec.VirtualMachine.Zone})
+		Zone:            service.Spec.VirtualMachine.Zone,
+		Debug:           r.Debug})
 	if err != nil {
+		l.Error(err, "failed to create powervs client")
 		return err
 	}
 
 	in, err := func() (*models.PVMInstanceReference, error) {
 		ins, err := client.GetAllInstance()
 		if err != nil {
+			l.Error(err, "failed to GetAllInstance")
 			return nil, err
 		}
 		for _, in := range ins.PvmInstances {
