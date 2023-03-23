@@ -45,6 +45,12 @@ spec:
         - --leader-elect
         image: controller:latest
         name: manager
+        env:
+        - name: IBMCLOUD_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: ibm-credential
+              key: IBMCLOUD_APIKEY
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
