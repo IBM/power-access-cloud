@@ -43,6 +43,8 @@ spec:
         - /manager
         args:
         - --leader-elect
+        - --zap-time-encoding=iso8601
+        - --sync-period 10m
         image: controller:latest
         name: manager
         env:
