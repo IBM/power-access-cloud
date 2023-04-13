@@ -1,11 +1,13 @@
 // import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import {useSelector, useDispatch} from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
 import { newRequest } from "../modules/group";
 import { getGroup } from "../modules/group";
 
+
 export default function NewRequest() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dispatch = useDispatch();
   const { group } = useSelector((state) => state);
@@ -14,7 +16,6 @@ export default function NewRequest() {
   useEffect(() => {
     loadUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
 
   let navigate = useNavigate();
 
@@ -25,7 +26,7 @@ export default function NewRequest() {
   });
 
   const loadUser = async () => {
-    const result = dispatch(getGroup(id));;
+    const result = dispatch(getGroup(id));
     setGroup(result.data);
   };
 
@@ -35,8 +36,16 @@ export default function NewRequest() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    dispatch(newRequest(g));
-    navigate("..");
+    setIsSubmitting(true);
+    try {
+      await dispatch(newRequest(g)); // wait for the dispatch to complete
+    } catch (error) {
+      // handle any errors that occurred during the dispatch
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+    navigate("..")
   };
 
   return (
@@ -45,54 +54,59 @@ export default function NewRequest() {
         <div className="col-md-6 offset-md-3 border rounded p-4 mt-2 shadow">
           <h2 className="text-center m-4">Request for a group</h2>
 
-          <form onSubmit={(e) => onSubmit(e)}>
-          <div className="mb-3">
-              <label htmlFor="ID" className="form-label">
-                ID
-              </label>
-              <input
-                type={"text"}
-                className="form-control"
-                placeholder="Enter your name"
-                name="id"
-                value={group.id}
-                // onChange={(e) => onInputChange(e)}
-                disabled
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="Name" className="form-label">
-                Name
-              </label>
-              <input
-                type={"text"}
-                className="form-control"
-                placeholder="Enter your name"
-                name="name"
-                value={group.name}
-                disabled
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="Justifcation" className="form-label">
-              Justifcation
-              </label>
-              <textarea
-                type={"text"}
-                className="form-control"
-                placeholder="Enter your Justifcation for joining the group"
-                name="justification"
-                value={group.justification}
-                onChange={(e) => onInputChange(e)}
-              />
-            </div>
-            <button type="submit" className="btn btn-outline-primary">
-              Submit
-            </button>
-            <Link className="btn btn-outline-danger mx-2" to="/groups">
-              Cancel
-            </Link>
-          </form>
+            <form onSubmit={(e) => onSubmit(e)}>
+              <div className="mb-3">
+                <label htmlFor="ID" className="form-label">
+                  ID
+                </label>
+                <input
+                  type={"text"}
+                  className="form-control"
+                  placeholder="Enter your name"
+                  name="id"
+                  value={group.id}
+                  // onChange={(e) => onInputChange(e)}
+                  disabled
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="Name" className="form-label">
+                  Name
+                </label>
+                <input
+                  type={"text"}
+                  className="form-control"
+                  placeholder="Enter your name"
+                  name="name"
+                  value={group.name}
+                  disabled
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="Justifcation" className="form-label">
+                  Justifcation<span className="text-danger">*</span>
+                </label>
+                <textarea
+                  type={"text"}
+                  className="form-control"
+                  placeholder="Enter your Justifcation for joining the group"
+                  name="justification"
+                  value={group.justification}
+                  onChange={(e) => onInputChange(e)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-outline-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+              <Link className="btn btn-outline-danger mx-2" to="/groups">
+                Cancel
+              </Link>
+            </form>
         </div>
       </div>
     </div>

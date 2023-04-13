@@ -11,7 +11,7 @@ import Pac from './Pac';
 const App = ({ store }) => (
   <Provider store={store}>
     <BrowserRouter>
-        <div class="container">
+        <div className="container">
         <RenderOnAnonymous>
         <Welcome/>
           {console.log("Welcome to RenderOnAnonymous")}
