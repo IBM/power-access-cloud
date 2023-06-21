@@ -69,13 +69,12 @@ func CreateRouter() *gin.Engine {
 
 	// List all catalogs like vm, ocp, k8s
 	authorized.GET("/catalogs", services.GetAllCatalogs)
-	authorized.GET("/catalogs/:id", services.GetCatalog)
+	authorized.GET("/catalogs/:name", services.GetCatalog)
 
 	// only for admins
 	{
 		authorized.POST("/catalogs", services.CreateCatalog)
-		authorized.PUT("/catalogs/:id", services.UpdateCatalog)
-		authorized.DELETE("/catalogs/:id", services.DeleteCatalog)
+		authorized.DELETE("/catalogs/:name", services.DeleteCatalog)
 	}
 
 	// service related endpoints
@@ -83,12 +82,9 @@ func CreateRouter() *gin.Engine {
 	// List all user provisioned services
 	// services?all=true for admin to list all provisioned services
 	authorized.GET("/services", services.GetAllServices)
-	authorized.GET("/services/:id", services.GetService)
-
+	authorized.GET("/services/:name", services.GetService)
 	authorized.POST("/services", services.CreateService)
-
-	authorized.PUT("/services", services.UpdateService)
-	authorized.DELETE("/services/:id", services.DeleteService)
+	authorized.DELETE("/services/:name", services.DeleteService)
 	// Currently, for extending the service expiry
 	authorized.PUT("/services/:id/expiry", services.NewRequest)
 

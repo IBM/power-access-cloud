@@ -26,10 +26,6 @@ func CreateService(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "CreateService"})
 }
 
-func UpdateService(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "UpdateService"})
-}
-
 func DeleteService(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "DeleteService"})
 }
