@@ -42,6 +42,10 @@ const headers = [
     header: "Created",
   },
   {
+    key:"type",
+    header: "Type"
+  },
+  {
     key: "state",
     header: "State"
   }

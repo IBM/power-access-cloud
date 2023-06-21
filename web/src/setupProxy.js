@@ -5,7 +5,7 @@ module.exports = function(app) {
     target: process.env.REACT_APP_PAC_GO_SERVER_TARGET || 'http://localhost:8000',
     changeOrigin: true,
     pathRewrite: {
-      '^/pac-go-server': '/', //rewrite the path
+      '^/pac-go-server': '/api/v1', //rewrite the path
     },
   }));
 };

@@ -27,7 +27,7 @@ export const allGroups = () => {
 };
 
 export const getGroup = (id)=>{
-  const url = `/pac-go-server/group/${id}`;
+  const url = `/pac-go-server/groups/${id}`;
 
   return _axios.get(url)
   .then(response => ({
@@ -41,12 +41,11 @@ export const getGroup = (id)=>{
 };
 
 export const newRequest = (group) => {
-  const url = `/pac-go-server/group/${group.id}/request`;
+  const url = `/pac-go-server/groups/${group.id}/request`;
 
   const requestData = {
     justification: group.justification,
   };
-
   return _axios.post(url, requestData)
     .then((response) => ({
       type: "LIST_GROUP",
@@ -87,7 +86,7 @@ export const allRequests = () => {
 };
 
 export const approveRequest = (id) => {
-  const url = `/pac-go-server/request/${id}/approve`;
+  const url = `/pac-go-server/requests/${id}/approve`;
 
   return _axios.post(url,null)
     .then(response => ({
