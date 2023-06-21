@@ -64,6 +64,9 @@ test: manifests generate fmt vet envtest ## Run tests.
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
+pac-go-server: fmt ## Build pac-go-server binary.
+	go build -o bin/pac-go-server ./cmd/pac-go-server/main.go
+
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
