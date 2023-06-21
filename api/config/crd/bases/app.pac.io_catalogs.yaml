@@ -35,13 +35,59 @@ spec:
           spec:
             description: CatalogSpec defines the desired state of Catalog
             properties:
-              foo:
-                description: Foo is an example field of Catalog. Edit catalog_types.go
-                  to remove/update
+              capacity:
+                properties:
+                  cpu:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    x-kubernetes-int-or-string: true
+                  memory:
+                    type: integer
+                required:
+                - cpu
+                - memory
+                type: object
+              description:
                 type: string
+              expiry:
+                type: integer
+              type:
+                description: CatalogType is type of catalog
+                enum:
+                - VM
+                type: string
+              vm:
+                properties:
+                  crn:
+                    type: string
+                  image:
+                    type: string
+                  network:
+                    type: string
+                  processor_type:
+                    type: string
+                  system_type:
+                    type: string
+                required:
+                - crn
+                - image
+                - processor_type
+                - system_type
+                type: object
+            required:
+            - capacity
+            - description
+            - expiry
+            - type
             type: object
           status:
             description: CatalogStatus defines the observed state of Catalog
+            properties:
+              message:
+                type: string
+              ready:
+                type: boolean
             type: object
         type: object
     served: true

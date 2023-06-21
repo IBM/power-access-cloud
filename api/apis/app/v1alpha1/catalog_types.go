@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // CatalogTypeVM is VM catalog type
@@ -28,8 +29,8 @@ const CatalogTypeVM CatalogType = "VM"
 type CatalogType string
 
 type Capacity struct {
-	CPU    float64 `json:"cpu"`
-	Memory int     `json:"memory"`
+	CPU    intstr.IntOrString `json:"cpu"`
+	Memory int                `json:"memory"`
 }
 
 // CatalogSpec defines the desired state of Catalog
