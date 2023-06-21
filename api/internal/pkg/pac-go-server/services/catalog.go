@@ -18,10 +18,6 @@ func CreateCatalog(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "CreateCatalog"})
 }
 
-func UpdateCatalog(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "UpdateCatalog"})
-}
-
 func DeleteCatalog(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "DeleteCatalog"})
 }
