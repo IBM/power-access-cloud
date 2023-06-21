@@ -1,28 +1,58 @@
-// import logo from './logo.svg';
 import '../App.css';
-import { Provider } from "react-redux";
-import { BrowserRouter } from "react-router-dom";
-import RenderOnAnonymous from "./RenderOnAnonymous";
-import RenderOnAuthenticated from "./RenderOnAuthenticated";
-import Welcome from "./Welcome";
+import React from 'react';
+import Login from "./Login";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Pac from './Pac';
+import NavbarComp from "./Navbar";
+import GroupList from "./GroupList";
+import RequestList from "./RequestList";
+import NewRequest from "./PopUp/NewRequest";
+import About from "./About";
+import AuthRoute from './PrivateRoute/AuthRoute';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import UserService from '../services/UserService';
 
-const App = ({ store }) => (
-  <Provider store={store}>
-    <BrowserRouter>
-        <div className="container">
-        <RenderOnAnonymous>
-        <Welcome/>
-          {console.log("Welcome to RenderOnAnonymous")}
-        </RenderOnAnonymous>
-        <RenderOnAuthenticated>
-          {console.log("Welcome to RenderOnAuthenticated")}
-          <Pac/>
-        </RenderOnAuthenticated>
-        </div>
-    </BrowserRouter>
-  </Provider>
-);
+const App = () => {
+  const auth = UserService.isLoggedIn();
+  // const navigate = useNavigate();
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <AuthRoute Component={About} />,
+    },
+    {
+      path: "/login",
+      element: <AuthRoute Component={Login} />,
+    },
+    {
+      path: "/groups",
+      element: <AuthRoute Component={GroupList} />
+    },
+    {
+      path: "/requests",
+      element: <AuthRoute Component={RequestList} />
+    },
+    {
+      path: "/request/:id",
+      element: <AuthRoute Component={NewRequest} />
+    },
+    {
+      path: "/about",
+      element: <AuthRoute Component={About} />
+    },
+  ]);
+  if (auth === true && window.location.pathname === "/login"){
+    window.location.href = window.location.href.replace("/login", "");
+    return ;
+  }
+  return (
+    <React.Fragment>
+      {auth === true && <NavbarComp />}
+      <RouterProvider router={router} />
+    </React.Fragment>
+  );
+};
 
 export default App;

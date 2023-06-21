@@ -7,6 +7,7 @@ let keycloakConfig = {
   clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
 };
 
+
 const _kc = new Keycloak(keycloakConfig);
 
 /**
@@ -14,6 +15,7 @@ const _kc = new Keycloak(keycloakConfig);
  *
  * @param onAuthenticatedCallback
  */
+
 const initKeycloak = (onAuthenticatedCallback) => {
   _kc
     .init({
