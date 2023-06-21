@@ -1,0 +1,12 @@
+apiVersion: app.pac.io/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: pac
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: pac
+  name: catalog-sample
+spec:
+  # TODO(user): Add fields here

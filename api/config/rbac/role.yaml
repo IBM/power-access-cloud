@@ -8,6 +8,32 @@ rules:
 - apiGroups:
   - app.pac.io
   resources:
+  - catalogs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - app.pac.io
+  resources:
+  - catalogs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - app.pac.io
+  resources:
+  - catalogs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - app.pac.io
+  resources:
   - configs
   verbs:
   - create

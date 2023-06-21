@@ -23,4 +23,22 @@ resources:
   kind: Service
   path: github.com/PDeXchange/pac/apis/manageiq/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: pac.io
+  group: app
+  kind: Catalog
+  path: github.com/PDeXchange/pac/apis/app/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: pac.io
+  group: app
+  kind: Service
+  path: github.com/PDeXchange/pac/apis/app/v1alpha1
+  version: v1alpha1
 version: "3"

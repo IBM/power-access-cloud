@@ -35,6 +35,7 @@ import (
 
 	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
 	manageiqv1alpha1 "github.com/PDeXchange/pac/apis/manageiq/v1alpha1"
+	appcontrollers "github.com/PDeXchange/pac/controllers/app"
 	controllers "github.com/PDeXchange/pac/controllers/app"
 	manageiqcontrollers "github.com/PDeXchange/pac/controllers/manageiq"
 	//+kubebuilder:scaffold:imports
@@ -130,6 +131,20 @@ func main() {
 			setupLog.Error(err, "unable to create controller", "controller", "Service")
 			os.Exit(1)
 		}
+	}
+	if err = (&appcontrollers.CatalogReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Catalog")
+		os.Exit(1)
+	}
+	if err = (&appcontrollers.ServiceReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Service")
+		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
 
