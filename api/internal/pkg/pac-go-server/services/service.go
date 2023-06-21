@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/client/kubernetes"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,9 +10,14 @@ import (
 )
 
 var dbCon db.DB
+var kubeClient kubernetes.Client
 
 func SetDB(db db.DB) {
 	dbCon = db
+}
+
+func SetKubeClient(client kubernetes.Client) {
+	kubeClient = client
 }
 
 func GetAllServices(c *gin.Context) {
