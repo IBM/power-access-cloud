@@ -40,6 +40,9 @@ func CreateRouter() *gin.Engine {
 	}))
 	authorized.Use(RetrospectKeycloakToken)
 
+	authorizedAdmin := authorized.Group("")
+	authorizedAdmin.Use(AllowAdminOnly)
+
 	// Group routes
 	authorized.GET("/groups", services.GetAllGroups)
 	authorized.GET("/groups/:id", services.GetGroup)
@@ -55,8 +58,8 @@ func CreateRouter() *gin.Engine {
 	authorized.GET("/requests", services.GetAllRequests)
 	authorized.GET("/requests/:id", services.GetRequest)
 	authorized.DELETE("/request/:id", services.DeleteRequest)
-	authorized.POST("/requests/:id/approve", services.ApproveRequest)
-	authorized.POST("/requests/:id/reject", services.RejectRequest)
+	authorizedAdmin.POST("/requests/:id/approve", services.ApproveRequest)
+	authorizedAdmin.POST("/requests/:id/reject", services.RejectRequest)
 
 	// key related routes
 
@@ -73,8 +76,8 @@ func CreateRouter() *gin.Engine {
 
 	// only for admins
 	{
-		authorized.POST("/catalogs", services.CreateCatalog)
-		authorized.DELETE("/catalogs/:name", services.DeleteCatalog)
+		authorizedAdmin.POST("/catalogs", services.CreateCatalog)
+		authorizedAdmin.DELETE("/catalogs/:name", services.DeleteCatalog)
 	}
 
 	// service related endpoints
