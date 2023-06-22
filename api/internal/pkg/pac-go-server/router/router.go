@@ -46,7 +46,7 @@ func CreateRouter() *gin.Engine {
 	// Group routes
 	authorized.GET("/groups", services.GetAllGroups)
 	authorized.GET("/groups/:id", services.GetGroup)
-	authorized.POST("/groups/:id/request", services.NewRequest)
+	authorized.POST("/groups/:id/request", services.NewGroupRequest)
 
 	authorized.GET("/groups/:id/quota", services.GetQuota)
 	authorized.POST("/groups/:id/quota", services.CreateQuota)
@@ -57,7 +57,7 @@ func CreateRouter() *gin.Engine {
 	// /requests?type=group to list only group add requests
 	authorized.GET("/requests", services.GetAllRequests)
 	authorized.GET("/requests/:id", services.GetRequest)
-	authorized.DELETE("/request/:id", services.DeleteRequest)
+	authorized.DELETE("/requests/:id", services.DeleteRequest)
 	authorizedAdmin.POST("/requests/:id/approve", services.ApproveRequest)
 	authorizedAdmin.POST("/requests/:id/reject", services.RejectRequest)
 
@@ -89,7 +89,7 @@ func CreateRouter() *gin.Engine {
 	authorized.POST("/services", services.CreateService)
 	authorized.DELETE("/services/:name", services.DeleteService)
 	// Currently, for extending the service expiry
-	authorized.PUT("/services/:id/expiry", services.NewRequest)
+	authorized.PUT("/services/:name/expiry", services.UpdateServiceExpiryRequest)
 
 	// quota related endpoints
 

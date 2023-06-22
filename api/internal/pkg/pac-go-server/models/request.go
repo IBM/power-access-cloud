@@ -29,8 +29,8 @@ type Request struct {
 }
 
 type ServiceExpiry struct {
-	ServiceID string    `json:"service_id" bson:"service_id,omitempty"`
-	Expiry    time.Time `json:"expiry" bson:"expiry,omitempty"`
+	Name   string    `json:"name" bson:"name,omitempty"`
+	Expiry time.Time `json:"expiry" bson:"expiry,omitempty"`
 }
 
 type GroupAdmission struct {

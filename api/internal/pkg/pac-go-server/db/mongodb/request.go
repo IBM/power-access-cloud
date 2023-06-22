@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -46,28 +47,28 @@ func (db *MongoDB) NewRequest(request *models.Request) error {
 	return nil
 }
 
-func (db *MongoDB) GetRequestByGroupIDAndUserID(groupID string, userID string) (*models.Request, error) {
-	var request models.Request
+func (db *MongoDB) GetRequestByGroupIDAndUserID(groupID string, userID string) ([]models.Request, error) {
+	var requests []models.Request
 
 	filter := bson.D{
 		{"$and",
 			bson.A{
-				bson.D{{"group_id", groupID}},
+				bson.D{{"group.group_id", groupID}},
 				bson.D{{"user_id", userID}},
 			}},
 	}
 
 	collection := db.Database.Collection("requests")
 	ctx, _ := context.WithTimeout(context.Background(), dbContextTimeout)
-	err := collection.FindOne(ctx, filter).Decode(&request)
-	if err == mongo.ErrNoDocuments {
-		return nil, nil
-	}
+	cur, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("error getting request: %w", err)
 	}
-
-	return &request, nil
+	defer cur.Close(ctx)
+	if err = cur.All(context.TODO(), &requests); err != nil {
+		return nil, fmt.Errorf("error fetching requests: %w", err)
+	}
+	return requests, nil
 }
 
 // GetRequestByID returns a request by its ID
@@ -122,4 +123,27 @@ func (db *MongoDB) UpdateRequestState(id string, state models.RequestStateType) 
 	}
 
 	return nil
+}
+
+func (db *MongoDB) GetRequestByServiceName(serviceName string) ([]models.Request, error) {
+	var requests []models.Request
+	if serviceName == "" {
+		return nil, errors.New("serviceName name is not set")
+	}
+	filter := bson.D{{
+		Key:   "service.name",
+		Value: serviceName,
+	}}
+	collection := db.Database.Collection("requests")
+	ctx, _ := context.WithTimeout(context.Background(), dbContextTimeout)
+	cur, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("error getting requests: %w", err)
+	}
+	defer cur.Close(ctx)
+
+	if err = cur.All(context.TODO(), &requests); err != nil {
+		return nil, fmt.Errorf("error fetching requests: %w", err)
+	}
+	return requests, nil
 }

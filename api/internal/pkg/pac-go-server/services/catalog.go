@@ -21,7 +21,7 @@ func GetAllCatalogs(c *gin.Context) {
 	catalogs, err := kubeClient.GetCatalogs()
 	if err != nil {
 		logger.Error("failed to get catalogs", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("%v", err)})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	catalogsItems := convertToCatalogs(catalogs)
@@ -53,7 +53,7 @@ func CreateCatalog(c *gin.Context) {
 	logger := log.GetLogger()
 	catalog := models.Catalog{}
 	if err := c.BindJSON(&catalog); err != nil {
-		logger.Error("failed to bin request", zap.Error(err))
+		logger.Error("failed to bind request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to bind request, Error: %v", err.Error())})
 		return
 	}

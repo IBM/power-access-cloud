@@ -7,15 +7,19 @@ import (
 type DB interface {
 	Connect() error
 	Disconnect() error
+
 	GetRequestsByUserID(id string) ([]models.Request, error)
 	NewRequest(request *models.Request) error
-	GetRequestByGroupIDAndUserID(groupID, userID string) (*models.Request, error)
+	GetRequestByGroupIDAndUserID(groupID, userID string) ([]models.Request, error)
 	GetRequestByID(string) (*models.Request, error)
 	DeleteRequest(string) error
 	UpdateRequestState(id string, state models.RequestStateType) error
+	GetRequestByServiceName(string) ([]models.Request, error)
+
 	GetKeyByID(id string) (*models.Key, error)
 	GetKeyByUserID(userid string) ([]models.Key, error)
 	CreateKey(key *models.Key) error
 	DeleteKey(string) error
+
 	GetUserQuota(string) (models.Quota, error)
 }
