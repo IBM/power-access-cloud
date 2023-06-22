@@ -8,3 +8,8 @@ type Key struct {
 	Name    string             `json:"name" bson:"name,omitempty"`
 	Content string             `json:"content" bson:"content,omitempty"`
 }
+
+func GetNewKey() Key {
+	var key Key
+	return key
+}
