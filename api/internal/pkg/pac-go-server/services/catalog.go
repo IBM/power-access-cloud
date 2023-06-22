@@ -9,10 +9,12 @@ import (
 	"go.uber.org/zap"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	pac "github.com/PDeXchange/pac/apis/app/v1alpha1"
 	log "github.com/PDeXchange/pac/internal/pkg/pac-go-server/logger"
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
+	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
 func GetAllCatalogs(c *gin.Context) {
@@ -96,7 +98,6 @@ func convertToCatalog(catalogItem pac.Catalog) models.Catalog {
 		Name:        catalogItem.Name,
 		Description: catalogItem.Spec.Description,
 		Capacity: models.Capacity{
-			CPU:    catalogItem.Spec.Capacity.CPU,
 			Memory: catalogItem.Spec.Capacity.Memory,
 		},
 		Expiry: catalogItem.Spec.Expiry,
@@ -115,6 +116,8 @@ func convertToCatalog(catalogItem pac.Catalog) models.Catalog {
 			Network:       catalogItem.Spec.VM.Network,
 		}
 	}
+	cpu, _ := utils.GetFloatValue(catalogItem.Spec.Capacity.CPU)
+	catalog.Capacity.CPU = cpu
 	return catalog
 }
 
@@ -138,7 +141,7 @@ func validateCreateCatalogParams(catalog models.Catalog) []error {
 	if catalog.Name == "" {
 		errs = append(errs, errors.New("catalog name should be set"))
 	}
-	if catalog.Capacity.CPU.String() == "" && catalog.Capacity.CPU.IntValue() == 0 {
+	if catalog.Capacity.CPU == 0 {
 		errs = append(errs, errors.New("catalog cpu capacity should be set"))
 	}
 	if catalog.Capacity.Memory == 0 {
@@ -176,7 +179,7 @@ func createCatalogObject(catalog models.Catalog) pac.Catalog {
 			Type:        pac.CatalogType(catalog.Type),
 			Description: catalog.Description,
 			Capacity: pac.Capacity{
-				CPU:    catalog.Capacity.CPU,
+				CPU:    intstr.FromString(fmt.Sprintf("%v", catalog.Capacity.CPU)),
 				Memory: catalog.Capacity.Memory,
 			},
 			Expiry: catalog.Expiry,

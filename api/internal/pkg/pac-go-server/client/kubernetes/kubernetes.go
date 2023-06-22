@@ -10,6 +10,8 @@ import (
 	log "github.com/PDeXchange/pac/internal/pkg/pac-go-server/logger"
 )
 
+const DefaultNamespace = "default"
+
 type KubeClient struct {
 	kubeClient client.Client
 }

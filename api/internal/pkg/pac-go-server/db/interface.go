@@ -13,4 +13,8 @@ type DB interface {
 	GetRequestByID(string) (*models.Request, error)
 	DeleteRequest(string) error
 	UpdateRequestState(id string, state models.RequestStateType) error
+
+	GetKeyByUserID(string) ([]models.Key, error)
+
+	GetUserQuota(string) (models.Quota, error)
 }
