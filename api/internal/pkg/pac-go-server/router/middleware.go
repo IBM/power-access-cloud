@@ -9,7 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
+	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
+
+func AllowAdminOnly(c *gin.Context) {
+	kc := utils.NewKeyClockClient(c.Request.Context())
+	if !kc.IsRole(utils.ManagerRole) {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Not authorized to perform this action"})
+		return
+	}
+	c.Next()
+}
 
 func RetrospectKeycloakToken(c *gin.Context) {
 	ctx := context.WithValue(c.Request.Context(), "keyclock_client", client)
