@@ -17,4 +17,5 @@ type DB interface {
 	GetKeyByUserID(userid string) ([]models.Key, error)
 	CreateKey(key *models.Key) error
 	DeleteKey(string) error
+	GetUserQuota(string) (models.Quota, error)
 }

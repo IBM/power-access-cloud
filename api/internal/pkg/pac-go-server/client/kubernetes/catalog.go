@@ -20,7 +20,7 @@ func (client KubeClient) GetCatalogs() (pac.CatalogList, error) {
 
 func (client KubeClient) GetCatalog(name string) (pac.Catalog, error) {
 	catalog := pac.Catalog{}
-	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: "default", Name: name}, &catalog); err != nil {
+	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &catalog); err != nil {
 		if apierrors.IsNotFound(err) {
 			return catalog, fmt.Errorf("catalog with name %s does not exist", name)
 		}
@@ -41,7 +41,7 @@ func (client KubeClient) CreateCatalog(catalog pac.Catalog) error {
 
 func (client KubeClient) DeleteCatalog(name string) error {
 	catalog := pac.Catalog{}
-	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: "default", Name: name}, &catalog); err != nil {
+	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &catalog); err != nil {
 		if apierrors.IsNotFound(err) {
 			return nil
 		}

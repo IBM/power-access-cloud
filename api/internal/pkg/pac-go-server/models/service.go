@@ -6,8 +6,9 @@ import "time"
 type Service struct {
 	ID          string        `json:"id"`
 	UserID      string        `json:"user_id"`
+	Name        string        `json:"name"`
 	DisplayName string        `json:"display_name"`
-	CatalogID   string        `json:"catalog_id"`
+	CatalogName string        `json:"catalog_name"`
 	Expiry      time.Time     `json:"expiry"`
 	Status      ServiceStatus `json:"status"`
 }
