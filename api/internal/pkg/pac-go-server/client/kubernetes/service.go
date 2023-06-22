@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"time"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kClient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	pac "github.com/PDeXchange/pac/apis/app/v1alpha1"
@@ -69,6 +72,21 @@ func (client KubeClient) DeleteService(name, userId string) error {
 			return nil
 		}
 		return fmt.Errorf("failed to delete service with name %s Error: %v", name, err)
+	}
+	return nil
+}
+
+func (client KubeClient) UpdateServiceExpiry(name string, expiry time.Time) error {
+	service := pac.Service{}
+	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &service); err != nil {
+		if apierrors.IsNotFound(err) {
+			return fmt.Errorf("service with name %s does not exist", name)
+		}
+		return fmt.Errorf("failed to get service with name %s Error: %v", name, err)
+	}
+	service.Spec.Expiry = v1.Time{Time: expiry}
+	if err := client.kubeClient.Update(context.Background(), &service); err != nil {
+		return fmt.Errorf("failed to update service with name %s Error: %v", name, err)
 	}
 	return nil
 }
