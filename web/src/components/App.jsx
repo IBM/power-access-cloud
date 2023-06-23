@@ -15,6 +15,8 @@ import {
 import UserService from '../services/UserService';
 import "../App.css";
 import Keys from './Keys';
+import Catalogs from './Catalogs';
+import Services from './Services';
 
 const App = () => {
   const auth = UserService.isLoggedIn();
@@ -47,6 +49,14 @@ const App = () => {
     {
       path: "/keys",
       element: <AuthRoute Component={Keys} />
+    },
+    {
+      path: "/catalogs",
+      element: <AuthRoute Component={Catalogs} />
+    },
+    {
+      path: "/services",
+      element: <AuthRoute Component={Services} />
     },
   ]);
   if (auth === true && window.location.pathname === "/login"){

@@ -136,3 +136,68 @@ export const deleteKeys = (id)=>{
     payload: error
   }));
 }
+
+export const getAllCatalogs = ()=>{
+  const url = `/pac-go-server/catalogs`;
+  return _axios.get(url)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}
+
+export const deployCatalog = (payload)=>{
+  const url = `/pac-go-server/services`;
+  return _axios.post(url,payload)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}
+
+export const getServices = ()=>{
+  const url = `/pac-go-server/services`;
+  return _axios.get(url)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}
+
+export const deleteServices = (name)=>{
+  const url = `/pac-go-server/services/${name}`;
+  return _axios.delete(url)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}
+
+export const extendServices = (name, payload)=>{
+  const url = `/pac-go-server/services/${name}/expiry`;
+  return _axios.put(url,payload)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}

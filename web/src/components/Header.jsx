@@ -59,6 +59,12 @@ const HeaderNav = () => {
                     <SideNavLink href="/keys">
                         Keys
                     </SideNavLink>
+                    <SideNavLink href="/catalogs">
+                        Catalogs
+                    </SideNavLink>
+                    <SideNavLink href="/services">
+                        Services
+                    </SideNavLink>
                 </SideNavItems>
             </SideNav>
         </>
