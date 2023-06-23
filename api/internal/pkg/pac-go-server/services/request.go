@@ -17,7 +17,7 @@ import (
 func GetAllRequests(c *gin.Context) {
 	logger := log.GetLogger()
 	kc := utils.NewKeyClockClient(c.Request.Context())
-	requests := []models.Request{}
+	var requests []models.Request
 	var err error
 
 	var userID string
@@ -25,8 +25,16 @@ func GetAllRequests(c *gin.Context) {
 		// Get authenticated user's ID
 		userID = kc.GetUserID()
 	}
-	logger.Debug("getting requests", zap.String("user id", userID))
-	requests, err = dbCon.GetRequestsByUserID(userID)
+	listByType := c.DefaultQuery("type", "")
+	switch listByType {
+	case string(models.RequestAddToGroup), string(models.RequestExtendServiceExpiry), "":
+		logger.Debug("getting requests", zap.String("type", listByType), zap.String("user id", userID))
+	default:
+		logger.Error("Invalid request type", zap.String("type", listByType))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid request type - %s", listByType)})
+		return
+	}
+	requests, err = dbCon.GetRequestsByUserID(userID, listByType)
 	if err != nil {
 		logger.Error("failed to get requests", zap.String("user id", userID), zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

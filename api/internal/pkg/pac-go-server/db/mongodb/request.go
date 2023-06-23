@@ -13,12 +13,14 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 )
 
-func (db *MongoDB) GetRequestsByUserID(id string) ([]models.Request, error) {
+func (db *MongoDB) GetRequestsByUserID(id, requestType string) ([]models.Request, error) {
 	var requests []models.Request
-
-	filter := bson.D{{}}
+	filter := bson.D{}
+	if requestType != "" {
+		filter = append(filter, bson.E{Key: "type", Value: requestType})
+	}
 	if id != "" {
-		filter = bson.D{{Key: "user_id", Value: id}}
+		filter = append(filter, bson.E{Key: "user_id", Value: id})
 	}
 
 	collection := db.Database.Collection("requests")
