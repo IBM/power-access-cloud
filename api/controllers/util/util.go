@@ -58,7 +58,9 @@ func ValidateProcType(procType string) error {
 }
 
 func ValidateVMCapacity(catalogCapacity *appv1alpha1.Capacity, vmCapacity *appv1alpha1.Capacity) error {
-	if vmCapacity.CPU != "" {
+	if vmCapacity.CPU == "" {
+		vmCapacity.CPU = catalogCapacity.CPU
+	} else {
 		catalogCPUCapacity, err := strconv.ParseFloat(catalogCapacity.CPU, 32)
 		if err != nil {
 			return errors.Wrap(err, "error parsing catalog cpu capacity")
@@ -74,7 +76,9 @@ func ValidateVMCapacity(catalogCapacity *appv1alpha1.Capacity, vmCapacity *appv1
 		}
 	}
 
-	if vmCapacity.Memory > catalogCapacity.Memory {
+	if vmCapacity.Memory == 0 {
+		vmCapacity.Memory = catalogCapacity.Memory
+	} else if vmCapacity.Memory > catalogCapacity.Memory {
 		return errors.Errorf("vm memory capacity should not exceed catalog memory capacity. catalog memory capacity: %d, vm memory capacity: %d", catalogCapacity.Memory, vmCapacity.Memory)
 	}
 

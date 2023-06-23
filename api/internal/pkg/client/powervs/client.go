@@ -71,6 +71,14 @@ func (s *Client) GetNetworkByName(name string) (*models.NetworkReference, error)
 	return nil, errors.Errorf("error retrieving network by name %s", name)
 }
 
+func (s *Client) GetNetworks() (*models.Networks, error) {
+	return s.networkClient.GetAll()
+}
+
+func (s *Client) GetNetwork(id string) (*models.Network, error) {
+	return s.networkClient.Get(id)
+}
+
 func (s *Client) CreateVM(opts *models.PVMInstanceCreate) (*models.PVMInstanceList, error) {
 	return s.instanceClient.Create(opts)
 }
