@@ -62,12 +62,12 @@ func CreateKey(c *gin.Context) {
 	}
 	// Validate the Key name length
 	if len(key.Name) > 32 || key.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Name must be 32 characters and connot empty."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Name must be 32 characters and cannot empty."})
 		return
 	}
 	// Insert the request into the database
 	if err := dbCon.CreateKey(&key); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to insert the request into the db, err: %s", err.Error())})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to insert the key into the db, err: %s", err.Error())})
 		return
 	}
 
@@ -89,7 +89,7 @@ func DeleteKey(c *gin.Context) {
 	}
 
 	if err := dbCon.DeleteKey(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to delete the record from the db, err: %s", err.Error())})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to delete the key from the db, err: %s", err.Error())})
 		return
 	}
 
