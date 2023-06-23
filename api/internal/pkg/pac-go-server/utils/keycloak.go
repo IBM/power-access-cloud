@@ -73,9 +73,8 @@ func (k *KeyClockClient) AddUserToGroup(userID, groupID string) error {
 }
 
 func (k *KeyClockClient) IsMemberOfGroup(name string) bool {
-	grps := k.ctx.Value("groups").([]models.Group)
-
-	for _, group := range grps {
+	groups := k.GetUserGroups()
+	for _, group := range groups {
 		if group.Name == name {
 			return true
 		}
@@ -96,4 +95,8 @@ func (k *KeyClockClient) IsRole(name string) bool {
 
 func (k *KeyClockClient) GetUserID() string {
 	return k.ctx.Value("userid").(string)
+}
+
+func (k *KeyClockClient) GetUserGroups() []models.Group {
+	return k.ctx.Value("groups").([]models.Group)
 }

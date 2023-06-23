@@ -304,6 +304,10 @@ func usedCapacity(userId string) (models.Capacity, error) {
 	}
 	// fetch the catalogs associated with the service
 	for _, svc := range serviceList.Items {
+		// ignore the expired services
+		if svc.Status.State == pac.ServiceStateExpired {
+			continue
+		}
 		if _, ok := catalogMap[svc.Spec.Catalog.Name]; ok {
 			catalogMap[svc.Spec.Catalog.Name] += 1
 		} else {

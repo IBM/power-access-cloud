@@ -72,3 +72,24 @@ func (db *MongoDB) DeleteQuota(id string) error {
 	}
 	return nil
 }
+
+func (db *MongoDB) GetGroupsQuota(groups []string) ([]models.Quota, error) {
+	var quota []models.Quota
+	if len(groups) == 0 {
+		return nil, fmt.Errorf("groups is empty")
+	}
+	filter := bson.M{"group_id": bson.M{"$in": groups}}
+
+	collection := db.Database.Collection("quota")
+	ctx, _ := context.WithTimeout(context.Background(), dbContextTimeout)
+	cur, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("error getting requests: %w", err)
+	}
+	defer cur.Close(ctx)
+
+	if err = cur.All(context.TODO(), &quota); err != nil {
+		return nil, fmt.Errorf("error fetching quota: %w", err)
+	}
+	return quota, nil
+}

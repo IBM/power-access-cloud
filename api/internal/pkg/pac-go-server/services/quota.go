@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 
 	log "github.com/PDeXchange/pac/internal/pkg/pac-go-server/logger"
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
-	"github.com/gin-gonic/gin"
 )
 
 // Get the respective quota of the group ID passed.
@@ -33,11 +33,6 @@ func GetQuota(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &quotaDb)
-}
-
-// TODO : Needs to get the max of all groups
-func GetUserQuota(c *gin.Context) {
-	//c.JSON(http.StatusOK, gin.H{"message": ""})
 }
 
 func CreateQuota(c *gin.Context) {
@@ -178,4 +173,71 @@ func checkGroupExists(c *gin.Context, gid string) error {
 		return err
 	}
 	return nil
+}
+
+func GetUserQuota(c *gin.Context) {
+	logger := log.GetLogger()
+	var userQuota, usedQuota, availableQuota models.Capacity
+	var err error
+	kc := utils.NewKeyClockClient(c.Request.Context())
+	userID := kc.GetUserID()
+	logger.Debug("getting quota for user", zap.String("user id", userID))
+
+	userGroups := kc.GetUserGroups()
+	logger.Debug("user groups", zap.Any("user groups", userGroups))
+
+	if len(userGroups) != 0 {
+		logger.Debug("fetching user quota for groups")
+		var userGroupIds []string
+		for _, grp := range userGroups {
+			userGroupIds = append(userGroupIds, grp.ID)
+		}
+		groupsQuota, err := dbCon.GetGroupsQuota(userGroupIds)
+		if err != nil {
+			logger.Error("failed to get quota", zap.String("user id", userID), zap.Error(err))
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to get quota, err: %s", err.Error())})
+			return
+		}
+		logger.Debug("user group quota", zap.String("user id", userID), zap.Any("group quota", groupsQuota))
+		userQuota = getMaxCapacity(groupsQuota)
+		logger.Debug("user maximum quota", zap.Any("user quota", userQuota))
+	} else {
+		logger.Debug("user does not belong to any group", zap.String("user id", userID))
+	}
+	usedQuota, err = usedCapacity(userID)
+	if err != nil {
+		logger.Error("failed to get used quota", zap.String("userid", userID), zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to get used quota %v", err)})
+		return
+	}
+	availableQuota.CPU = userQuota.CPU - usedQuota.CPU
+	availableQuota.Memory = userQuota.Memory - usedQuota.Memory
+	
+	// in case of negative available quota set it to 0
+	if availableQuota.CPU < 0 {
+		availableQuota.CPU = 0
+	}
+	if availableQuota.Memory < 0 {
+		availableQuota.Memory = 0
+	}
+	logger.Debug("quotas of user", zap.Any("used quota", usedQuota), zap.Any("available quota", availableQuota))
+	c.JSON(http.StatusOK, gin.H{"user_quota": userQuota, "used_quota": usedQuota, "available_quota": availableQuota})
+}
+
+func getMaxCapacity(quotas []models.Quota) models.Capacity {
+	var maxCPU float64
+	var maxMemory int
+
+	for _, quota := range quotas {
+		if quota.Capacity.CPU > maxCPU {
+			maxCPU = quota.Capacity.CPU
+		}
+		if quota.Capacity.Memory > maxMemory {
+			maxMemory = quota.Capacity.Memory
+		}
+	}
+	return models.Capacity{
+		CPU:    maxCPU,
+		Memory: maxMemory,
+	}
 }
