@@ -23,15 +23,13 @@ import (
 
 	"github.com/pkg/errors"
 
-	capiutil "sigs.k8s.io/cluster-api/util"
-
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
+	capiutil "sigs.k8s.io/cluster-api/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"strings"
 
 	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
 	"github.com/PDeXchange/pac/controllers/util"
@@ -175,7 +173,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	} else {
 		if controllerutil.ContainsFinalizer(catalog, appv1alpha1.CatalogFinalizer) {
 			ownedServices, err := filterOwnedServices(ctx, scope)
-			if err != nil && strings.Contains(err.Error(), "") {
+			if err != nil {
 				return ctrl.Result{}, errors.Wrap(err, "error filtering services owned by catalog")
 			}
 

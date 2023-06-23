@@ -23,7 +23,9 @@ import (
 
 	"github.com/pkg/errors"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	capiutil "sigs.k8s.io/cluster-api/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -80,6 +82,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		service.Status.Message = message
 		return ctrl.Result{}, errors.Errorf(message)
 	}
+
+	service.OwnerReferences = capiutil.EnsureOwnerRef(service.OwnerReferences, metav1.OwnerReference{
+		APIVersion: catalog.APIVersion,
+		Kind:       catalog.Kind,
+		Name:       catalog.Name,
+		UID:        catalog.UID,
+	})
 
 	scope, err := NewControllerScope(ctx, ControllerScopeParams{
 		Type:    serviceController,

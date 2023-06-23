@@ -22,6 +22,7 @@ import (
 	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
 	"github.com/pkg/errors"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,6 +46,7 @@ func createVM(scope *ControllerScope) error {
 		Processors: &processors,
 		SysType:    vmSpec.SystemType,
 		ProcType:   &vmSpec.ProcessorType,
+		UserData:   strings.Join(scope.Service.Spec.SSHKeys, "\n"),
 	}
 
 	pvmInstanceList, err := scope.PowerVSClient.CreateVM(createOpts)
