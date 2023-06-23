@@ -21,5 +21,11 @@ type DB interface {
 	CreateKey(key *models.Key) error
 	DeleteKey(string) error
 
+	// Implementations for group quota.
+	NewQuota(*models.Quota) error
+	UpdateQuota(*models.Quota) error
+	DeleteQuota(string) error
+	GetQuotaForGroupID(string) (*models.Quota, error)
+
 	GetUserQuota(string) (models.Quota, error)
 }

@@ -49,9 +49,6 @@ func CreateRouter() *gin.Engine {
 	authorized.POST("/groups/:id/request", services.NewGroupRequest)
 
 	authorized.GET("/groups/:id/quota", services.GetQuota)
-	authorized.POST("/groups/:id/quota", services.CreateQuota)
-	authorized.PUT("/groups/:id/quota", services.UpdateQuota)
-	authorized.DELETE("/groups/:id/quota", services.DeleteQuota)
 
 	// Request routes
 	// /requests?type=group to list only group add requests
@@ -78,6 +75,10 @@ func CreateRouter() *gin.Engine {
 	{
 		authorizedAdmin.POST("/catalogs", services.CreateCatalog)
 		authorizedAdmin.DELETE("/catalogs/:name", services.DeleteCatalog)
+
+		authorizedAdmin.POST("/groups/:id/quota", services.CreateQuota)
+		authorizedAdmin.PUT("/groups/:id/quota", services.UpdateQuota)
+		authorizedAdmin.DELETE("/groups/:id/quota", services.DeleteQuota)
 	}
 
 	// service related endpoints
