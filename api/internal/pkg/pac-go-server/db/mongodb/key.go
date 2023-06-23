@@ -3,12 +3,11 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-  
+
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 )
 
@@ -60,8 +59,7 @@ func (db *MongoDB) GetKeyByID(id string) (*models.Key, error) {
 	ctx, _ := context.WithTimeout(context.Background(), dbContextTimeout)
 	err = collection.FindOne(ctx, filter).Decode(&key)
 	if err == mongo.ErrNoDocuments {
-		log.Println("no documents found")
-		return nil, nil
+		return nil, fmt.Errorf("no documents found")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("error getting request: %w", err)
