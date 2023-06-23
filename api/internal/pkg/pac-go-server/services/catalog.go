@@ -107,12 +107,17 @@ func convertToCatalog(catalogItem pac.Catalog) models.Catalog {
 	}
 	switch catalogItem.Spec.Type {
 	case pac.CatalogTypeVM:
+		cpu, _ := utils.CastStrToFloat(catalogItem.Spec.VM.Capacity.CPU)
 		catalog.VM = models.VM{
 			CRN:           catalogItem.Spec.VM.CRN,
 			ProcessorType: catalogItem.Spec.VM.ProcessorType,
 			SystemType:    catalogItem.Spec.VM.SystemType,
 			Image:         catalogItem.Spec.VM.Image,
 			Network:       catalogItem.Spec.VM.Network,
+			Capacity: models.Capacity{
+				Memory: catalogItem.Spec.Capacity.Memory,
+				CPU:    cpu,
+			},
 		}
 	}
 	cpu, _ := utils.CastStrToFloat(catalogItem.Spec.Capacity.CPU)
