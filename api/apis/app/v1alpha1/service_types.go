@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -46,7 +47,7 @@ type VM struct {
 }
 
 var VMAccessInfoTemplate = func(externalIP, internalIP string) string {
-	return fmt.Sprintf("VM can be accessed via ExternalIP %s or InternalIP, use any SSH pub key registered to SSH into the VM", externalIP, internalIP)
+	return fmt.Sprintf("VM can be accessed via ExternalIP: %s or InternalIP: %s, use any SSH pub key registered to SSH into the VM", externalIP, internalIP)
 }
 
 // ServiceSpec defines the desired state of Service
