@@ -2,9 +2,9 @@ import Keycloak from "keycloak-js";
 
 // Keycloak configuration
 let keycloakConfig = {
-  url: process.env.REACT_APP_KEYCLOAK_URL,
-  realm: process.env.REACT_APP_KEYCLOAK_REALM,
-  clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
+  url: window._env_.REACT_APP_KEYCLOAK_URL,
+  realm: window._env_.REACT_APP_KEYCLOAK_REALM,
+  clientId: window._env_.REACT_APP_KEYCLOAK_CLIENT_ID,
 };
 
 
