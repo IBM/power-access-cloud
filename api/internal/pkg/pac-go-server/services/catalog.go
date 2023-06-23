@@ -164,6 +164,12 @@ func validateCreateCatalogParams(catalog models.Catalog) []error {
 		if vm.Image == "" {
 			errs = append(errs, errors.New("for catalog type VM image should be set"))
 		}
+		if vm.Capacity.CPU == 0 {
+			errs = append(errs, errors.New("for catalog type VM cpu capacity should be set"))
+		}
+		if vm.Capacity.Memory == 0 {
+			errs = append(errs, errors.New("for catalog type VM memory capacity should be set"))
+		}
 	}
 	return errs
 }
@@ -192,6 +198,10 @@ func createCatalogObject(catalog models.Catalog) pac.Catalog {
 			SystemType:    catalog.VM.SystemType,
 			Image:         catalog.VM.Image,
 			Network:       catalog.VM.Network,
+			Capacity: pac.Capacity{
+				CPU:    utils.CastFloatToStr(catalog.VM.Capacity.CPU),
+				Memory: catalog.VM.Capacity.Memory,
+			},
 		}
 	}
 	return catalogItem

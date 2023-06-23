@@ -17,9 +17,10 @@ type CatalogStatus struct {
 }
 
 type VM struct {
-	CRN           string `json:"crn"`
-	ProcessorType string `json:"processor_type"`
-	SystemType    string `json:"system_type"`
-	Image         string `json:"image"`
-	Network       string `json:"network"`
+	CRN           string   `json:"crn"`
+	ProcessorType string   `json:"processor_type"`
+	SystemType    string   `json:"system_type"`
+	Image         string   `json:"image"`
+	Network       string   `json:"network"`
+	Capacity      Capacity `json:"capacity"`
 }
