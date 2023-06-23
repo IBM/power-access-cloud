@@ -1,1 +1,19 @@
 @use '@carbon/react';
+
+.cds--side-nav__link-text{
+    font-size: 1.2rem !important;
+    color: white !important;
+    margin-top: 10px;
+}
+.user-profile{
+    width:200px;
+    height: 100px;
+    background-color: black;
+    color: white;
+    position: absolute;
+    top: 45px;
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 999;
+    right: 0px;
+}

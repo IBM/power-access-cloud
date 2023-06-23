@@ -2,17 +2,19 @@ import '../App.css';
 import React from 'react';
 import Login from "./Login";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import NavbarComp from "./Navbar";
 import GroupList from "./GroupList";
 import RequestList from "./RequestList";
 import NewRequest from "./PopUp/NewRequest";
 import About from "./About";
 import AuthRoute from './PrivateRoute/AuthRoute';
+import HeaderNav from './Header';
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
 import UserService from '../services/UserService';
+import "../App.css";
+import Keys from './Keys';
 
 const App = () => {
   const auth = UserService.isLoggedIn();
@@ -42,6 +44,10 @@ const App = () => {
       path: "/about",
       element: <AuthRoute Component={About} />
     },
+    {
+      path: "/keys",
+      element: <AuthRoute Component={Keys} />
+    },
   ]);
   if (auth === true && window.location.pathname === "/login"){
     window.location.href = window.location.href.replace("/login", "");
@@ -49,8 +55,10 @@ const App = () => {
   }
   return (
     <React.Fragment>
-      {auth === true && <NavbarComp />}
-      <RouterProvider router={router} />
+      {auth === true && <HeaderNav />}
+      <section className='contentSection'>
+        <RouterProvider router={router} />
+      </section>
     </React.Fragment>
   );
 };
