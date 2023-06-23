@@ -31,7 +31,7 @@ const ApproveRequest = ({selectRows,setActionProps})=> {
     >
       <div>
          <div className="mb-3">
-            <h4>Are you sure want to Exit from the Group!</h4>
+            <h4>Are you sure want to Approve this request!</h4>
           </div>
       </div>
     </Modal>

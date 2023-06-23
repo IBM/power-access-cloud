@@ -99,3 +99,40 @@ export const approveRequest = (id) => {
     }));
 };
 
+export const allKeys = ()=>{
+  const url = `/pac-go-server/keys`;
+  return _axios.get(url)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}
+export const createKeys = (payload)=>{
+  const url = `/pac-go-server/keys`;
+  return _axios.post(url,payload)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}
+
+export const deleteKeys = (id)=>{
+  const url = `/pac-go-server/keys/${id.id}`;
+  return _axios.delete(url)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}

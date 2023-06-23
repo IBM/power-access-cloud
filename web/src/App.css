@@ -36,3 +36,13 @@
     transform: rotate(360deg);
   }
 }
+.contentSection{
+  width: calc(100% - 265px);
+  margin-left: 265px;
+  margin-top: 35px;
+}
+.sidebar-fixed{
+  margin-top:"47px" !important;
+  background-color:"black";
+  color: "white"
+}
