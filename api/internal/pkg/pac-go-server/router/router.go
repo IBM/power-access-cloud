@@ -75,6 +75,7 @@ func CreateRouter() *gin.Engine {
 	{
 		authorizedAdmin.POST("/catalogs", services.CreateCatalog)
 		authorizedAdmin.DELETE("/catalogs/:name", services.DeleteCatalog)
+		authorizedAdmin.PUT("/catalogs/:name/retire", services.RetireCatalog)
 
 		authorizedAdmin.POST("/groups/:id/quota", services.CreateQuota)
 		authorizedAdmin.PUT("/groups/:id/quota", services.UpdateQuota)

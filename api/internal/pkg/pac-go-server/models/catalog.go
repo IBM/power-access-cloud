@@ -6,6 +6,7 @@ type Catalog struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	Capacity    Capacity      `json:"capacity"`
+	Retired     bool          `json:"retired"`
 	Expiry      int           `json:"expiry"`
 	VM          VM            `json:"vm"`
 	Status      CatalogStatus `json:"status"`

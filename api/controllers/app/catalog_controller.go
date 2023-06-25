@@ -161,6 +161,12 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 	}()
 
+	// Set ready as false if catalog is retired
+	if catalog.Spec.Retired {
+		catalog.Status.Message = "catalog is retired"
+		return ctrl.Result{}, nil
+	}
+
 	if catalog.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(catalog, appv1alpha1.CatalogFinalizer) {
 			controllerutil.AddFinalizer(catalog, appv1alpha1.CatalogFinalizer)

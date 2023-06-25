@@ -49,6 +49,10 @@ spec:
                 type: string
               expiry:
                 type: integer
+              retired:
+                description: Retired says whether the Catalog is retired or not, if
+                  retired then it will not be available for provisioning
+                type: boolean
               type:
                 description: CatalogType is type of catalog
                 enum:
@@ -86,6 +90,7 @@ spec:
             - capacity
             - description
             - expiry
+            - retired
             - type
             type: object
           status:

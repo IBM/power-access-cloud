@@ -43,6 +43,8 @@ type CatalogSpec struct {
 	Description string `json:"description"`
 	// +kubebuilder:validation:Required
 	Capacity Capacity `json:"capacity"`
+	// Retired says whether the Catalog is retired or not, if retired then it will not be available for provisioning
+	Retired bool `json:"retired"`
 	// +kubebuilder:validation:Required
 	Expiry int `json:"expiry"`
 	// +optional

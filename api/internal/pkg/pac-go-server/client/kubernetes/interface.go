@@ -11,6 +11,7 @@ type Client interface {
 	GetCatalog(string) (pac.Catalog, error)
 	CreateCatalog(pac.Catalog) error
 	DeleteCatalog(string) error
+	RetireCatalog(string) error
 
 	GetServices(string string) (pac.ServiceList, error)
 	GetService(string) (pac.Service, error)
