@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+
 	"github.com/PDeXchange/pac/apis/app/v1alpha1"
 	"github.com/PDeXchange/pac/controllers/util"
 	"github.com/PDeXchange/pac/internal/pkg/client/platform"
@@ -25,6 +26,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/IBM/go-sdk-core/v5/core"
+	"sigs.k8s.io/cluster-api/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -47,6 +49,7 @@ type ControllerScopeParams struct {
 
 type ControllerScope struct {
 	logr.Logger
+	patchHelper    *patch.Helper
 	Client         client.Client
 	Catalog        *v1alpha1.Catalog
 	Service        *v1alpha1.Service
@@ -73,6 +76,13 @@ func NewControllerScope(ctx context.Context, params ControllerScopeParams) (scop
 		return
 	}
 	scope.Catalog = params.Catalog
+
+	helper, err := patch.NewHelper(params.Catalog, params.Client)
+	if err != nil {
+		err = errors.Wrap(err, "failed to init patch helper")
+		return nil, err
+	}
+	scope.patchHelper = helper
 
 	if params.Type == serviceController {
 		if params.Service == nil {
@@ -112,4 +122,14 @@ func NewControllerScope(ctx context.Context, params ControllerScopeParams) (scop
 	}
 
 	return scope, nil
+}
+
+// Close closes the scope persisting the catalog/service configuration and status.
+func (m *ControllerScope) Close() error {
+	return m.PatchObject()
+}
+
+// PatchObject persists the catalog/service configuration and status.
+func (m *ControllerScope) PatchObject() error {
+	return m.patchHelper.Patch(context.TODO(), m.Catalog)
 }

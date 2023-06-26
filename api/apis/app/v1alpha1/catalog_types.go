@@ -51,7 +51,7 @@ type CatalogSpec struct {
 
 // CatalogStatus defines the observed state of Catalog
 type CatalogStatus struct {
-	Ready   bool   `json:"ready"`
+	Ready   bool   `json:"ready,omitempty"`
 	Message string `json:"message,omitempty"`
 }
 
