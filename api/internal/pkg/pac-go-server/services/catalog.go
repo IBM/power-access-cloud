@@ -90,6 +90,24 @@ func DeleteCatalog(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func RetireCatalog(c *gin.Context) {
+	logger := log.GetLogger()
+	catalogName := c.Param("name")
+	if catalogName == "" {
+		logger.Error("catalog name is not set")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "catalog name is not set"})
+		return
+	}
+
+	if err := kubeClient.RetireCatalog(catalogName); err != nil {
+		logger.Error("failed to retire catalog", zap.String("catalog name", catalogName), zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+	logger.Debug("successfully retired catalog", zap.String("catalog name", catalogName))
+	c.Status(http.StatusNoContent)
+}
+
 func convertToCatalog(catalogItem pac.Catalog) models.Catalog {
 	catalog := models.Catalog{
 		ID:          string(catalogItem.UID),
@@ -99,7 +117,8 @@ func convertToCatalog(catalogItem pac.Catalog) models.Catalog {
 		Capacity: models.Capacity{
 			Memory: catalogItem.Spec.Capacity.Memory,
 		},
-		Expiry: catalogItem.Spec.Expiry,
+		Retired: catalogItem.Spec.Retired,
+		Expiry:  catalogItem.Spec.Expiry,
 		Status: models.CatalogStatus{
 			Ready:   catalogItem.Status.Ready,
 			Message: catalogItem.Status.Message,

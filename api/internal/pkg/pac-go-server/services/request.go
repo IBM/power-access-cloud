@@ -89,6 +89,20 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	}
 	logger.Debug("fetched service", zap.Any("service", service))
 
+	// service shouldn't be extended if catalog already retired
+	catalog, err := kubeClient.GetCatalog(service.Spec.Catalog.Name)
+	if err != nil {
+		logger.Error("failed to get catalog", zap.String("catalog name", service.Spec.Catalog.Name), zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+
+	if catalog.Spec.Retired {
+		logger.Debug("catalog is retired, can't extend the expiry", zap.Any("catalog", catalog))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("catalog %s is retired, can't extend the expiry", catalog.Name)})
+		return
+	}
+
 	// verify already request exist for service extension
 	req, err := dbCon.GetRequestByServiceName(serviceName)
 	if err != nil {

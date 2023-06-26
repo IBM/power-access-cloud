@@ -78,7 +78,14 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, errors.Wrapf(err, "error retrieving catalog with name %s for service %s", service.Spec.Catalog.Name, service.Name)
 	}
 
-	if !catalog.Status.Ready {
+	// If the catalog is retired, we should not allow any new services to be created. Hence, we set the service state to error.
+	if service.Status.State != appv1alpha1.ServiceStateCreated && catalog.Spec.Retired {
+		service.Status.State = appv1alpha1.ServiceStateError
+		service.Status.Message = "catalog is retired"
+		return ctrl.Result{}, nil
+	}
+
+	if service.Status.State != appv1alpha1.ServiceStateCreated && !catalog.Status.Ready {
 		service.Status.State = appv1alpha1.ServiceStateError
 		message := fmt.Sprintf("catalog %s not in ready state", service.Spec.Catalog.Name)
 		service.Status.Message = message

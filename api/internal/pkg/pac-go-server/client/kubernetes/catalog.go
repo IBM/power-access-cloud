@@ -55,3 +55,18 @@ func (client KubeClient) DeleteCatalog(name string) error {
 	}
 	return nil
 }
+
+func (client KubeClient) RetireCatalog(name string) error {
+	catalog := pac.Catalog{}
+	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &catalog); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		return fmt.Errorf("failed to retire catalog with name %s Error: %v", name, err)
+	}
+	catalog.Spec.Retired = true
+	if err := client.kubeClient.Update(context.Background(), &catalog); err != nil {
+		return fmt.Errorf("failed to retire catalog with name %s Error: %v", name, err)
+	}
+	return nil
+}

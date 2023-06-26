@@ -124,6 +124,12 @@ func CreateService(c *gin.Context) {
 	}
 	logger.Debug("catalog details", zap.String("name", service.CatalogName), zap.Any("catalog", catalog))
 
+	if catalog.Spec.Retired {
+		logger.Error("catalog is retired cannot deploy service", zap.Any("catalog", catalog))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("catalog %s is retired, cannot deploy service", catalog.Name)})
+		return
+	}
+
 	if !catalog.Status.Ready {
 		logger.Error("catalog is not in ready state cannot deploy service", zap.Any("catalog", catalog))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("catalog %s is not in ready state, cannot deploy service", catalog.Name)})

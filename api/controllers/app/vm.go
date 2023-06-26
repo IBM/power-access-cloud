@@ -19,12 +19,13 @@ package controllers
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/IBM-Cloud/power-go-client/power/models"
-	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
-	"github.com/pkg/errors"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/IBM-Cloud/power-go-client/power/models"
+	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 func extractPVMInstance(scope *ControllerScope, pvmInstance *models.PVMInstance) {
