@@ -4,13 +4,13 @@ import { deleteServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteService = ({selectRows,setActionProps})=> {
-    let name = "";
-    selectRows[0].cells.forEach((item)=>{
-        if (item.id.split(":")[1] === "name"){
-            name = item?.value;
-        }
-    });
+const DeleteService = ({ selectRows, setActionProps }) => {
+  let name = "";
+  selectRows[0].cells.forEach((item) => {
+    if (item.id.split(":")[1] === "name") {
+      name = item?.value;
+    }
+  });
   let navigate = useNavigate();
 
   const onSubmit = async () => {
@@ -25,12 +25,12 @@ const DeleteService = ({selectRows,setActionProps})=> {
 
   return (
     <Modal
-      modalHeading="Exit request"
+      modalHeading="Delete service"
       danger={true}
-      onRequestClose={()=>{
+      onRequestClose={() => {
         setActionProps("");
       }}
-      onRequestSubmit={()=>{
+      onRequestSubmit={() => {
         onSubmit();
       }}
       open={true}
@@ -38,12 +38,12 @@ const DeleteService = ({selectRows,setActionProps})=> {
       secondaryButtonText={"Cancel"}
     >
       <div>
-         <div className="mb-3">
-            <h4>Are you sure want to delete this Service!</h4>
-          </div>
+        <div className="mb-3">
+          <h4>Are you sure want to delete this Service!</h4>
+        </div>
       </div>
     </Modal>
   );
-}
+};
 
 export default DeleteService;

@@ -151,6 +151,19 @@ export const getAllCatalogs = ()=>{
   }));
 }
 
+export const deleteCatalog = (name)=>{
+  const url = `/pac-go-server/catalogs/${name}`;
+  return _axios.delete(url)
+  .then(response => ({
+    type: "LIST_REQUESTS",
+    payload: response.data
+  }))
+  .catch(error => ({
+    type: "API_ERROR",
+    payload: error
+  }));
+}
+
 export const deployCatalog = (payload)=>{
   const url = `/pac-go-server/services`;
   return _axios.post(url,payload)
