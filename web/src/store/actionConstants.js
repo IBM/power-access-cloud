@@ -1,5 +1,7 @@
 export const APPROVE_REQUEST = "APPROVE_REQUEST";
 export const REJECT_REQUEST = "REJECT_REQUEST";
+export const DELETE_REQUEST = "DELETE_REQUEST";
+export const REQUEST_DETAILS = "REQUEST_DETAILS";
 export const USER_LOGIN = "USER_LOGIN";
 export const LIST_GROUP = "LIST_GROUP";
 export const NEW_REQUEST = "NEW_REQUEST";
