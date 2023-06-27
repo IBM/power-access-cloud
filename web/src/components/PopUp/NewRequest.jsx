@@ -4,10 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { newRequest, getGroup } from "../../services/request";
 import { Modal } from "@carbon/react";
 
-const NewRequest = ({selectRows,setActionProps})=> {
-  const [loading,setLoading] = useState(true);
+const NewRequest = ({ selectRows, setActionProps }) => {
+  const [loading, setLoading] = useState(true);
   const id = selectRows[0]?.id;
-  console.log(selectRows);
   useEffect(() => {
     loadUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -24,9 +23,9 @@ const NewRequest = ({selectRows,setActionProps})=> {
     const result = await getGroup(id);
     setLoading(false);
     setGroup({
-      id:result?.payload?.id,
+      id: result?.payload?.id,
       name: result?.payload?.name,
-      justification:""
+      justification: "",
     });
   };
 
@@ -42,29 +41,27 @@ const NewRequest = ({selectRows,setActionProps})=> {
       console.log(error);
     } finally {
     }
-    navigate("..")
+    navigate("..");
   };
 
   return (
     <Modal
       modalHeading="Request for a group"
       danger={true}
-      onRequestClose={()=>{
+      onRequestClose={() => {
         setActionProps("");
       }}
-      onRequestSubmit={()=>{
+      onRequestSubmit={() => {
         onSubmit();
       }}
       open={true}
       primaryButtonText={"Submit"}
       secondaryButtonText={"Cancel"}
     >
-      {
-        loading && <>Loading....</>
-      }
-      {
-        !loading && <div>
-         <div className="mb-3">
+      {loading && <>Loading....</>}
+      {!loading && (
+        <div>
+          <div className="mb-3">
             <label htmlFor="ID" className="form-label">
               ID
             </label>
@@ -105,10 +102,10 @@ const NewRequest = ({selectRows,setActionProps})=> {
               required
             />
           </div>
-      </div>
-      }
+        </div>
+      )}
     </Modal>
   );
-}
+};
 
 export default NewRequest;

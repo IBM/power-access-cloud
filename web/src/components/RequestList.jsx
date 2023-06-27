@@ -107,7 +107,6 @@ const RequestList = () => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectionHandler = (rows = []) => {
-    console.log(rows);
     selectRows = rows;
   };
 
@@ -178,7 +177,6 @@ const RequestList = () => {
                   placeholder={"Search"}
                 />
                 {batchActionProps.batchActions.map((action) => {
-                  console.log({ action });
                   return (
                     <TableBatchAction
                       renderIcon={action.icon}
