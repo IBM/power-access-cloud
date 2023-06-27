@@ -13,7 +13,6 @@ import (
 // Get the Key values and update.
 func GetAllKeys(c *gin.Context) {
 	kc := utils.NewKeyClockClient(c.Request.Context())
-	var keys []models.Key
 
 	var userID string
 	if !kc.IsRole(utils.ManagerRole) {
@@ -23,10 +22,6 @@ func GetAllKeys(c *gin.Context) {
 	keys, err := dbCon.GetKeyByUserID(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if len(keys) == 0 {
-		c.JSON(http.StatusOK, struct{}{})
 		return
 	}
 	c.JSON(http.StatusOK, keys)
