@@ -133,6 +133,22 @@ func (db *MongoDB) UpdateRequestState(id string, state models.RequestStateType) 
 	return nil
 }
 
+func (db *MongoDB) UpdateRequestStateWithComment(id string, state models.RequestStateType, comment string) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid id: %w", err)
+	}
+	collection := db.Database.Collection("requests")
+	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
+	defer cancel()
+	_, err = collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: objectId}}, bson.D{{Key: "$set", Value: bson.D{{Key: "state", Value: state}, {Key: "comment", Value: comment}}}})
+	if err != nil {
+		return fmt.Errorf("error updating request: %w", err)
+	}
+
+	return nil
+}
+
 func (db *MongoDB) GetRequestByServiceName(serviceName string) ([]models.Request, error) {
 	var requests []models.Request
 	if serviceName == "" {

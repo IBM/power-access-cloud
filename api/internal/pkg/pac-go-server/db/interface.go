@@ -14,6 +14,7 @@ type DB interface {
 	GetRequestByID(string) (*models.Request, error)
 	DeleteRequest(string) error
 	UpdateRequestState(id string, state models.RequestStateType) error
+	UpdateRequestStateWithComment(id string, state models.RequestStateType, comment string) error
 	GetRequestByServiceName(string) ([]models.Request, error)
 
 	GetKeyByID(id string) (*models.Key, error)

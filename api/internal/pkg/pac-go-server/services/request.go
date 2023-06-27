@@ -271,6 +271,19 @@ func RejectRequest(c *gin.Context) {
 		return
 	}
 
+	var request models.Request
+	if err := c.BindJSON(&request); err != nil {
+		logger.Error("failed to bind request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to load the body, please feed the proper json body: %s", err)})
+		return
+	}
+
+	if request.Comment == "" {
+		logger.Error("comment is required to reject a request")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Comment is required to reject a request."})
+		return
+	}
+
 	id := c.Param("id")
 	req, err := dbCon.GetRequestByID(id)
 	if err != nil {
@@ -279,7 +292,14 @@ func RejectRequest(c *gin.Context) {
 		return
 	}
 	logger.Debug("fetched request", zap.Any("request", req))
-	if err := dbCon.UpdateRequestState(id, models.RequestStateRejected); err != nil {
+
+	if req.State == models.RequestStateRejected || req.State == models.RequestStateApproved {
+		logger.Debug("request is already", zap.String("state", string(req.State)), zap.String("id", id))
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Request is already %s.", string(req.State))})
+		return
+	}
+
+	if err := dbCon.UpdateRequestStateWithComment(id, models.RequestStateRejected, req.Comment); err != nil {
 		logger.Error("failed to update request status in database", zap.String("id", id), zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to update the state field in the db, err: %s", err.Error())})
 		return

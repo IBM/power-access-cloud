@@ -12,7 +12,7 @@ import (
 )
 
 func (db *MongoDB) GetKeyByUserID(id string) ([]models.Key, error) {
-	var keys []models.Key
+	keys := []models.Key{}
 
 	filter := bson.D{{}}
 	if id != "" {
