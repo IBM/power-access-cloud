@@ -95,7 +95,6 @@ const Catalogs = () => {
   const displayData = flattenArrayOfObject(
     clientSearchFilter(searchText, rows)
   );
-  console.log(displayData);
   const renderSkeleton = () => {
     const headerLabels = headers?.map((x) => x?.header);
     return (
@@ -165,7 +164,6 @@ const Catalogs = () => {
                   placeholder={"Search"}
                 />
                 {batchActionProps.batchActions.map((action) => {
-                  console.log({ action });
                   return (
                     <TableBatchAction
                       renderIcon={action.icon}
