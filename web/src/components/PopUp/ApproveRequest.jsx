@@ -3,12 +3,12 @@ import React from "react";
 import { approveRequest } from "../../services/request";
 import { Modal } from "@carbon/react";
 
-const ApproveRequest = ({selectRows,setActionProps})=> {
+const ApproveRequest = ({ selectRows, setActionProps }) => {
   const id = selectRows[0]?.id;
 
   const onSubmit = async () => {
     try {
-      await approveRequest(id) // wait for the dispatch to complete
+      await approveRequest(id); // wait for the dispatch to complete
     } catch (error) {
       console.log(error);
     }
@@ -16,12 +16,12 @@ const ApproveRequest = ({selectRows,setActionProps})=> {
 
   return (
     <Modal
-      modalHeading="Exit group"
-      danger={true}
-      onRequestClose={()=>{
+      modalHeading="Approve Request"
+      danger={false}
+      onRequestClose={() => {
         setActionProps("");
       }}
-      onRequestSubmit={()=>{
+      onRequestSubmit={() => {
         onSubmit();
         setActionProps("");
       }}
@@ -30,12 +30,12 @@ const ApproveRequest = ({selectRows,setActionProps})=> {
       secondaryButtonText={"Cancel"}
     >
       <div>
-         <div className="mb-3">
-            <h4>Are you sure want to Approve this request!</h4>
-          </div>
+        <div className="mb-3">
+          <h4>Are you sure want to Approve this request!</h4>
+        </div>
       </div>
     </Modal>
   );
-}
+};
 
 export default ApproveRequest;
