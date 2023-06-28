@@ -62,7 +62,7 @@ func (db *MongoDB) GetKeyByID(id string) (*models.Key, error) {
 	defer cancel()
 	err = collection.FindOne(ctx, filter).Decode(&key)
 	if err == mongo.ErrNoDocuments {
-		return nil, fmt.Errorf("no documents found")
+		return nil, fmt.Errorf("key not found with id: %s", id)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("error getting key: %w", err)
