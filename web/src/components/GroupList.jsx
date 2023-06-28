@@ -16,6 +16,7 @@ import {
   TableToolbarSearch,
   TableSelectAll,
   DataTableSkeleton,
+  InlineNotification,
 } from "@carbon/react";
 import { MobileAdd, TrashCan } from "@carbon/icons-react";
 import { clientSearchFilter } from "../utils/Search";
@@ -62,6 +63,8 @@ let selectRows = [];
 const GroupList = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [errorTitle, setErrorTitle] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
 
@@ -69,6 +72,11 @@ const GroupList = () => {
     let data = await allGroups();
     setRows(data?.payload);
     setLoading(false);
+  };
+
+  const handleErrorMessage = (title, message) => {
+    setErrorTitle(title);
+    setErrorMsg(message);
   };
 
   const selectionHandler = (rows = []) => {
@@ -99,10 +107,18 @@ const GroupList = () => {
     return (
       <React.Fragment>
         {actionProps?.key === BUTTON_REQUEST && (
-          <NewRequest selectRows={selectRows} setActionProps={setActionProps} />
+          <NewRequest 
+            selectRows={selectRows} 
+            setActionProps={setActionProps} 
+            onError={handleErrorMessage}
+          />
         )}
         {actionProps?.key === BUTTON_DELETE && (
-          <ExitGroup selectRows={selectRows} setActionProps={setActionProps} />
+          <ExitGroup 
+            selectRows={selectRows} 
+            setActionProps={setActionProps} 
+            onError={handleErrorMessage}
+          />
         )}
       </React.Fragment>
     );
@@ -114,6 +130,15 @@ const GroupList = () => {
   return (
     <>
       {renderActionModals()}
+      { errorMsg && (
+        <InlineNotification
+        title={errorTitle}
+        subtitle={errorMsg}
+        onClose={()=>{
+          setErrorMsg("");
+        }}
+        />
+      )}
       <DataTable rows={displayData} headers={headers}>
         {({
           rows,

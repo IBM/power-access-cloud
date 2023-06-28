@@ -4,7 +4,7 @@ import { deleteServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteService = ({ selectRows, setActionProps }) => {
+const DeleteService = ({ selectRows, setActionProps, onError }) => {
   let name = "";
   selectRows[0].cells.forEach((item) => {
     if (item.id.split(":")[1] === "name") {
@@ -15,7 +15,12 @@ const DeleteService = ({ selectRows, setActionProps }) => {
 
   const onSubmit = async () => {
     try {
-      await deleteServices(name); // wait for the dispatch to complete
+      const {type, payload} = await deleteServices(name); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Service deletion failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -34,7 +39,7 @@ const DeleteService = ({ selectRows, setActionProps }) => {
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={"Delete"}
       secondaryButtonText={"Cancel"}
     >
       <div>

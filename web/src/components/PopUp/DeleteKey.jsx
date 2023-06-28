@@ -4,13 +4,18 @@ import { deleteKeys } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteKey = ({selectRows,setActionProps})=> {
+const DeleteKey = ({selectRows,setActionProps, onError})=> {
   const id = selectRows[0]?.id;
   let navigate = useNavigate();
 
   const onSubmit = async () => {
     try {
-      await deleteKeys({ id }); // wait for the dispatch to complete
+      const {type, payload} = await deleteKeys({ id }); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Catalog deployment failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -29,7 +34,7 @@ const DeleteKey = ({selectRows,setActionProps})=> {
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={"Delete"}
       secondaryButtonText={"Cancel"}
     >
       <div>

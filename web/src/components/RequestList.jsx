@@ -28,6 +28,7 @@ import {
   TableSelectRow,
   TableToolbarSearch,
   TableSelectAll,
+  InlineNotification,
 } from "@carbon/react";
 import ApproveRequest from "./PopUp/ApproveRequest";
 import RequestDetails from "./PopUp/RequestDetail";
@@ -101,6 +102,8 @@ const RequestList = () => {
   const isAdmin = UserService.isAdminUser();
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [errorTitle, setErrorTitle] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [actionProps, setActionProps] = useState("");
 
   const fetchAllRequest = async () => {
@@ -116,6 +119,11 @@ const RequestList = () => {
     fetchAllRequest();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleErrorMessage = (title, message) => {
+    setErrorTitle(title);
+    setErrorMsg(message);
+  };
+
   const selectionHandler = (rows = []) => {
     selectRows = rows;
   };
@@ -127,6 +135,7 @@ const RequestList = () => {
           <ApproveRequest
             selectRows={selectRows}
             setActionProps={setActionProps}
+            onError={handleErrorMessage}
           />
         )}
         {actionProps?.key === REQUEST_DETAILS && (
@@ -139,12 +148,14 @@ const RequestList = () => {
           <RejectRequest
             selectRows={selectRows}
             setActionProps={setActionProps}
+            onError={handleErrorMessage}
           />
         )}
         {actionProps?.key === DELETE_REQUEST && (
           <DeleteRequest
             selectRows={selectRows}
             setActionProps={setActionProps}
+            onError={handleErrorMessage}
           />
         )}
       </React.Fragment>
@@ -155,6 +166,15 @@ const RequestList = () => {
   return (
     <>
       {renderActionModals()}
+      { errorMsg && (
+        <InlineNotification
+        title={errorTitle}
+        subtitle={errorMsg}
+        onClose={()=>{
+          setErrorMsg("");
+        }}
+        />
+      )}
       <DataTable rows={displayData} headers={headers}>
         {({
           rows,

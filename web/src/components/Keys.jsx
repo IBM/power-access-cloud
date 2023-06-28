@@ -20,6 +20,7 @@ import {
   TableToolbarSearch,
   TableSelectAll,
   DataTableSkeleton,
+  InlineNotification,
 } from "@carbon/react";
 import DeleteKey from "./PopUp/DeleteKey";
 const BUTTON_REQUEST = "BUTTON_REQUEST";
@@ -62,6 +63,8 @@ let selectRows = [];
 const Keys = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [errorTitle, setErrorTitle] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
   const isAdmin = UserService.isAdminUser();
@@ -72,6 +75,12 @@ const Keys = () => {
     setRows(data?.payload);
     setLoading(false);
   };
+
+  const handleErrorMessage = (title, message) => {
+    setErrorTitle(title);
+    setErrorMsg(message);
+  };
+  
   const selectionHandler = (rows = []) => {
     selectRows = rows;
   };
@@ -108,10 +117,18 @@ const Keys = () => {
     return (
       <React.Fragment>
         {actionProps?.key === BUTTON_REQUEST && (
-          <AddKey selectRows={selectRows} setActionProps={setActionProps} />
+          <AddKey 
+            selectRows={selectRows} 
+            setActionProps={setActionProps} 
+            onError={handleErrorMessage}
+          />
         )}
         {actionProps?.key === BUTTON_DELETE && (
-          <DeleteKey selectRows={selectRows} setActionProps={setActionProps} />
+          <DeleteKey 
+            selectRows={selectRows} 
+            setActionProps={setActionProps} 
+            onError={handleErrorMessage}
+          />
         )}
       </React.Fragment>
     );
@@ -123,6 +140,16 @@ const Keys = () => {
   return (
     <>
       {renderActionModals()}
+      {renderActionModals()}
+      { errorMsg && (
+        <InlineNotification
+        title={errorTitle}
+        subtitle={errorMsg}
+        onClose={()=>{
+          setErrorMsg("");
+        }}
+        />
+      )}
       <DataTable rows={displayData} headers={headers}>
         {({
           rows,

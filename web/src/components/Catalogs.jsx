@@ -14,6 +14,7 @@ import {
   TableToolbarSearch,
   TableSelectAll,
   DataTableSkeleton,
+  InlineNotification,
 } from "@carbon/react";
 import { MobileAdd, TrashCan, AlarmSubtract } from "@carbon/icons-react";
 import { clientSearchFilter } from "../utils/Search";
@@ -91,6 +92,8 @@ const Catalogs = () => {
   const isAdmin = UserService.isAdminUser();
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [errorTitle, setErrorTitle] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
 
@@ -102,6 +105,11 @@ const Catalogs = () => {
     let data = await getAllCatalogs();
     setRows(data?.payload);
     setLoading(false);
+  };
+
+  const handleErrorMessage = (title, message) => {
+    setErrorTitle(title);
+    setErrorMsg(message);
   };
 
   const selectionHandler = (rows = []) => {
@@ -140,12 +148,14 @@ const Catalogs = () => {
           <DeleteCatalog
             selectRows={selectRows}
             setActionProps={setActionProps}
+            onError={handleErrorMessage}
           />
         )}
         {actionProps?.key === BUTTON_REQUEST && (
           <DeployCatalog
             selectRows={selectRows}
             setActionProps={setActionProps}
+            onError={handleErrorMessage}
           />
         )}
       </React.Fragment>
@@ -158,6 +168,15 @@ const Catalogs = () => {
   return (
     <>
       {renderActionModals()}
+      { errorMsg && (
+        <InlineNotification
+        title={errorTitle}
+        subtitle={errorMsg}
+        onClose={()=>{
+          setErrorMsg("");
+        }}
+        />
+      )}
       <DataTable rows={displayData} headers={headers}>
         {({
           rows,

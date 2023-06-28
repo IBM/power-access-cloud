@@ -3,12 +3,17 @@ import React from "react";
 import { approveRequest } from "../../services/request";
 import { Modal } from "@carbon/react";
 
-const ApproveRequest = ({ selectRows, setActionProps }) => {
+const ApproveRequest = ({ selectRows, setActionProps, onError }) => {
   const id = selectRows[0]?.id;
 
   const onSubmit = async () => {
     try {
-      await approveRequest(id); // wait for the dispatch to complete
+      const {type, payload} = await approveRequest(id); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Approval of request failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       console.log(error);
     }

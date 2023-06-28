@@ -4,7 +4,7 @@ import { extendServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal, DatePicker, DatePickerInput } from "@carbon/react";
 
-const ServiceExtend = ({ selectRows, setActionProps }) => {
+const ServiceExtend = ({ selectRows, setActionProps, onError }) => {
   const [justification, setJustification] = useState("");
   let name = "";
   let expiry = "";
@@ -23,13 +23,18 @@ const ServiceExtend = ({ selectRows, setActionProps }) => {
     const changedDate = new Date(date);
     const isoString = changedDate.toISOString();
     try {
-      await extendServices(name, {
+      const {type, payload} = await extendServices(name, {
         justification,
         type: "SERVICE_EXPIRY",
         service: {
           expiry: isoString,
         },
       }); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Service extension failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       console.log(error);
     }

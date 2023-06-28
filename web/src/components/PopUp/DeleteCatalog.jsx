@@ -4,7 +4,7 @@ import { deleteCatalog } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteCatalog = ({selectRows,setActionProps})=> {
+const DeleteCatalog = ({selectRows,setActionProps,onError})=> {
     let name = "";
     selectRows[0].cells.forEach((item)=>{
         if (item.id.split(":")[1] === "name"){
@@ -15,7 +15,13 @@ const DeleteCatalog = ({selectRows,setActionProps})=> {
 
   const onSubmit = async () => {
     try {
-      await deleteCatalog(name); // wait for the dispatch to complete
+      const {type, payload} = await deleteCatalog(name); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        console.log("payload:", payload)
+        const errorTitle = "Deletion of Catalog failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -34,7 +40,7 @@ const DeleteCatalog = ({selectRows,setActionProps})=> {
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={"Delete"}
       secondaryButtonText={"Cancel"}
     >
       <div>

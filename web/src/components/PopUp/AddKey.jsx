@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { createKeys  } from "../../services/request";
 import { Modal } from "@carbon/react";
 
-const AddKey = ({ setActionProps})=> {
+const AddKey = ({ setActionProps, onError })=> {
   let navigate = useNavigate();
 
   const [g, setGroup] = useState({
@@ -20,11 +20,15 @@ const AddKey = ({ setActionProps})=> {
     if (g.name.trim()==="" || g.content.trim() === "")
       return ;
     try {
-      await createKeys(g); // wait for the dispatch to complete
+      const {type, payload} = await createKeys(g); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Key addition failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       // handle any errors that occurred during the dispatch
       console.log(error);
-    } finally {
     }
     setActionProps("");
     navigate("/keys")

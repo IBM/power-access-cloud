@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { rejectRequest } from "../../services/request";
 import { Modal } from "@carbon/react";
 
-const RejectRequest = ({ selectRows, setActionProps }) => {
+const RejectRequest = ({ selectRows, setActionProps, onError }) => {
   const [request, setRequest] = useState({
     id: selectRows[0]?.id,
     comment: "",
@@ -11,7 +11,12 @@ const RejectRequest = ({ selectRows, setActionProps }) => {
 
   const onSubmit = async () => {
     try {
-      await rejectRequest(request); // wait for the dispatch to complete
+      const {type, payload} = await rejectRequest(request); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Rejection of request failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       console.log(error);
     }

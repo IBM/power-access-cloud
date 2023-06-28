@@ -4,7 +4,7 @@ import { deployCatalog } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeployCatalog = ({selectRows,setActionProps})=> {
+const DeployCatalog = ({selectRows, setActionProps, onError })=> {
     const [catalogName, setCatalogName] = useState("");
     let name = "";
     selectRows[0].cells.forEach((item)=>{
@@ -16,10 +16,15 @@ const DeployCatalog = ({selectRows,setActionProps})=> {
 
     const onSubmit = async () => {
         try {
-          await deployCatalog({
+          const {type, payload} = await deployCatalog({
             catalog_name:name,
             display_name:catalogName,
           }); // wait for the dispatch to complete
+          if (type==="API_ERROR"){
+            const errorTitle = "Catalog deployment failed"
+            const errorMsg = payload.response.data.error;
+            onError(errorTitle, errorMsg);
+          }
         } catch (error) {
         console.log(error);
         }

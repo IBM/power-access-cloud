@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { newRequest, getGroup } from "../../services/request";
 import { Modal } from "@carbon/react";
 
-const NewRequest = ({ selectRows, setActionProps }) => {
+const NewRequest = ({ selectRows, setActionProps, onError }) => {
   const [loading, setLoading] = useState(true);
   const id = selectRows[0]?.id;
   useEffect(() => {
@@ -35,7 +35,12 @@ const NewRequest = ({ selectRows, setActionProps }) => {
 
   const onSubmit = async () => {
     try {
-      await newRequest(g); // wait for the dispatch to complete
+      const {type, payload} = await newRequest(g); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Request for the group failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       // handle any errors that occurred during the dispatch
       console.log(error);

@@ -3,12 +3,17 @@ import React, { useState } from "react";
 import { deleteGroup } from "../../services/request";
 import { Modal } from "@carbon/react";
 
-const ExitGroup = ({ selectRows, setActionProps }) => {
+const ExitGroup = ({ selectRows, setActionProps, onError }) => {
   const id = selectRows[0]?.id;
 
   const onSubmit = async () => {
     try {
-      await deleteGroup(g); // wait for the dispatch to complete
+      const {type, payload} = await deleteGroup(g); // wait for the dispatch to complete
+      if (type==="API_ERROR"){
+        const errorTitle = "Exit group failed"
+        const errorMsg = payload.response.data.error;
+        onError(errorTitle, errorMsg);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -35,12 +40,12 @@ const ExitGroup = ({ selectRows, setActionProps }) => {
         setActionProps("");
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={"Exit"}
       secondaryButtonText={"Cancel"}
     >
       <div>
         <div className="mb-3">
-          <h4>Are you sure want to Exit from this group!</h4>
+          <h4>Are you sure want to Exit from this group?</h4>
         </div>
         <div className="mb-3">
           <label htmlFor="Justifcation" className="form-label">
