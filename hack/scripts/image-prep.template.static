@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+mv /etc/resolv.conf /etc/resolv.conf.orig || true
+echo "nameserver 9.9.9.9" | tee /etc/resolv.conf
+{{if eq .Dist "rhel"}}
+subscription-manager register --force --auto-attach --username={{ .RHNUser }} --password={{ .RHNPassword }}
+{{end}}
+yum update -y && yum install -y yum-utils
+yum install -y cloud-init
+rm -rf /etc/systemd/system/multi-user.target.wants/firewalld.service
+rpm -vih --nodeps https://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/ibm-power-repo-latest.noarch.rpm
+sed -i 's/^more \/opt\/ibm\/lop\/notice/#more \/opt\/ibm\/lop\/notice/g' /opt/ibm/lop/configure
+sed -i 's/^less \/opt\/ibm\/lop\/notice/#less \/opt\/ibm\/lop\/notice/g' /opt/ibm/lop/configure
+echo 'y' | /opt/ibm/lop/configure
+yum update -y; yum repolist
+# Disable the AT repository due to slowness in nature
+#yum-config-manager --disable Advance_Toolchain
+yum install  powerpc-utils librtas DynamicRM  devices.chrp.base.ServiceRM rsct.opt.storagerm rsct.core rsct.basic rsct.core src -y
+yum install -y device-mapper-multipath
+cat <<EOF > /etc/multipath.conf
+defaults {
+    user_friendly_names yes
+    verbosity 6
+    polling_interval 10
+    max_polling_interval 50
+    reassign_maps yes
+    failback immediate
+    rr_min_io 2000
+    no_path_retry 10
+    checker_timeout 30
+    find_multipaths smart
+}
+EOF
+sed -i 's/GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=60/g' /etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX="console=tty0 console=hvc0,115200n8  biosdevname=0  crashkernel=auto rd.shell rd.debug rd.driver.pre=dm_multipath log_buf_len=1M "/g' /etc/default/grub
+echo 'force_drivers+=" dm-multipath "' >/etc/dracut.conf.d/10-mp.conf
+dracut --regenerate-all --force
+for kernel in $(rpm -q kernel | sort -V | sed 's/kernel-//')
+do
+	echo "Generating initramfs for kernel version: ${kernel}"
+	dracut --kver ${kernel} --force --add multipath --include /etc/multipath /etc/multipath --include /etc/multipath.conf /etc/multipath.conf
+done
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+#curl https://gist.githubusercontent.com/mkumatag/a99ac20b0d1000347f9253d182c33c1e/raw/115a7a99fffd77fb3afd296a57b39fcdf6beb491/prep-pac.sh -o /usr/local/bin/prep-pac.sh
+curl https://raw.githubusercontent.com/PDeXchange/hack/main/scripts/prep-pac.sh -o /usr/local/bin/prep-pac.sh
+chmod +x /usr/local/bin/prep-pac.sh
+
+cat <<EOT >> /usr/lib/systemd/system/prep-pac.service
+[Unit]
+Description=Prepare the machine for the Power Access Cloud
+Requires=cloud-final.service
+After=cloud-final.service
+
+[Service]
+ExecStart=/usr/local/bin/prep-pac.sh
+Restart=on-failure
+RestartSec=30
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOT
+
+systemctl enable prep-pac.service
+#mkdir -p /etc/cloud/cloud.cfg.d
+#cat <<EOT >> /etc/cloud/cloud.cfg.d/99-custom-networking.cfg
+#network: {config: disabled}
+#EOT
+
+rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0
+{{if .RootPasswd }}
+echo {{ .RootPasswd }} | passwd root --stdin
+{{end}}
+{{if eq .Dist "rhel"}}
+subscription-manager unregister
+subscription-manager clean
+{{end}}
+
+# Remove the ibm repositories used for the rsct installation
+rpm -e ibm-power-repo-*.noarch
+
+mv /etc/resolv.conf.orig /etc/resolv.conf || true
+touch /.autorelabel
