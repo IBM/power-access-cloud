@@ -62,10 +62,15 @@ export const newRequest = (group) => {
 };
 
 export const deleteGroup = (group) => {
-  const url = `/pac-go-server/groups/${group.id}`;
+  const url = `/pac-go-server/groups/${group.id}/exit`;
+
+  const requestData = {
+    justification: group.justification,
+    type: "GROUP_EXIT",
+  };
 
   return _axios
-    .post(url, group)
+    .post(url, requestData)
     .then((response) => ({
       type: "DELETE_GROUP",
       payload: response.data,
