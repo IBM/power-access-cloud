@@ -176,7 +176,7 @@ const Services = () => {
               {selectionHandler && selectionHandler(selectedRows)}
               <TableToolbar {...getToolbarProps()}>
                 <TableToolbarSearch
-                  persistent="true"
+                  persistent={true}
                   tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
                   onChange={(onInputChange) => {
                     setSearchText(onInputChange.target.value);
@@ -186,6 +186,7 @@ const Services = () => {
                 {batchActionProps.batchActions.map((action) => {
                   return (
                     <TableBatchAction
+                      key={action.key}
                       renderIcon={action.icon}
                       disabled={!(selectRows.length === 1)}
                       onClick={() => setActionProps(action)}
@@ -208,7 +209,7 @@ const Services = () => {
                 </TableHead>
                 <TableBody>
                   {rows.map((row) => (
-                    <TableRow>
+                    <TableRow key={row.id}>
                       <TableSelectRow {...getSelectionProps({ row })} />
                       {row.cells.map((cell) => (
                         <TableCell key={cell.id}>{cell.value}</TableCell>

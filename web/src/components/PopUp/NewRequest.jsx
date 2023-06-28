@@ -35,9 +35,9 @@ const NewRequest = ({ selectRows, setActionProps, onError }) => {
 
   const onSubmit = async () => {
     try {
-      const {type, payload} = await newRequest(g); // wait for the dispatch to complete
-      if (type==="API_ERROR"){
-        const errorTitle = "Request for the group failed"
+      const { type, payload } = await newRequest(g); // wait for the dispatch to complete
+      if (type === "API_ERROR") {
+        const errorTitle = "Request for the group failed";
         const errorMsg = payload.response.data.error;
         onError(errorTitle, errorMsg);
       }
@@ -46,7 +46,8 @@ const NewRequest = ({ selectRows, setActionProps, onError }) => {
       console.log(error);
     } finally {
     }
-    navigate("..");
+    setActionProps("");
+    navigate("/groups");
   };
 
   return (

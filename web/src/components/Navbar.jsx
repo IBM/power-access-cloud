@@ -7,10 +7,8 @@ const ProfileSection = () => {
   return (
     <>
       <div className="user-profile">
-        <div style={{ "font-weight": "bolder" }}>
-          {UserService.getUsername()}
-        </div>
-        <div style={{ "font-size": "large" }}>{UserService.getName()}</div>
+        <div style={{ fontWeight: "bolder" }}>{UserService.getUsername()}</div>
+        <div style={{ fontSize: "large" }}>{UserService.getName()}</div>
         <hr />
         <div>
           <Button

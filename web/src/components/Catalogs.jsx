@@ -201,7 +201,7 @@ const Catalogs = () => {
               {selectionHandler && selectionHandler(selectedRows)}
               <TableToolbar {...getToolbarProps()}>
                 <TableToolbarSearch
-                  persistent="true"
+                  persistent={true}
                   tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
                   onChange={(onInputChange) => {
                     setSearchText(onInputChange.target.value);
@@ -239,7 +239,7 @@ const Catalogs = () => {
                 </TableHead>
                 <TableBody>
                   {rows.map((row) => (
-                    <TableRow>
+                    <TableRow key={row.id}>
                       <TableSelectRow {...getSelectionProps({ row })} />
                       {row.cells.map((cell) => (
                         <TableCell key={cell.id}>{cell.value}</TableCell>
