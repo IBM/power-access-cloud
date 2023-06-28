@@ -16,7 +16,7 @@ import {
   DataTableSkeleton,
   InlineNotification,
 } from "@carbon/react";
-import { MobileAdd } from "@carbon/icons-react";
+import { CalendarAddAlt, TrashCan } from "@carbon/icons-react";
 import { clientSearchFilter } from "../utils/Search";
 import FooterPagination from "../utils/Pagination";
 import { flattenArrayOfObject } from "./commonUtils";
@@ -55,18 +55,18 @@ const headers = [
 
 const TABLE_BUTTONS = [
   {
-    key: BUTTON_REQUEST,
-    label: "Delete",
+    key: BUTTON_EXTEND,
+    label: "Change Expiry",
     kind: "ghost",
-    icon: MobileAdd,
+    icon: CalendarAddAlt,
     standalone: true,
     hasIconOnly: true,
   },
   {
-    key: BUTTON_EXTEND,
-    label: "Date Extend",
+    key: BUTTON_REQUEST,
+    label: "Delete",
     kind: "ghost",
-    icon: MobileAdd,
+    icon: TrashCan,
     standalone: true,
     hasIconOnly: true,
   },
@@ -143,16 +143,16 @@ const Services = () => {
   return (
     <>
       {renderActionModals()}
-      { errorMsg && (
+      {errorMsg && (
         <InlineNotification
-        title={errorTitle}
-        subtitle={errorMsg}
-        onClose={()=>{
-          setErrorMsg("");
-        }}
+          title={errorTitle}
+          subtitle={errorMsg}
+          onClose={() => {
+            setErrorMsg("");
+          }}
         />
       )}
-      <DataTable rows={displayData} headers={headers}>
+      <DataTable rows={displayData} headers={headers} isSortable>
         {({
           rows,
           headers,

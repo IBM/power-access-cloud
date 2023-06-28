@@ -7,9 +7,9 @@ import {
   DELETE_REQUEST,
 } from "../store/actionConstants";
 import {
-  MobileAdd,
+  CheckmarkOutline,
   InformationSquare,
-  RuleCancelled,
+  MisuseOutline,
   TrashCan,
 } from "@carbon/icons-react";
 import FooterPagination from "../utils/Pagination";
@@ -82,7 +82,7 @@ const TABLE_BUTTONS = [
     key: REJECT_REQUEST,
     label: "Reject",
     kind: "ghost",
-    icon: RuleCancelled,
+    icon: MisuseOutline,
     standalone: true,
     hasIconOnly: true,
     adminOnly: true,
@@ -91,7 +91,7 @@ const TABLE_BUTTONS = [
     key: APPROVE_REQUEST,
     label: "Approve",
     kind: "ghost",
-    icon: MobileAdd,
+    icon: CheckmarkOutline,
     standalone: true,
     hasIconOnly: true,
     adminOnly: true,
@@ -166,16 +166,16 @@ const RequestList = () => {
   return (
     <>
       {renderActionModals()}
-      { errorMsg && (
+      {errorMsg && (
         <InlineNotification
-        title={errorTitle}
-        subtitle={errorMsg}
-        onClose={()=>{
-          setErrorMsg("");
-        }}
+          title={errorTitle}
+          subtitle={errorMsg}
+          onClose={() => {
+            setErrorMsg("");
+          }}
         />
       )}
-      <DataTable rows={displayData} headers={headers}>
+      <DataTable rows={displayData} headers={headers} isSortable>
         {({
           rows,
           headers,

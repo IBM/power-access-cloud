@@ -80,7 +80,7 @@ const Keys = () => {
     setErrorTitle(title);
     setErrorMsg(message);
   };
-  
+
   const selectionHandler = (rows = []) => {
     selectRows = rows;
   };
@@ -117,16 +117,16 @@ const Keys = () => {
     return (
       <React.Fragment>
         {actionProps?.key === BUTTON_REQUEST && (
-          <AddKey 
-            selectRows={selectRows} 
-            setActionProps={setActionProps} 
+          <AddKey
+            selectRows={selectRows}
+            setActionProps={setActionProps}
             onError={handleErrorMessage}
           />
         )}
         {actionProps?.key === BUTTON_DELETE && (
-          <DeleteKey 
-            selectRows={selectRows} 
-            setActionProps={setActionProps} 
+          <DeleteKey
+            selectRows={selectRows}
+            setActionProps={setActionProps}
             onError={handleErrorMessage}
           />
         )}
@@ -141,16 +141,16 @@ const Keys = () => {
     <>
       {renderActionModals()}
       {renderActionModals()}
-      { errorMsg && (
+      {errorMsg && (
         <InlineNotification
-        title={errorTitle}
-        subtitle={errorMsg}
-        onClose={()=>{
-          setErrorMsg("");
-        }}
+          title={errorTitle}
+          subtitle={errorMsg}
+          onClose={() => {
+            setErrorMsg("");
+          }}
         />
       )}
-      <DataTable rows={displayData} headers={headers}>
+      <DataTable rows={displayData} headers={headers} isSortable>
         {({
           rows,
           headers,

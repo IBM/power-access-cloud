@@ -168,16 +168,16 @@ const Catalogs = () => {
   return (
     <>
       {renderActionModals()}
-      { errorMsg && (
+      {errorMsg && (
         <InlineNotification
-        title={errorTitle}
-        subtitle={errorMsg}
-        onClose={()=>{
-          setErrorMsg("");
-        }}
+          title={errorTitle}
+          subtitle={errorMsg}
+          onClose={() => {
+            setErrorMsg("");
+          }}
         />
       )}
-      <DataTable rows={displayData} headers={headers}>
+      <DataTable rows={displayData} headers={headers} isSortable>
         {({
           rows,
           headers,

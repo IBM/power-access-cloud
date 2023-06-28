@@ -22,7 +22,7 @@ export const flattenObject = (obj) => {
           timeDifference / (1000 * 60 * 60 * 24)
         );
 
-        const options = { year: "numeric", month: "numeric", day: "numeric" };
+        const options = { year: "numeric", month: "short", day: "2-digit" };
         const expDateOnly = exp.toLocaleDateString(undefined, options);
 
         if (daysDifference >= 0) {
