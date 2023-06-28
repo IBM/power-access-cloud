@@ -22,6 +22,8 @@ import { flattenArrayOfObject } from "./commonUtils";
 import { getAllCatalogs } from "../services/request";
 import DeployCatalog from "./PopUp/DeployCatalog";
 import DeleteCatalog from "./PopUp/DeleteCatalog";
+import UserService from "../services/UserService";
+
 const BUTTON_REQUEST = "BUTTON_REQUEST";
 const BUTTON_DELETE = "BUTTON_DELETE";
 
@@ -60,6 +62,7 @@ const TABLE_BUTTONS = [
     icon: TrashCan,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: true,
   },
   {
     key: BUTTON_REQUEST,
@@ -68,15 +71,21 @@ const TABLE_BUTTONS = [
     icon: MobileAdd,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: false,
   },
 ];
 
 let selectRows = [];
 const Catalogs = () => {
+  const isAdmin = UserService.isAdminUser();
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
+
+  const filteredButtons = isAdmin
+    ? TABLE_BUTTONS // Display all buttons for admin users
+    : TABLE_BUTTONS.filter((button) => !button.adminOnly); // Filter out admin-only buttons for non-admin users
 
   const fetchData = async () => {
     let data = await getAllCatalogs();
@@ -164,15 +173,21 @@ const Catalogs = () => {
                   placeholder={"Search"}
                 />
                 {batchActionProps.batchActions.map((action) => {
-                  return (
-                    <TableBatchAction
-                      renderIcon={action.icon}
-                      disabled={!(selectRows.length === 1)}
-                      onClick={() => setActionProps(action)}
-                    >
-                      {action.label}
-                    </TableBatchAction>
-                  );
+                  return filteredButtons.map((btn) => {
+                    if (btn.key === action.key) {
+                      return (
+                        <TableBatchAction
+                          renderIcon={btn.icon}
+                          disabled={!(selectRows.length === 1)}
+                          onClick={() => setActionProps(btn)}
+                          key={btn.key} // Add a unique key for each rendered component
+                        >
+                          {btn.label}
+                        </TableBatchAction>
+                      );
+                    }
+                    return null;
+                  });
                 })}
               </TableToolbar>
               <Table {...getTableProps()}>

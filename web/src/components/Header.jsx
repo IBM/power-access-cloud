@@ -33,7 +33,7 @@ const HeaderNav = () => {
                     setShowProfile(!showProfile);
                   }}
                 >
-                  <UserAvatar size="small" />
+                  <UserAvatar size="32" tabIndex="0" />
                 </HeaderGlobalAction>
               </HeaderGlobalBar>
             </Header>
@@ -55,12 +55,12 @@ const HeaderNav = () => {
         className="sidebar-fixed"
       >
         <SideNavItems>
-          <SideNavLink href="/">About Section</SideNavLink>
           <SideNavLink href="/groups">Groups</SideNavLink>
           <SideNavLink href="/requests">Request</SideNavLink>
           <SideNavLink href="/keys">Keys</SideNavLink>
           <SideNavLink href="/catalogs">Catalogs</SideNavLink>
           <SideNavLink href="/services">Services</SideNavLink>
+          <SideNavLink href="/">About</SideNavLink>
         </SideNavItems>
       </SideNav>
     </>

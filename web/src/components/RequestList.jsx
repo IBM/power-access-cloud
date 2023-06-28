@@ -33,6 +33,7 @@ import ApproveRequest from "./PopUp/ApproveRequest";
 import RequestDetails from "./PopUp/RequestDetail";
 import RejectRequest from "./PopUp/RejectRequest";
 import DeleteRequest from "./PopUp/DeleteRequest";
+import UserService from "../services/UserService";
 
 const headers = [
   {
@@ -65,6 +66,7 @@ const TABLE_BUTTONS = [
     icon: InformationSquare,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: false,
   },
   {
     key: DELETE_REQUEST,
@@ -73,6 +75,7 @@ const TABLE_BUTTONS = [
     icon: TrashCan,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: false,
   },
   {
     key: REJECT_REQUEST,
@@ -81,6 +84,7 @@ const TABLE_BUTTONS = [
     icon: RuleCancelled,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: true,
   },
   {
     key: APPROVE_REQUEST,
@@ -89,10 +93,12 @@ const TABLE_BUTTONS = [
     icon: MobileAdd,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: true,
   },
 ];
 let selectRows = [];
 const RequestList = () => {
+  const isAdmin = UserService.isAdminUser();
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [actionProps, setActionProps] = useState("");
@@ -101,6 +107,10 @@ const RequestList = () => {
     let data = await allRequests();
     setRows(data?.payload);
   };
+
+  const filteredButtons = isAdmin
+    ? TABLE_BUTTONS // Display all buttons for admin users
+    : TABLE_BUTTONS.filter((button) => !button.adminOnly); // Filter out admin-only buttons for non-admin users
 
   useEffect(() => {
     fetchAllRequest();
@@ -177,15 +187,21 @@ const RequestList = () => {
                   placeholder={"Search"}
                 />
                 {batchActionProps.batchActions.map((action) => {
-                  return (
-                    <TableBatchAction
-                      renderIcon={action.icon}
-                      disabled={!(selectRows.length === 1)}
-                      onClick={() => setActionProps(action)}
-                    >
-                      {action.label}
-                    </TableBatchAction>
-                  );
+                  return filteredButtons.map((btn) => {
+                    if (btn.key === action.key) {
+                      return (
+                        <TableBatchAction
+                          renderIcon={btn.icon}
+                          disabled={!(selectRows.length === 1)}
+                          onClick={() => setActionProps(btn)}
+                          key={btn.key} // Add a unique key for each rendered component
+                        >
+                          {btn.label}
+                        </TableBatchAction>
+                      );
+                    }
+                    return null;
+                  });
                 })}
               </TableToolbar>
               <Table {...getTableProps()}>
