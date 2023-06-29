@@ -14,9 +14,12 @@ import "../App.css";
 import Keys from "./Keys";
 import Catalogs from "./Catalogs";
 import Services from "./Services";
+import Users from "./Users";
 
 const App = () => {
   const auth = UserService.isLoggedIn();
+  const isAdmin = UserService.isAdminUser();
+
   // const navigate = useNavigate();
   const router = createBrowserRouter([
     {
@@ -54,6 +57,10 @@ const App = () => {
     {
       path: "/services",
       element: <AuthRoute Component={Services} />,
+    },
+    isAdmin && {
+      path: "/users",
+      element: <AuthRoute Component={Users} />,
     },
   ]);
   if (auth === true && window.location.pathname === "/login") {

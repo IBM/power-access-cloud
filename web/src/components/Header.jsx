@@ -11,8 +11,10 @@ import {
   SideNavLink,
 } from "@carbon/react";
 import ProfileSection from "./Navbar";
+import UserService from "../services/UserService";
 
 const HeaderNav = () => {
+  const isAdmin = UserService.isAdminUser();
   const [showProfile, setShowProfile] = useState(false);
   return (
     <>
@@ -60,6 +62,7 @@ const HeaderNav = () => {
           <SideNavLink href="/keys">Keys</SideNavLink>
           <SideNavLink href="/catalogs">Catalogs</SideNavLink>
           <SideNavLink href="/services">Services</SideNavLink>
+          {isAdmin && <SideNavLink href="/users">Users</SideNavLink>}
           <SideNavLink href="/">About</SideNavLink>
         </SideNavItems>
       </SideNav>
