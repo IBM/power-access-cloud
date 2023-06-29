@@ -293,3 +293,17 @@ export const extendServices = (name, payload) => {
       payload: error,
     }));
 };
+
+export const allUsers = () => {
+  const url = `/pac-go-server/users`;
+  return _axios
+    .get(url)
+    .then((response) => ({
+      type: "LIST_REQUESTS",
+      payload: response.data,
+    }))
+    .catch((error) => ({
+      type: "API_ERROR",
+      payload: error,
+    }));
+};

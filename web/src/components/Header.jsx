@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { UserAvatar } from "@carbon/icons-react";
 import {
   Header,
+  HeaderContainer,
   HeaderName,
+  HeaderMenuButton,
   HeaderGlobalAction,
   HeaderGlobalBar,
   Theme,
@@ -10,69 +12,65 @@ import {
   SideNavItems,
   SideNavLink,
 } from "@carbon/react";
-import ProfileSection from "./Navbar";
+import ProfileSection from "./Profile";
+import UserService from "../services/UserService";
 
 const HeaderNav = () => {
+  const isAdmin = UserService.isAdminUser();
   const [showProfile, setShowProfile] = useState(false);
   return (
-    <>
-      <>
-        <div className="userDetails">
-          <p>User1</p>
-        </div>
-        <div className="container">
-          <Theme theme="g100">
-            <Header aria-label="IBM Platform Name">
-              <HeaderName href="#" prefix="Power">
-                Access Cloud
-              </HeaderName>
-              <HeaderGlobalBar>
-                <HeaderGlobalAction
-                  aria-label="Profile"
-                  onClick={() => {
-                    setShowProfile(!showProfile);
-                  }}
-                >
-                  <UserAvatar size="32" tabIndex="0" />
-                </HeaderGlobalAction>
-              </HeaderGlobalBar>
-            </Header>
-          </Theme>
-        </div>
-        {showProfile && <ProfileSection />}
-      </>
-      <SideNav
-        isFixedNav={true}
-        expanded={true}
-        isChildOfHeader={false}
-        aria-label="Side navigation"
-        style={{
-          marginTop: "47px",
-          backgroundColor: "black",
-          color: "white",
-          fontSize: "1.5rem",
-        }}
-        className="sidebar-fixed"
-      >
-        <SideNavItems>
-          <SideNavLink href="/groups">Groups</SideNavLink>
-          <SideNavLink href="/requests">Request</SideNavLink>
-          <SideNavLink href="/keys">Keys</SideNavLink>
-          <SideNavLink href="/catalogs">Catalogs</SideNavLink>
-          <SideNavLink href="/services">Services</SideNavLink>
-          <SideNavLink href="/">About</SideNavLink>
-        </SideNavItems>
-      </SideNav>
-    </>
+    <HeaderContainer
+      render={({ isSideNavExpanded, onClickSideNavExpand }) => (
+        <>
+          <p>welcome</p>
+          <Header aria-label="IBM Platform Name">
+            <HeaderMenuButton
+              aria-label={isSideNavExpanded ? "Close menu" : "Open menu"}
+              isCollapsible
+              onClick={onClickSideNavExpand}
+              isActive={isSideNavExpanded}
+              aria-expanded={isSideNavExpanded}
+            />
+            <HeaderName href="#" prefix="Power">
+              Access Cloud
+            </HeaderName>
+            <HeaderGlobalBar>
+              <HeaderGlobalAction
+                aria-label="Profile"
+                onClick={() => {
+                  setShowProfile(!showProfile);
+                }}
+              >
+                <UserAvatar size="32" tabIndex="0" />
+              </HeaderGlobalAction>
+              {showProfile && <ProfileSection />}
+            </HeaderGlobalBar>
+            <SideNav
+              aria-label="Side navigation"
+              expanded={isSideNavExpanded}
+              onOverlayClick={onClickSideNavExpand}
+              onSideNavBlur={onClickSideNavExpand}
+              isFixedNav={true}
+              isChildOfHeader={false}
+              style={{
+                marginTop: "47px",
+              }}
+            >
+              <SideNavItems>
+                <SideNavLink href="/groups">Groups</SideNavLink>
+                <SideNavLink href="/requests">Request</SideNavLink>
+                <SideNavLink href="/keys">Keys</SideNavLink>
+                <SideNavLink href="/catalogs">Catalogs</SideNavLink>
+                <SideNavLink href="/services">Services</SideNavLink>
+                {isAdmin && <SideNavLink href="/users">Users</SideNavLink>}
+                <SideNavLink href="/">About</SideNavLink>
+              </SideNavItems>
+            </SideNav>
+          </Header>
+        </>
+      )}
+    />
   );
 };
 
 export default HeaderNav;
-/*
-For Future Use
-<SideNavMenu title="L0 menu">
-    <SideNavMenuItem href="https://www.carbondesignsystem.com/">
-        L0 menu item
-    </SideNavMenuItem>
-</SideNavMenu>
-*/

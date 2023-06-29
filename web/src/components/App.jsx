@@ -14,9 +14,13 @@ import "../App.css";
 import Keys from "./Keys";
 import Catalogs from "./Catalogs";
 import Services from "./Services";
+import Users from "./Users";
+import { Theme } from "@carbon/react";
 
 const App = () => {
   const auth = UserService.isLoggedIn();
+  const isAdmin = UserService.isAdminUser();
+
   // const navigate = useNavigate();
   const router = createBrowserRouter([
     {
@@ -55,6 +59,10 @@ const App = () => {
       path: "/services",
       element: <AuthRoute Component={Services} />,
     },
+    isAdmin && {
+      path: "/users",
+      element: <AuthRoute Component={Users} />,
+    },
   ]);
   if (auth === true && window.location.pathname === "/login") {
     window.location.href = window.location.href.replace("/login", "");
@@ -62,7 +70,7 @@ const App = () => {
   }
   return (
     <React.Fragment>
-      {auth === true && <HeaderNav />}
+      <Theme theme="g90">{auth === true && <HeaderNav />} </Theme>
       <section className={auth ? "contentSection" : ""}>
         <RouterProvider router={router} />
       </section>
