@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { allKeys } from "../services/request";
 import { MobileAdd, TrashCan } from "@carbon/icons-react";
 import { clientSearchFilter } from "../utils/Search";
@@ -30,6 +30,12 @@ const headers = [
   {
     key: "id",
     header: "ID",
+    adminOnly: true,
+  },
+  {
+    key: "user_id",
+    header: "User ID",
+    adminOnly: true,
   },
   {
     key: "name",
@@ -68,7 +74,10 @@ const Keys = () => {
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
   const isAdmin = UserService.isAdminUser();
-  const isFirstRender = useRef(true);
+
+  const filteredHeaders = isAdmin
+    ? headers // Display all buttons for admin users
+    : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
 
   const fetchData = async () => {
     let data = await allKeys();
@@ -86,23 +95,13 @@ const Keys = () => {
   };
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    if (isAdmin) {
-      headers.splice(2, 0, {
-        key: "user_id",
-        header: "User ID",
-      });
-    }
     fetchData();
   }, [isAdmin, headers, actionProps]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayData = clientSearchFilter(searchText, rows);
 
   const renderSkeleton = () => {
-    const headerLabels = headers?.map((x) => x?.header);
+    const headerLabels = filteredHeaders?.map((x) => x?.header);
     return (
       <DataTableSkeleton
         columnCount={headerLabels?.length}
@@ -140,7 +139,6 @@ const Keys = () => {
   return (
     <>
       {renderActionModals()}
-      {renderActionModals()}
       {errorMsg && (
         <InlineNotification
           title={errorTitle}
@@ -150,7 +148,7 @@ const Keys = () => {
           }}
         />
       )}
-      <DataTable rows={displayData} headers={headers} isSortable>
+      <DataTable rows={displayData} headers={filteredHeaders} isSortable>
         {({
           rows,
           headers,

@@ -48,6 +48,7 @@ const headers = [
   {
     key: "user_id",
     header: "User ID",
+    adminOnly: true,
   },
   {
     key: "created_at",
@@ -56,6 +57,10 @@ const headers = [
   {
     key: "state",
     header: "State",
+  },
+  {
+    key: "comment",
+    header: "Comment",
   },
 ];
 
@@ -105,6 +110,10 @@ const RequestList = () => {
   const [errorTitle, setErrorTitle] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [actionProps, setActionProps] = useState("");
+
+  const filteredHeaders = isAdmin
+    ? headers // Display all buttons for admin users
+    : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
 
   const fetchAllRequest = async () => {
     let data = await allRequests();
@@ -175,7 +184,7 @@ const RequestList = () => {
           }}
         />
       )}
-      <DataTable rows={displayData} headers={headers} isSortable>
+      <DataTable rows={displayData} headers={filteredHeaders} isSortable>
         {({
           rows,
           headers,
