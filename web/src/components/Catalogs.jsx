@@ -25,6 +25,7 @@ import DeployCatalog from "./PopUp/DeployCatalog";
 import DeleteCatalog from "./PopUp/DeleteCatalog";
 import RetireCatalog from "./PopUp/RetireCatalog";
 import UserService from "../services/UserService";
+import QuotaWarning from "./PopUp/QuotaWarning";
 
 const BUTTON_REQUEST = "BUTTON_REQUEST";
 const BUTTON_DELETE = "BUTTON_DELETE";
@@ -177,6 +178,7 @@ const Catalogs = () => {
           }}
         />
       )}
+      <QuotaWarning />
       <DataTable rows={displayData} headers={headers} isSortable>
         {({
           rows,

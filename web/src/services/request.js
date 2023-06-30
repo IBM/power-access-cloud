@@ -307,3 +307,17 @@ export const allUsers = () => {
       payload: error,
     }));
 };
+
+export const getQuota = () => {
+  const url = `/pac-go-server/quota`;
+  return _axios
+    .get(url)
+    .then((response) => ({
+      type: "LIST_REQUESTS",
+      payload: response.data,
+    }))
+    .catch((error) => ({
+      type: "API_ERROR",
+      payload: error,
+    }));
+};

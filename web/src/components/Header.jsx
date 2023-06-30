@@ -7,7 +7,6 @@ import {
   HeaderMenuButton,
   HeaderGlobalAction,
   HeaderGlobalBar,
-  Theme,
   SideNav,
   SideNavItems,
   SideNavLink,
