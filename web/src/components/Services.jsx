@@ -23,13 +23,21 @@ import { flattenArrayOfObject } from "./commonUtils";
 import { getServices } from "../services/request";
 import DeleteService from "./PopUp/DeleteService";
 import ServiceExtend from "./PopUp/ServiceExtend";
+import UserService from "../services/UserService";
+
 const BUTTON_REQUEST = "BUTTON_REQUEST";
 const BUTTON_EXTEND = "BUTTON_EXTEND";
 
 const headers = [
   {
+    key: "user_id",
+    header: "User ID",
+    adminOnly: true,
+  },
+  {
     key: "name",
     header: "Name",
+    adminOnly: true,
   },
   {
     key: "display_name",
@@ -46,6 +54,10 @@ const headers = [
   {
     key: "status.state",
     header: "State",
+  },
+  {
+    key: "status.message",
+    header: "Message",
   },
   {
     key: "status.access_info",
@@ -80,6 +92,11 @@ const Services = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
+  const isAdmin = UserService.isAdminUser();
+
+  const filteredHeaders = isAdmin
+    ? headers // Display all buttons for admin users
+    : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
 
   const fetchData = async () => {
     let data = await getServices();
@@ -105,7 +122,7 @@ const Services = () => {
   };
 
   const renderSkeleton = () => {
-    const headerLabels = headers?.map((x) => x?.header);
+    const headerLabels = filteredHeaders?.map((x) => x?.header);
     return (
       <DataTableSkeleton
         columnCount={headerLabels?.length}
@@ -152,7 +169,7 @@ const Services = () => {
           }}
         />
       )}
-      <DataTable rows={displayData} headers={headers} isSortable>
+      <DataTable rows={displayData} headers={filteredHeaders} isSortable>
         {({
           rows,
           headers,

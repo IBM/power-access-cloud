@@ -24,6 +24,8 @@ import FooterPagination from "../utils/Pagination";
 import { flattenArrayOfObject } from "./commonUtils";
 import NewRequest from "./PopUp/NewRequest";
 import ExitGroup from "./PopUp/ExitGroup";
+import UserService from "../services/UserService";
+
 const BUTTON_REQUEST = "BUTTON_REQUEST";
 const BUTTON_DELETE = "BUTTON_DELETE";
 
@@ -31,6 +33,7 @@ const headers = [
   {
     key: "id",
     header: "ID",
+    adminOnly: true,
   },
   {
     key: "name",
@@ -67,6 +70,11 @@ const GroupList = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
+  const isAdmin = UserService.isAdminUser();
+
+  const filteredHeaders = isAdmin
+    ? headers // Display all buttons for admin users
+    : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
 
   const fetchData = async () => {
     let data = await allGroups();
@@ -92,7 +100,7 @@ const GroupList = () => {
   );
 
   const renderSkeleton = () => {
-    const headerLabels = headers?.map((x) => x?.header);
+    const headerLabels = filteredHeaders?.map((x) => x?.header);
     return (
       <DataTableSkeleton
         columnCount={headerLabels?.length}
@@ -139,7 +147,7 @@ const GroupList = () => {
           }}
         />
       )}
-      <DataTable rows={displayData} headers={headers} isSortable>
+      <DataTable rows={displayData} headers={filteredHeaders} isSortable>
         {({
           rows,
           headers,
