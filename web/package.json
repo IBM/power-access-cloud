@@ -20,7 +20,6 @@
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.7",
     "react-router-dom": "^6.11.2",
-    "react-scripts": "5.0.1",
     "redux": "^4.2.1",
     "redux-axios-middleware": "^4.0.1",
     "redux-logger": "^3.0.6",
@@ -30,6 +29,9 @@
     "sass-loader": "^13.3.1",
     "web-vitals": "^2.1.4",
     "yarn": "^1.22.19"
+  },
+  "devDependencies": {
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "dev": "chmod +x ./env.sh && ./env.sh && cp env-config.js ./public/ && react-scripts start",
