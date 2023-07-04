@@ -6,28 +6,29 @@ RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn build
 
-FROM nginx:1.19-alpine AS server
+FROM nginxinc/nginx-unprivileged:1.19-alpine AS server
 
 # Nginx config
 RUN rm -rf /etc/nginx/conf.d
-COPY conf /etc/nginx
+COPY --chown=nginx:nginx conf /etc/nginx
 
 
 # Static build
-COPY --from=builder /app/build /usr/share/nginx/html/
+COPY --from=builder --chown=nginx:nginx /app/build /usr/share/nginx/html/
 
 # Default port exposure
 EXPOSE 80
 
 WORKDIR /usr/share/nginx/html
-COPY ./env.sh .
-COPY .env .
-
+COPY --chown=nginx:nginx ./env.sh .
+COPY --chown=nginx:nginx .env .
+COPY --chown=nginx:nginx ./entrypoint.sh .
+USER root
 # Add bash
 RUN apk add --no-cache bash
 
-# Make our shell script executable
-RUN chmod +x env.sh
+RUN chown -R nginx:nginx /usr/share/nginx/html
+USER nginx
 
 # Start Nginx server
-CMD ["/bin/bash", "-c", "/usr/share/nginx/html/env.sh && nginx -g \"daemon off;\""]
+CMD ["/bin/bash", "/usr/share/nginx/html/entrypoint.sh"]

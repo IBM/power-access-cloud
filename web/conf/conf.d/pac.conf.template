@@ -1,0 +1,25 @@
+upstream pac-go-server {
+  server ${REACT_APP_PAC_GO_SERVER_TARGET};
+}
+
+server {
+  listen 8080;
+  location / {
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+    try_files $uri $uri/ /index.html;
+    expires -1; # Set it to different value depending on your standard requirements
+  }
+  location /pac-go-server/ {
+        client_max_body_size 50M;
+        rewrite ^/pac-go-server/(.*)$ /api/v1/$1 break;
+        proxy_pass http://pac-go-server;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_set_header   Host              $http_host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+  }
+  error_page   500 502 503 504  /50x.html;
+  location = /50x.html {
+    root   /usr/share/nginx/html;
+  }
+}
