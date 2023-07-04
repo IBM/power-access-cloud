@@ -24,7 +24,7 @@ func (db *MongoDB) GetQuotaForGroupID(id string) (*models.Quota, error) {
 	err := collection.FindOne(ctx, filter).Decode(&quota)
 	if err == mongo.ErrNoDocuments {
 		logger.Info("No documents found for quota", zap.Error(err))
-		return nil, fmt.Errorf("quota not found with id: %s", id)
+		return nil, fmt.Errorf("quota not found for id: %s, err: %w", id, err)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("error getting request: %w", err)

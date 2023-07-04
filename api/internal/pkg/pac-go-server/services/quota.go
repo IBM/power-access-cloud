@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -66,7 +67,7 @@ func CreateQuota(c *gin.Context) {
 
 	// TODO: check if the quota for the particular group first exists, before updating
 	quotaDb, err := dbCon.GetQuotaForGroupID(gid)
-	if err != nil && err != mongo.ErrNoDocuments {
+	if err != nil && errors.Unwrap(err) != mongo.ErrNoDocuments {
 		logger.Error("error occured while checking quota", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": "An error occured while creating quota, contact PAC support."})
 		return
