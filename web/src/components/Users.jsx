@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { allUsers } from "../services/request";
 import { clientSearchFilter } from "../utils/Search";
 import FooterPagination from "../utils/Pagination";
@@ -43,7 +43,6 @@ const Users = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
-  const isFirstRender = useRef(true);
 
   const fetchData = async () => {
     let data = await allUsers();
@@ -52,10 +51,6 @@ const Users = () => {
   };
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
     fetchData();
   }, [headers]); // eslint-disable-line react-hooks/exhaustive-deps
 
