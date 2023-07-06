@@ -1,1 +1,0 @@
-This is just a copy from the ../keycloak dir as a placeholder at the moment, needs modification.

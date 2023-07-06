@@ -13,6 +13,7 @@ sync-theme: clean
 	tar xvf keycloak-themes.jar
 	rm -rf META-INF
 	rm -rf keycloak-themes.jar
+	cp -r pac/ theme/pac
 
 .PHONY: clean
 clean:
@@ -23,3 +24,12 @@ clean:
 .PHONY: docker-build
 docker-build:
 	docker build --build-arg KEYCLOAK_BASE_IMAGE=$(KEYCLOCK_IMAGE) -t $(REGISTRY)/$(IMG):$(VERSION)-$(KEYCLOCK_IMAGE_TAG) .
+
+.PHONY: build-prod-image
+build-prod-image: clean sync-theme
+	docker build --build-arg KEYCLOAK_BASE_IMAGE=$(KEYCLOCK_IMAGE) -t $(REGISTRY)/$(IMG):$(VERSION)-$(KEYCLOCK_IMAGE_TAG) .
+
+.PHONY: clean
+clean:
+	docker rm -f keycloak_themes
+	rm -rf theme
