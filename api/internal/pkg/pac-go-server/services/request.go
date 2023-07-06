@@ -391,7 +391,7 @@ func RejectRequest(c *gin.Context) {
 		return
 	}
 
-	if err := dbCon.UpdateRequestStateWithComment(id, models.RequestStateRejected, req.Comment); err != nil {
+	if err := dbCon.UpdateRequestStateWithComment(id, models.RequestStateRejected, request.Comment); err != nil {
 		logger.Error("failed to update request status in database", zap.String("id", id), zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to update the state field in the db, err: %s", err.Error())})
 		return
