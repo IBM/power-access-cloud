@@ -13,7 +13,7 @@ export const flattenObject = (obj) => {
       else if (key === "retired")
         result[key] = obj[key] === true ? "True" : "False";
       else if (key === "membership")
-        result[key] = obj[key] === true ? "True" : "False";
+        result[key] = obj[key] === true ? "Active" : "Inactive";
       else if (key === "expiry") {
         const exp = new Date(obj[key]);
         const currentDate = new Date();

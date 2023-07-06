@@ -14,7 +14,6 @@ import {
   TableBatchAction,
   TableSelectRow,
   TableToolbarSearch,
-  TableSelectAll,
   DataTableSkeleton,
   InlineNotification,
 } from "@carbon/react";
@@ -155,7 +154,7 @@ const GroupList = () => {
           }}
         />
       )}
-      <DataTable rows={displayData} headers={filteredHeaders} isSortable>
+      <DataTable rows={displayData} headers={filteredHeaders} isSortable radio>
         {({
           rows,
           headers,
@@ -202,7 +201,7 @@ const GroupList = () => {
               <Table {...getTableProps()}>
                 <TableHead>
                   <TableRow>
-                    <TableSelectAll {...getSelectionProps()} />
+                    <TableHeader/>
                     {headers.map((header) => (
                       <TableHeader {...getHeaderProps({ header })}>
                         {header.header}
