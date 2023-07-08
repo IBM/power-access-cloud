@@ -2,21 +2,31 @@
 import React, { useState } from "react";
 import { deleteGroup } from "../../services/request";
 import { Modal } from "@carbon/react";
+import { useNavigate } from "react-router-dom";
 
-const ExitGroup = ({ selectRows, setActionProps, onError }) => {
+const ExitGroup = ({ selectRows, setActionProps, response }) => {
   const id = selectRows[0]?.id;
+  let navigate = useNavigate();
 
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     try {
-      const {type, payload} = await deleteGroup(g); // wait for the dispatch to complete
-      if (type==="API_ERROR"){
-        const errorTitle = "Exit group failed"
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+      const { type, payload } = await deleteGroup(g); // wait for the dispatch to complete
+      if (type === "API_ERROR") {
+        title = "The request to exit the group has failed.";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "The exit request from the group was successful, track the progress under request section.";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
+    setActionProps("");
+    navigate("/groups");
   };
 
   const [g, setGroup] = useState({
