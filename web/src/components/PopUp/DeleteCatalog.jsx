@@ -4,27 +4,32 @@ import { deleteCatalog } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteCatalog = ({selectRows,setActionProps,onError})=> {
-    let name = "";
-    selectRows[0].cells.forEach((item)=>{
-        if (item.id.split(":")[1] === "name"){
-            name = item?.value;
-        }
-    });
+const DeleteCatalog = ({ selectRows, setActionProps, response }) => {
+  let name = "";
+  selectRows[0].cells.forEach((item) => {
+    if (item.id.split(":")[1] === "name") {
+      name = item?.value;
+    }
+  });
   let navigate = useNavigate();
 
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     try {
-      const {type, payload} = await deleteCatalog(name); // wait for the dispatch to complete
-      if (type==="API_ERROR"){
-        console.log("payload:", payload)
-        const errorTitle = "Deletion of Catalog failed"
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+      const { type, payload } = await deleteCatalog(name); // wait for the dispatch to complete
+      if (type === "API_ERROR") {
+        title = "The deletion of the catalog has failed.";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "The deletion of the catalog was successful.";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
     setActionProps("");
     navigate("/catalogs");
   };
@@ -33,10 +38,10 @@ const DeleteCatalog = ({selectRows,setActionProps,onError})=> {
     <Modal
       modalHeading="Delete Catalog"
       danger={true}
-      onRequestClose={()=>{
+      onRequestClose={() => {
         setActionProps("");
       }}
-      onRequestSubmit={()=>{
+      onRequestSubmit={() => {
         onSubmit();
       }}
       open={true}
@@ -44,9 +49,9 @@ const DeleteCatalog = ({selectRows,setActionProps,onError})=> {
       secondaryButtonText={"Cancel"}
     >
       <div>
-         <div className="mb-3">
-            <h4>Are you sure want to delete this Catalog!</h4>
-          </div>
+        <div className="mb-3">
+          <h4>Are you sure want to delete this Catalog!</h4>
+        </div>
       </div>
     </Modal>
   );
