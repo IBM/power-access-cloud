@@ -4,21 +4,27 @@ import { deleteKeys } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteKey = ({selectRows,setActionProps, onError})=> {
+const DeleteKey = ({ selectRows, setActionProps, response }) => {
   const id = selectRows[0]?.id;
   let navigate = useNavigate();
 
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     try {
-      const {type, payload} = await deleteKeys({ id }); // wait for the dispatch to complete
-      if (type==="API_ERROR"){
-        const errorTitle = "Catalog deployment failed"
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+      const { type, payload } = await deleteKeys({ id }); // wait for the dispatch to complete
+      if (type === "API_ERROR") {
+        title = "Key delete failed";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "Key deleted successfully";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
     setActionProps("");
     navigate("/keys");
   };
@@ -27,10 +33,10 @@ const DeleteKey = ({selectRows,setActionProps, onError})=> {
     <Modal
       modalHeading="Exit request"
       danger={true}
-      onRequestClose={()=>{
+      onRequestClose={() => {
         setActionProps("");
       }}
-      onRequestSubmit={()=>{
+      onRequestSubmit={() => {
         onSubmit();
       }}
       open={true}
@@ -38,9 +44,9 @@ const DeleteKey = ({selectRows,setActionProps, onError})=> {
       secondaryButtonText={"Cancel"}
     >
       <div>
-         <div className="mb-3">
-            <h4>Are you sure want to delete this key!</h4>
-          </div>
+        <div className="mb-3">
+          <h4>Are you sure want to delete this key!</h4>
+        </div>
       </div>
     </Modal>
   );
