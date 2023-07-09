@@ -14,7 +14,6 @@ import {
   TableToolbarSearch,
   TableSelectAll,
   DataTableSkeleton,
-  InlineNotification,
 } from "@carbon/react";
 import { CalendarAddAlt, TrashCan } from "@carbon/icons-react";
 import { clientSearchFilter } from "../utils/Search";
@@ -24,6 +23,7 @@ import { getServices } from "../services/request";
 import DeleteService from "./PopUp/DeleteService";
 import ServiceExtend from "./PopUp/ServiceExtend";
 import UserService from "../services/UserService";
+import Notify from "./utils/Notify";
 
 const BUTTON_REQUEST = "BUTTON_REQUEST";
 const BUTTON_EXTEND = "BUTTON_EXTEND";
@@ -88,8 +88,9 @@ let selectRows = [];
 const Services = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [errorTitle, setErrorTitle] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [title, setTitle] = useState("");
+  const [notifyKind, setNotifyKind] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
   const isAdmin = UserService.isAdminUser();
@@ -117,9 +118,10 @@ const Services = () => {
     clientSearchFilter(searchText, rows)
   );
 
-  const handleErrorMessage = (title, message) => {
-    setErrorTitle(title);
-    setErrorMsg(message);
+  const handleResponse = (title, message, errored) => {
+    setTitle(title);
+    setMessage(message);
+    errored ? setNotifyKind("error") : setNotifyKind("success");
   };
 
   const renderSkeleton = () => {
@@ -141,106 +143,99 @@ const Services = () => {
           <DeleteService
             selectRows={selectRows}
             setActionProps={setActionProps}
-            onError={handleErrorMessage}
+            response={handleResponse}
           />
         )}
         {actionProps?.key === BUTTON_EXTEND && (
           <ServiceExtend
             selectRows={selectRows}
             setActionProps={setActionProps}
-            onError={handleErrorMessage}
+            response={handleResponse}
           />
         )}
       </React.Fragment>
     );
   };
 
-  if (loading) {
-    renderSkeleton();
-  }
   return (
     <>
-      {renderActionModals()}
-      {errorMsg && (
-        <InlineNotification
-          title={errorTitle}
-          subtitle={errorMsg}
-          onClose={() => {
-            setErrorMsg("");
-          }}
-        />
-      )}
-      <DataTable rows={displayData} headers={filteredHeaders} isSortable>
-        {({
-          rows,
-          headers,
-          getTableProps,
-          getHeaderProps,
-          getRowProps,
-          getBatchActionProps,
-          getToolbarProps,
-          getTableContainerProps,
-          getSelectionProps,
-          selectedRows,
-        }) => {
-          const batchActionProps = getBatchActionProps({
-            batchActions: TABLE_BUTTONS,
-          });
-          return (
-            <TableContainer
-              title={"Service Details"}
-              {...getTableContainerProps()}
-            >
-              {selectionHandler && selectionHandler(selectedRows)}
-              <TableToolbar {...getToolbarProps()}>
-                <TableToolbarSearch
-                  persistent={true}
-                  tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
-                  onChange={(onInputChange) => {
-                    setSearchText(onInputChange.target.value);
-                  }}
-                  placeholder={"Search"}
-                />
-                {batchActionProps.batchActions.map((action) => {
-                  return (
-                    <TableBatchAction
-                      key={action.key}
-                      renderIcon={action.icon}
-                      disabled={!(selectRows.length === 1)}
-                      onClick={() => setActionProps(action)}
-                    >
-                      {action.label}
-                    </TableBatchAction>
-                  );
-                })}
-              </TableToolbar>
-              <Table {...getTableProps()}>
-                <TableHead>
-                  <TableRow>
-                    <TableSelectAll {...getSelectionProps()} />
-                    {headers.map((header) => (
-                      <TableHeader {...getHeaderProps({ header })}>
-                        {header.header}
-                      </TableHeader>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableSelectRow {...getSelectionProps({ row })} />
-                      {row.cells.map((cell) => (
-                        <TableCell key={cell.id}>{cell.value}</TableCell>
+      <Notify title={title} message={message} nkind={notifyKind} setTitle={setTitle} />
+      {loading ? (renderSkeleton()) : (
+        <>
+          {renderActionModals()}
+          <DataTable rows={displayData} headers={filteredHeaders} isSortable>
+            {({
+              rows,
+              headers,
+              getTableProps,
+              getHeaderProps,
+              getRowProps,
+              getBatchActionProps,
+              getToolbarProps,
+              getTableContainerProps,
+              getSelectionProps,
+              selectedRows,
+            }) => {
+              const batchActionProps = getBatchActionProps({
+                batchActions: TABLE_BUTTONS,
+              });
+              return (
+                <TableContainer
+                  title={"Service Details"}
+                  {...getTableContainerProps()}
+                >
+                  {selectionHandler && selectionHandler(selectedRows)}
+                  <TableToolbar {...getToolbarProps()}>
+                    <TableToolbarSearch
+                      persistent={true}
+                      tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
+                      onChange={(onInputChange) => {
+                        setSearchText(onInputChange.target.value);
+                      }}
+                      placeholder={"Search"}
+                    />
+                    {batchActionProps.batchActions.map((action) => {
+                      return (
+                        <TableBatchAction
+                          key={action.key}
+                          renderIcon={action.icon}
+                          disabled={!(selectRows.length === 1)}
+                          onClick={() => setActionProps(action)}
+                        >
+                          {action.label}
+                        </TableBatchAction>
+                      );
+                    })}
+                  </TableToolbar>
+                  <Table {...getTableProps()}>
+                    <TableHead>
+                      <TableRow>
+                        <TableSelectAll {...getSelectionProps()} />
+                        {headers.map((header) => (
+                          <TableHeader {...getHeaderProps({ header })}>
+                            {header.header}
+                          </TableHeader>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rows.map((row) => (
+                        <TableRow key={row.id}>
+                          <TableSelectRow {...getSelectionProps({ row })} />
+                          {row.cells.map((cell) => (
+                            <TableCell key={cell.id}>{cell.value}</TableCell>
+                          ))}
+                        </TableRow>
                       ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          );
-        }}
-      </DataTable>
-      {<FooterPagination displayData={rows} />}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              );
+            }}
+          </DataTable>
+          {<FooterPagination displayData={rows} />}
+        </>
+      )}
     </>
   );
 };

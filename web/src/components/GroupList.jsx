@@ -141,9 +141,6 @@ const GroupList = () => {
     );
   };
 
-  if (loading) {
-    renderSkeleton();
-  }
   return (
     <>
       <Notify title={title} message={message} nkind={notifyKind} setTitle={setTitle} />

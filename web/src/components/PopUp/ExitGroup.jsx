@@ -5,6 +5,8 @@ import { Modal } from "@carbon/react";
 import { useNavigate } from "react-router-dom";
 
 const ExitGroup = ({ selectRows, setActionProps, response }) => {
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Exit");
   const id = selectRows[0]?.id;
   let navigate = useNavigate();
 
@@ -46,11 +48,14 @@ const ExitGroup = ({ selectRows, setActionProps, response }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Exiting...")
         onSubmit();
         setActionProps("");
       }}
       open={true}
-      primaryButtonText={"Exit"}
+      primaryButtonText={primaryButtonText}
+      primaryButtonDisabled={primaryButtonDisabled}
       secondaryButtonText={"Cancel"}
     >
       <div>

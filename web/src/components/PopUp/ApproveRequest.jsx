@@ -1,22 +1,34 @@
 // import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { approveRequest } from "../../services/request";
 import { Modal } from "@carbon/react";
+import { useNavigate } from "react-router-dom";
 
-const ApproveRequest = ({ selectRows, setActionProps, onError }) => {
+const ApproveRequest = ({ selectRows, setActionProps, response }) => {
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
   const id = selectRows[0]?.id;
+  let navigate = useNavigate();
 
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     try {
-      const {type, payload} = await approveRequest(id); // wait for the dispatch to complete
-      if (type==="API_ERROR"){
-        const errorTitle = "Approval of request failed"
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+      const { type, payload } = await approveRequest(id); // wait for the dispatch to complete
+      if (type === "API_ERROR") {
+        title = "Approval of request failed";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "Approved request successfully.";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
+    setActionProps("");
+    navigate("/requests");
   };
 
   return (
@@ -27,12 +39,14 @@ const ApproveRequest = ({ selectRows, setActionProps, onError }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Submitting...")
         onSubmit();
-        setActionProps("");
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={primaryButtonText}
       secondaryButtonText={"Cancel"}
+      primaryButtonDisabled={primaryButtonDisabled}
     >
       <div>
         <div className="mb-3">

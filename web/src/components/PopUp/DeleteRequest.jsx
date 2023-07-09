@@ -1,29 +1,32 @@
 // import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { deleteRequest } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteRequest = ({ selectRows, setActionProps, onError }) => {
-  let id = "";
-  selectRows[0].cells.forEach((item) => {
-    if (item.id.split(":")[1] === "id") {
-      id = item?.value;
-    }
-  });
+const DeleteRequest = ({ selectRows, setActionProps, response }) => {
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Delete");
+  const id = selectRows[0]?.id;
   let navigate = useNavigate();
 
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     try {
-      const {type, payload} = await deleteRequest(id); // wait for the dispatch to complete
-      if (type==="API_ERROR"){
-        const errorTitle = "Request deletion failed"
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+      const { type, payload } = await deleteRequest(id); // wait for the dispatch to complete
+      if (type === "API_ERROR") {
+        title = "Request deletion failed.";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "Deleted request successfully.";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
     setActionProps("");
     navigate("/requests");
   };
@@ -36,11 +39,14 @@ const DeleteRequest = ({ selectRows, setActionProps, onError }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Deleting...")
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Delete"}
+      primaryButtonText={primaryButtonText}
       secondaryButtonText={"Cancel"}
+      primaryButtonDisabled={primaryButtonDisabled}
     >
       <div>
         <div className="mb-3">
