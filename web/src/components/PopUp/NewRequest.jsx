@@ -7,6 +7,9 @@ import { Modal } from "@carbon/react";
 const NewRequest = ({ selectRows, setActionProps, response }) => {
   const [loading, setLoading] = useState(true);
   const id = selectRows[0]?.id;
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
+
   useEffect(() => {
     loadUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -63,11 +66,14 @@ const NewRequest = ({ selectRows, setActionProps, response }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Submitting...")
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={primaryButtonText}
       secondaryButtonText={"Cancel"}
+      primaryButtonDisabled={primaryButtonDisabled}
     >
       {loading && <>Loading....</>}
       {!loading && (

@@ -6,6 +6,9 @@ import { Modal } from "@carbon/react";
 
 const DeployCatalog = ({ selectRows, setActionProps, response }) => {
   const [catalogName, setCatalogName] = useState("");
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
+
   let name = "";
   selectRows[0].cells.forEach((item) => {
     if (item.id.split(":")[1] === "name") {
@@ -46,11 +49,14 @@ const DeployCatalog = ({ selectRows, setActionProps, response }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Submitting...")
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={primaryButtonText}
       secondaryButtonText={"Cancel"}
+      primaryButtonDisabled={primaryButtonDisabled}
     >
       <div>
         <div className="mb-3">

@@ -4,7 +4,9 @@ import { extendServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal, DatePicker, DatePickerInput } from "@carbon/react";
 
-const ServiceExtend = ({ selectRows, setActionProps, onError }) => {
+const ServiceExtend = ({ selectRows, setActionProps, response }) => {
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
   const name = selectRows[0]?.id;
   const [justification, setJustification] = useState("");
   let expiry = "";
@@ -18,6 +20,9 @@ const ServiceExtend = ({ selectRows, setActionProps, onError }) => {
   let navigate = useNavigate();
 
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     const changedDate = new Date(date);
     const isoString = changedDate.toISOString();
     try {
@@ -29,13 +34,16 @@ const ServiceExtend = ({ selectRows, setActionProps, onError }) => {
         },
       }); // wait for the dispatch to complete
       if (type === "API_ERROR") {
-        const errorTitle = "Service extension failed";
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+        title = "Service extension failed";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "Service extention request submitted successfully, please wait for the approval. For more details please check the Requests tab.";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
     setActionProps("");
     navigate("/services");
   };
@@ -48,11 +56,14 @@ const ServiceExtend = ({ selectRows, setActionProps, onError }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Submitting...")
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={primaryButtonText}
       secondaryButtonText={"Cancel"}
+      primaryButtonDisabled={primaryButtonDisabled}
     >
       <div>
         <div className="mb-3">

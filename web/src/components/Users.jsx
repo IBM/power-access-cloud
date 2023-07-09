@@ -69,63 +69,64 @@ const Users = () => {
     );
   };
 
-  if (loading) {
-    renderSkeleton();
-  }
   return (
     <>
-      <DataTable rows={displayData} headers={headers} isSortable>
-        {({
-          rows,
-          headers,
-          getTableProps,
-          getHeaderProps,
-          getToolbarProps,
-          getTableContainerProps,
-        }) => {
-          return (
-            <TableContainer
-              title={"User Details"}
-              {...getTableContainerProps()}
-            >
-              <TableToolbar {...getToolbarProps()}>
-                <TableToolbarSearch
-                  persistent={true}
-                  // tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
-                  onChange={(onInputChange) => {
-                    setSearchText(onInputChange.target.value);
-                  }}
-                  placeholder={"Search"}
-                />
-              </TableToolbar>
-              <Table {...getTableProps()}>
-                <TableHead>
-                  <TableRow>
-                    {headers.map((header) => (
-                      <TableHeader
-                        key={header.key}
-                        {...getHeaderProps({ header })}
-                      >
-                        {header.header}
-                      </TableHeader>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.cells.map((cell) => (
-                        <TableCell key={cell.id}>{cell.value}</TableCell>
+      {loading ? (renderSkeleton()) : (
+        <>
+          <DataTable rows={displayData} headers={headers} isSortable>
+            {({
+              rows,
+              headers,
+              getTableProps,
+              getHeaderProps,
+              getToolbarProps,
+              getTableContainerProps,
+            }) => {
+              return (
+                <TableContainer
+                  title={"User Details"}
+                  {...getTableContainerProps()}
+                >
+                  <TableToolbar {...getToolbarProps()}>
+                    <TableToolbarSearch
+                      persistent={true}
+                      // tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
+                      onChange={(onInputChange) => {
+                        setSearchText(onInputChange.target.value);
+                      }}
+                      placeholder={"Search"}
+                    />
+                  </TableToolbar>
+                  <Table {...getTableProps()}>
+                    <TableHead>
+                      <TableRow>
+                        {headers.map((header) => (
+                          <TableHeader
+                            key={header.key}
+                            {...getHeaderProps({ header })}
+                          >
+                            {header.header}
+                          </TableHeader>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rows.map((row) => (
+                        <TableRow key={row.id}>
+                          {row.cells.map((cell) => (
+                            <TableCell key={cell.id}>{cell.value}</TableCell>
+                          ))}
+                        </TableRow>
                       ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          );
-        }}
-      </DataTable>
-      {<FooterPagination displayData={rows} />}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              );
+            }}
+          </DataTable>
+          {<FooterPagination displayData={rows} />}
+        </>
+      )}
     </>
   );
 };

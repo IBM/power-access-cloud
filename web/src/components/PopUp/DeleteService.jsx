@@ -1,24 +1,32 @@
 // import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { deleteServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteService = ({ selectRows, setActionProps, onError }) => {
+const DeleteService = ({ selectRows, setActionProps, response }) => {
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Delete");
   const name = selectRows[0]?.id;
   let navigate = useNavigate();
 
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     try {
       const { type, payload } = await deleteServices(name); // wait for the dispatch to complete
       if (type === "API_ERROR") {
-        const errorTitle = "Service deletion failed";
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+        title = "Service deletion failed.";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "Service deleted successfully.";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
     setActionProps("");
     navigate("/services");
   };
@@ -31,10 +39,13 @@ const DeleteService = ({ selectRows, setActionProps, onError }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Deleting...")
         onSubmit();
       }}
       open={true}
-      primaryButtonText={"Delete"}
+      primaryButtonText={primaryButtonText}
+      primaryButtonDisabled={primaryButtonDisabled}
       secondaryButtonText={"Cancel"}
     >
       <div>

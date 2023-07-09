@@ -2,24 +2,37 @@
 import React, { useState } from "react";
 import { rejectRequest } from "../../services/request";
 import { Modal } from "@carbon/react";
+import { useNavigate } from "react-router-dom";
 
-const RejectRequest = ({ selectRows, setActionProps, onError }) => {
+const RejectRequest = ({ selectRows, setActionProps, response }) => {
+  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
+  const [primaryButtonText, setPrimaryButtonText] = useState("Reject");
   const [request, setRequest] = useState({
     id: selectRows[0]?.id,
     comment: "",
   });
 
+  let navigate = useNavigate();
+
   const onSubmit = async () => {
+    let title = "";
+    let message = "";
+    let errored = false;
     try {
-      const {type, payload} = await rejectRequest(request); // wait for the dispatch to complete
-      if (type==="API_ERROR"){
-        const errorTitle = "Rejection of request failed"
-        const errorMsg = payload.response.data.error;
-        onError(errorTitle, errorMsg);
+      const { type, payload } = await rejectRequest(request); // wait for the dispatch to complete
+      if (type === "API_ERROR") {
+        title = "Rejection of request failed";
+        message = payload.response.data.error;
+        errored = true;
+      } else {
+        title = "Request rejected successfully.";
       }
     } catch (error) {
       console.log(error);
     }
+    response(title, message, errored)
+    setActionProps("");
+    navigate("/requests");
   };
 
   const onInputChange = (e) => {
@@ -33,12 +46,14 @@ const RejectRequest = ({ selectRows, setActionProps, onError }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
+        setPrimaryButtonDisabled(true);
+        setPrimaryButtonText("Rejecting...")
         onSubmit();
-        setActionProps("");
       }}
       open={true}
-      primaryButtonText={"Submit"}
+      primaryButtonText={primaryButtonText}
       secondaryButtonText={"Cancel"}
+      primaryButtonDisabled={primaryButtonDisabled}
     >
       <div>
         <div className="mb-3">
