@@ -38,29 +38,34 @@ const About = () => {
                 >
                   <h1 className="landing-page__subheading">What is Power Access Cloud(PAC)?</h1>
                   <p className="landing-page__p">
-                    <p>
-                      PAC is a self-service portal that offers Open Source developers access to Power Hardware resources for a limited time. It aims to simplify the exploration, development, and optimization of software on Power Architecture.
-                    </p>
-                    <h2 className="landing-page__subheading">Key Features:</h2>
-                    <ol>
-                      <li>
-                        <strong>Self-Service Portal:</strong> Users can log in to the PAC self-service portal using their GitHub and IBM ID credentials. The portal serves as the interface to access and manage Power Hardware resources.
-                      </li>
-                      <li>
-                        <strong>Catalog Browsing and Deployment:</strong> The self-service portal provides a catalog of available Power Hardware resources. Users can browse the catalog, select the desired resources, and deploy them according to their requirements.
-                      </li>
-                      <li>
-                        <strong>Access Request Management:</strong> Users can request access to specific groups that control resource allocation. This helps manage and control the availability of Power Hardware resources based on predefined limits and user needs.
-                      </li>
-                      <li>
-                        <strong>Auto Expiry and Approval Process:</strong> Deployed services within PAC are set with auto expiry to ensure efficient resource utilization. Users can request extensions for service expiration, which undergo an approval process to ensure fair distribution.
-                      </li>
-                    </ol>
-                    <p>
-                      PAC aims to foster collaboration, innovation, and adoption of Power Architecture by offering a comprehensive catalog of Power Hardware resources and enabling a self-service model. It eliminates the need for manual approvals, reduces infrastructure barriers, and provides a user-friendly experience for developers.
-                    </p>
+                    PAC is a self-service portal that offers Open Source developers access to Power Hardware resources for a limited time. It aims to simplify the exploration, development, and optimization of software on Power Architecture.
                   </p>
-                  {/* <Button>Learn more</Button> */}
+                  <h2 className="landing-page__subheading">Key Features:</h2>
+                  <ol>
+                    <li>
+                      <p>
+                        <strong>Self-Service Portal:</strong> Users can log in to the PAC self-service portal using their GitHub and IBM ID credentials. The portal serves as the interface to access and manage Power Hardware resources.
+                      </p>
+                    </li>
+                    <li>
+                      <p>
+                        <strong>Catalog Browsing and Deployment:</strong> The self-service portal provides a catalog of available Power Hardware resources. Users can browse the catalog, select the desired resources, and deploy them according to their requirements.
+                      </p>
+                    </li>
+                    <li>
+                      <p>
+                        <strong>Access Request Management:</strong> Users can request access to specific groups that control resource allocation. This helps manage and control the availability of Power Hardware resources based on predefined limits and user needs.
+                      </p>
+                    </li>
+                    <li>
+                      <p>
+                        <strong>Auto Expiry and Approval Process:</strong> Deployed services within PAC are set with auto expiry to ensure efficient resource utilization. Users can request extensions for service expiration, which undergo an approval process to ensure fair distribution.
+                      </p>
+                    </li>
+                  </ol>
+                  <p>
+                    PAC aims to foster collaboration, innovation, and adoption of Power Architecture by offering a comprehensive catalog of Power Hardware resources and enabling a self-service model. It eliminates the need for manual approvals, reduces infrastructure barriers, and provides a user-friendly experience for developers.
+                  </p>
                 </Column>
               </Grid>
             </TabPanel>
@@ -74,9 +79,9 @@ const About = () => {
                 >
                   <h2 className="landing-page__subheading">Join the group</h2>
                   <p className="landing-page__p">
-                      PAC allows users to join existing groups that control resource allocation and access permissions.
-                      Navigate to the "Groups" section in the self-service portal.
-                      Browse through the available groups and their descriptions to find one that aligns with your interests or requirements.
+                    PAC allows users to join existing groups that control resource allocation and access permissions.
+                    Navigate to the "Groups" section in the self-service portal.
+                    Browse through the available groups and their descriptions to find one that aligns with your interests or requirements.
                   </p>
                 </Column>
                 <Column
@@ -85,8 +90,8 @@ const About = () => {
                   sm={4}
                   className="landing-page__tab-content"
                 >
+                  <h1 className="landing-page__subheading">Request Group Access:</h1>
                   <p className="landing-page__p">
-                    <h1 className="landing-page__subheading">Request Group Access:</h1>
 
                     Select the desired group and click on the "Request Access" button. Provide any additional information or justification for joining the group in the access request form.
                     Submit your request.
@@ -99,14 +104,14 @@ const About = () => {
                   sm={4}
                   className="landing-page__tab-content"
                 >
-                <p className="landing-page__p">
                   <h1 className="landing-page__subheading">Track Request Status:</h1>
+                  <p className="landing-page__p">
 
                     Monitor the status of your group access request within the self-service portal.
                     You will be notified once your request is approved or rejected.
                     Submit your request.
-                </p>
-                <Button href="/groups">Join</Button> <Button href="/requests">Track</Button>
+                  </p>
+                  <Button href="/groups">Join</Button> <Button href="/requests">Track</Button>
                 </Column>
               </Grid>
             </TabPanel>
