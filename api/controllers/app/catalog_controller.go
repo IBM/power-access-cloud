@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package app
 
 import (
 	"context"
@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
+	appscope "github.com/PDeXchange/pac/controllers/app/scope"
 	"github.com/PDeXchange/pac/controllers/util"
 )
 
@@ -42,7 +43,7 @@ type CatalogReconciler struct {
 	Debug  bool
 }
 
-func filterOwnedServices(ctx context.Context, scope *CatalogScope) ([]client.Object, error) {
+func filterOwnedServices(ctx context.Context, scope *appscope.CatalogScope) ([]client.Object, error) {
 	var ownedServices []client.Object
 	eachFunc := func(o runtime.Object) error {
 		obj := o.(client.Object)
@@ -76,7 +77,7 @@ func filterOwnedServices(ctx context.Context, scope *CatalogScope) ([]client.Obj
 	return ownedServices, nil
 }
 
-func reconcileVMCatalog(ctx context.Context, scope *CatalogScope) error {
+func reconcileVMCatalog(ctx context.Context, scope *appscope.CatalogScope) error {
 	scope.Logger.Info("Starting VM catalog reconciliation ...", "name", scope.Catalog.Name)
 
 	vm := &scope.Catalog.Spec.VM
@@ -146,9 +147,8 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	scope, err := NewCatalogScope(ctx, CatalogScopeParams{
-		ControllerScopeParams: ControllerScopeParams{
-			Type:    catalogController,
+	scope, err := appscope.NewCatalogScope(ctx, appscope.CatalogScopeParams{
+		ControllerScopeParams: appscope.ControllerScopeParams{
 			Client:  r.Client,
 			Logger:  l,
 			Debug:   r.Debug,

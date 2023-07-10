@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package scope
 
 import (
 	"context"
@@ -26,7 +26,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/IBM/go-sdk-core/v5/core"
-	"sigs.k8s.io/cluster-api/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -56,67 +55,6 @@ type ControllerScope struct {
 
 type CatalogScopeParams struct {
 	ControllerScopeParams
-}
-
-type ServiceScopeParams struct {
-	ControllerScopeParams
-	Service *v1alpha1.Service
-}
-
-type CatalogScope struct {
-	ControllerScope
-	catalogPatchHelper *patch.Helper
-}
-
-type ServiceScope struct {
-	ControllerScope
-	servicePatchHelper *patch.Helper
-	Service            *v1alpha1.Service
-}
-
-func NewCatalogScope(ctx context.Context, params CatalogScopeParams) (*CatalogScope, error) {
-	scope := &CatalogScope{}
-
-	ctrlScope, err := NewControllerScope(ctx, params.ControllerScopeParams)
-	if err != nil {
-		return scope, errors.Wrap(err, "failed to init controller scope")
-	}
-
-	scope.ControllerScope = *ctrlScope
-
-	catalogHelper, err := patch.NewHelper(params.Catalog, params.Client)
-	if err != nil {
-		return scope, errors.Wrap(err, "failed to init patch helper")
-	}
-	scope.catalogPatchHelper = catalogHelper
-
-	return scope, nil
-}
-
-func NewServiceScope(ctx context.Context, params ServiceScopeParams) (*ServiceScope, error) {
-	scope := &ServiceScope{}
-
-	ctrlScope, err := NewControllerScope(ctx, params.ControllerScopeParams)
-	if err != nil {
-		err = errors.Wrap(err, "failed to init controller scope")
-		return scope, err
-	}
-	scope.ControllerScope = *ctrlScope
-
-	if params.Service == nil {
-		err = errors.New("service is required when creating a ServiceScope")
-		return scope, err
-	}
-	scope.Service = params.Service
-
-	serviceHelper, err := patch.NewHelper(params.Service, params.Client)
-	if err != nil {
-		err = errors.Wrap(err, "failed to init patch helper")
-		return scope, err
-	}
-	scope.servicePatchHelper = serviceHelper
-
-	return scope, nil
 }
 
 func NewControllerScope(ctx context.Context, params ControllerScopeParams) (*ControllerScope, error) {
@@ -167,14 +105,4 @@ func NewControllerScope(ctx context.Context, params ControllerScopeParams) (*Con
 	}
 
 	return scope, nil
-}
-
-// PatchObject persists the catalog/service configuration and status.
-func (m *CatalogScope) PatchCatalogObject() error {
-	return m.catalogPatchHelper.Patch(context.TODO(), m.Catalog)
-}
-
-// PatchObject persists the catalog/service configuration and status.
-func (m *ServiceScope) PatchServiceObject() error {
-	return m.servicePatchHelper.Patch(context.TODO(), m.Service)
 }

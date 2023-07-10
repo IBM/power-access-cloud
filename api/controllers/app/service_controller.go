@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package app
 
 import (
 	"context"
@@ -32,6 +32,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
+	"github.com/PDeXchange/pac/controllers/app/scope"
+	appservice "github.com/PDeXchange/pac/controllers/app/service"
 )
 
 // ServiceReconciler reconciles a Service object
@@ -68,9 +70,8 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, errors.Wrapf(err, "error retrieving catalog with name %s for service %s", service.Spec.Catalog.Name, service.Name)
 	}
 
-	scope, err := NewServiceScope(ctx, ServiceScopeParams{
-		ControllerScopeParams: ControllerScopeParams{
-			Type:    serviceController,
+	scope, err := scope.NewServiceScope(ctx, scope.ServiceScopeParams{
+		ControllerScopeParams: scope.ControllerScopeParams{
 			Client:  r.Client,
 			Logger:  l,
 			Debug:   r.Debug,
@@ -109,56 +110,85 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		UID:        catalog.UID,
 	})
 
+	var svc appservice.Interface
+
+	switch catalog.Spec.Type {
+	case appv1alpha1.CatalogTypeVM:
+		svc = appservice.NewVM(scope)
+	default:
+		return ctrl.Result{}, errors.Errorf("unknown catalog type %s", catalog.Spec.Type)
+	}
+
 	if scope.Service.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(scope.Service, appv1alpha1.ServiceFinalizer) {
 			controllerutil.AddFinalizer(scope.Service, appv1alpha1.ServiceFinalizer)
-			if err = scope.Client.Update(ctx, scope.Service); err != nil {
+			if err = scope.PatchServiceObject(); err != nil {
 				return ctrl.Result{}, fmt.Errorf("failed to add finalizer to catalog: %w", err)
 			}
 		}
 	} else {
 		if controllerutil.ContainsFinalizer(scope.Service, appv1alpha1.ServiceFinalizer) {
-			var isCleanupDone bool
-			switch catalog.Spec.Type {
-			case appv1alpha1.CatalogTypeVM:
-				isCleanupDone, err = ReconcileDeleteVM(scope)
-				if err != nil {
-					return ctrl.Result{}, errors.Wrap(err, "error reconciling vm service")
-				}
+			if _, err = svc.Delete(ctx); err != nil {
+				return ctrl.Result{}, errors.Wrap(err, "error deleting the service")
 			}
 
-			if isCleanupDone {
-				controllerutil.RemoveFinalizer(scope.Service, appv1alpha1.ServiceFinalizer)
-				if err = r.Update(ctx, scope.Service); err != nil {
-					return ctrl.Result{}, fmt.Errorf("failed to remove finalizer from catalog: %w", err)
-				}
-				return ctrl.Result{}, nil
-			} else {
-				// waiting for cleanup to complete before removing the finalizer, requeuing after a min
-				return ctrl.Result{RequeueAfter: time.Minute * 1}, nil
+			controllerutil.RemoveFinalizer(scope.Service, appv1alpha1.ServiceFinalizer)
+			if err = r.Update(ctx, scope.Service); err != nil {
+				return ctrl.Result{}, fmt.Errorf("failed to remove finalizer from catalog: %w", err)
 			}
+			return ctrl.Result{}, nil
 		}
 	}
 
-	// If the service state is not set then set to new and return immediately
-	if service.Status.State == "" {
-		service.Status.State = appv1alpha1.ServiceStateNew
+	if scope.IsExpired() && service.Status.State != appv1alpha1.ServiceStateExpired {
+		service.Status.State = appv1alpha1.ServiceStateExpired
+		service.Status.Expired = true
+		service.Status.Message = "service expired"
 		return ctrl.Result{}, nil
 	}
 
-	switch catalog.Spec.Type {
-	case appv1alpha1.CatalogTypeVM:
-		if err = ReconcileVM(scope); err != nil {
-			err = errors.Wrap(err, "error reconciling vm service")
-			scope.Service.Status.State = appv1alpha1.ServiceStateError
-			scope.Service.Status.Message = err.Error()
+	{
+		switch scope.Service.Status.State {
+		case "":
+			scope.Service.Status.State = appv1alpha1.ServiceStateNew
+			return ctrl.Result{}, nil
+		case appv1alpha1.ServiceStateExpired:
+			scope.Logger.Info("service expired", "name", scope.Service.ObjectMeta.Name)
 
-			return ctrl.Result{}, err
-		}
-		if scope.Service.Status.State == appv1alpha1.ServiceStateInProgress {
-			l.Info("VM still in IN_PROGRESS state, requeuing after a min")
+			if _, err := svc.Delete(ctx); err != nil {
+				return ctrl.Result{}, errors.Wrap(err, "error cleaning up service")
+			}
+
+			scope.Service.Status.AccessInfo = ""
+			return ctrl.Result{}, nil
+		case appv1alpha1.ServiceStateFailed:
+			if scope.Service.Status.Successful {
+				scope.Logger.Info("service in error state, but was successful created in the past, hence not taking any action", "name", scope.Service.ObjectMeta.Name)
+				return ctrl.Result{}, nil
+			}
+			scope.Logger.Info("Service is in error state, hence recreating the service", "name", scope.Service.ObjectMeta.Name)
+			scope.Service.Status.Message = "Service is in error state, hence recreating the service"
+			if _, err := svc.Delete(ctx); err != nil {
+				return ctrl.Result{}, errors.Wrap(err, "error cleaning up service")
+			}
+			scope.Service.Status.AccessInfo = ""
+			scope.Service.Status.State = ""
+			// give some time for the service to be deleted and requeue for next try
 			return ctrl.Result{RequeueAfter: time.Minute * 1}, nil
 		}
+	}
+
+	if err := svc.Reconcile(ctx); err != nil {
+		err = errors.Wrap(err, "error reconciling service")
+		scope.Service.Status.State = appv1alpha1.ServiceStateError
+		scope.Service.Status.Message = err.Error()
+
+		return ctrl.Result{}, err
+	}
+
+	if scope.Service.Status.State == appv1alpha1.ServiceStateInProgress {
+		l.Info("Service is in IN_PROGRESS state, requeuing after a min")
+		return ctrl.Result{RequeueAfter: time.Minute * 2}, nil
 	}
 
 	return ctrl.Result{}, nil

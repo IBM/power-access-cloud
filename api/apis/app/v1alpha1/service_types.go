@@ -107,3 +107,7 @@ func init() {
 func (s *ServiceStatus) SetSuccessful() {
 	s.Successful = true
 }
+
+func (s *ServiceStatus) ClearVMStatus() {
+	s.VM = VM{}
+}
