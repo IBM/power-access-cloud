@@ -308,6 +308,20 @@ export const allUsers = () => {
     }));
 };
 
+export const getEvents = (page, per_page) => {
+  const url = `/pac-go-server/events?page=${page}&per_page=${per_page}`;
+  return _axios
+    .get(url)
+    .then((response) => ({
+      type: "LIST_REQUESTS",
+      payload: response.data,
+    }))
+    .catch((error) => ({
+      type: "API_ERROR",
+      payload: error,
+    }));
+};
+
 export const getQuota = () => {
   const url = `/pac-go-server/quota`;
   return _axios

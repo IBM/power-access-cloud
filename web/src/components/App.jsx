@@ -15,6 +15,7 @@ import Keys from "./Keys";
 import Catalogs from "./Catalogs";
 import Services from "./Services";
 import Users from "./Users";
+import Events from "./Events";
 import { Theme } from "@carbon/react";
 
 const App = () => {
@@ -62,6 +63,10 @@ const App = () => {
     isAdmin && {
       path: "/users",
       element: <AuthRoute Component={Users} />,
+    },
+    isAdmin && {
+      path: "/events",
+      element: <AuthRoute Component={Events} />,
     },
   ]);
   if (auth === true && window.location.pathname === "/login") {

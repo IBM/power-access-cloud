@@ -63,6 +63,7 @@ const HeaderNav = () => {
                 <SideNavLink href="/catalogs">Catalogs</SideNavLink>
                 <SideNavLink href="/services">Services</SideNavLink>
                 {isAdmin && <SideNavLink href="/users">Users</SideNavLink>}
+                {isAdmin && <SideNavLink href="/events">Events</SideNavLink>}
               </SideNavItems>
             </SideNav>
           </Header>
