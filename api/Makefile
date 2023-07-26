@@ -61,11 +61,17 @@ test: manifests generate fmt vet envtest ## Run tests.
 ##@ Build
 
 .PHONY: build
-build: generate fmt vet ## Build manager binary.
+build: generate fmt vet ## Build binaries.
+	$(MAKE) manager pac-go-server event-notifier
+
+manager: ## Build manager binary.
 	go build -o bin/manager main.go
 
-pac-go-server: fmt ## Build pac-go-server binary.
+pac-go-server: ## Build cmd/pac-go-server binary.
 	go build -o bin/pac-go-server ./cmd/pac-go-server/main.go
+
+event-notifier: ## Build cmd/event-notifier binary.
+	go build -o bin/pac-go-server ./cmd/event-notifier
 
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.
