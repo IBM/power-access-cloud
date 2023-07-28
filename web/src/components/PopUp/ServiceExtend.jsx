@@ -51,7 +51,6 @@ const ServiceExtend = ({ selectRows, setActionProps, response }) => {
   return (
     <Modal
       modalHeading="Extend the service"
-      danger={true}
       onRequestClose={() => {
         setActionProps("");
       }}

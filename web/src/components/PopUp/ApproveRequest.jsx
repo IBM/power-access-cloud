@@ -34,7 +34,6 @@ const ApproveRequest = ({ selectRows, setActionProps, response }) => {
   return (
     <Modal
       modalHeading="Approve Request"
-      danger={false}
       onRequestClose={() => {
         setActionProps("");
       }}

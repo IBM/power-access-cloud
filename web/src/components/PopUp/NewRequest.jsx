@@ -61,7 +61,6 @@ const NewRequest = ({ selectRows, setActionProps, response }) => {
   return (
     <Modal
       modalHeading="Request for a group"
-      danger={true}
       onRequestClose={() => {
         setActionProps("");
       }}

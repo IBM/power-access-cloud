@@ -57,11 +57,11 @@ const HeaderNav = () => {
             >
               <SideNavItems>
                 <SideNavLink href="/">Home</SideNavLink>
-                <SideNavLink href="/groups">Groups</SideNavLink>
-                <SideNavLink href="/requests">Request</SideNavLink>
-                <SideNavLink href="/keys">Keys</SideNavLink>
                 <SideNavLink href="/catalogs">Catalogs</SideNavLink>
                 <SideNavLink href="/services">Services</SideNavLink>
+                <SideNavLink href="/groups">Groups</SideNavLink>
+                <SideNavLink href="/requests">{isAdmin ? "Requests" : "My Requests"}</SideNavLink>
+                <SideNavLink href="/keys">Keys</SideNavLink>
                 {isAdmin && <SideNavLink href="/users">Users</SideNavLink>}
                 {isAdmin && <SideNavLink href="/events">Events</SideNavLink>}
               </SideNavItems>

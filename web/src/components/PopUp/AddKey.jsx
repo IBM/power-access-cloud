@@ -43,7 +43,6 @@ const AddKey = ({ setActionProps, response }) => {
   return (
     <Modal
       modalHeading="Add key"
-      danger={true}
       onRequestClose={() => {
         setActionProps("");
       }}
