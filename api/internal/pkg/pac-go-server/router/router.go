@@ -104,5 +104,9 @@ func CreateRouter() *gin.Engine {
 
 	authorized.GET("/events", services.GetEvents)
 
+	// terms and conditions related endpoints
+	authorized.GET("/tnc", services.GetTermsAndConditionsStatus)
+	authorized.POST("/tnc", services.AcceptTermsAndConditions)
+
 	return router
 }

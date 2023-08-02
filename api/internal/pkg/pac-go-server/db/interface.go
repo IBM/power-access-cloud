@@ -33,4 +33,7 @@ type DB interface {
 	GetEventsByUserID(string, int64, int64) ([]models.Event, int64, error)
 	WatchEvents(chan<- *models.Event) error
 	MarkEventAsNotified(string) error
+
+	AcceptTermsAndConditions(*models.TermsAndConditions) error
+	GetTermsAndConditionsByUserID(string) (*models.TermsAndConditions, error)
 }
