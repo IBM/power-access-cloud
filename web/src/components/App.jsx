@@ -8,7 +8,7 @@ import NewRequest from "./PopUp/NewRequest";
 import About from "./About";
 import AuthRoute from "./PrivateRoute/AuthRoute";
 import HeaderNav from "./Header";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {Routes , Route } from "react-router-dom";
 import UserService from "../services/UserService";
 import "../App.css";
 import Keys from "./Keys";
@@ -22,53 +22,24 @@ const App = () => {
   const auth = UserService.isLoggedIn();
   const isAdmin = UserService.isAdminUser();
 
-  // const navigate = useNavigate();
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <AuthRoute Component={About} />,
-    },
-    {
-      path: "/login",
-      element: <AuthRoute Component={Login} />,
-    },
-    {
-      path: "/groups",
-      element: <AuthRoute Component={GroupList} />,
-    },
-    {
-      path: "/requests",
-      element: <AuthRoute Component={RequestList} />,
-    },
-    {
-      path: "/request/:id",
-      element: <AuthRoute Component={NewRequest} />,
-    },
-    {
-      path: "/about",
-      element: <AuthRoute Component={About} />,
-    },
-    {
-      path: "/keys",
-      element: <AuthRoute Component={Keys} />,
-    },
-    {
-      path: "/catalogs",
-      element: <AuthRoute Component={Catalogs} />,
-    },
-    {
-      path: "/services",
-      element: <AuthRoute Component={Services} />,
-    },
-    isAdmin && {
-      path: "/users",
-      element: <AuthRoute Component={Users} />,
-    },
-    isAdmin && {
-      path: "/events",
-      element: <AuthRoute Component={Events} />,
-    },
-  ]);
+  const RouterClass = () => {
+    return(
+      <Routes>
+      <Route path="/" element={<AuthRoute Component={About} />} />
+      <Route path="/login" element={<AuthRoute Component={Login} />} />
+      <Route path="/groups" element={<AuthRoute Component={GroupList} />} />
+      <Route path="/requests" element={<AuthRoute Component={RequestList} />} />
+      <Route path="/request/:id" element={<AuthRoute Component={NewRequest} />} />
+      <Route path="/about" element={<AuthRoute Component={About} />} />
+      <Route path="/keys" element={<AuthRoute Component={Keys} />} />
+      <Route path="/catalogs" element={<AuthRoute Component={Catalogs} />} />
+      <Route path="/services" element={<AuthRoute Component={Services} />} />
+      {isAdmin && <Route path="/users" element={<AuthRoute Component={Users} />} />}
+      {isAdmin && <Route path="/events" element={<AuthRoute Component={Events} />} />}
+    </Routes>
+    );
+  }
+
   if (auth === true && window.location.pathname === "/login") {
     window.location.href = window.location.href.replace("/login", "");
     return;
@@ -77,7 +48,7 @@ const App = () => {
     <React.Fragment>
       <Theme theme="g90">{auth === true && <HeaderNav />} </Theme>
       <section className={auth ? "contentSection" : ""}>
-        <RouterProvider router={router} />
+        <RouterClass />
       </section>
     </React.Fragment>
   );

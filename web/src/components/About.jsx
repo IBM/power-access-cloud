@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import {
   Button,
   Tabs,
@@ -111,7 +112,7 @@ const About = () => {
                     You will be notified once your request is approved or rejected.
                     Submit your request.
                   </p>
-                  <Button href="/groups">Join</Button> <Button href="/requests">Track</Button>
+                  <Link to="/groups"><Button>Join</Button></Link>  <Link to="/requests"><Button>Track</Button></Link>
                 </Column>
               </Grid>
             </TabPanel>
@@ -127,7 +128,7 @@ const About = () => {
                   <p className="landing-page__p">
                     To access the Power Access Cloud service user needs to have ssh key to access the deployed service. If you don't have ssh keys, please generate one and upload it to the portal.
                   </p>
-                  <Button href="/keys">Manage Keys</Button>
+                  <Link to="/keys"><Button>Manage Keys</Button></Link>
                 </Column>
               </Grid>
             </TabPanel>
@@ -157,7 +158,7 @@ const About = () => {
                   <p>
                     It's important to note that the availability of specific resources within the catalog may vary based on factors such as quotas, group permissions, and overall resource availability within the PAC infrastructure.
                   </p>
-                  <Button href="/catalogs">Catalogs</Button>
+                  <Link to="/catalogs"><Button>Catalogs</Button></Link>
                 </Column>
               </Grid>
             </TabPanel>
@@ -194,7 +195,7 @@ const About = () => {
                   <p>
                     It's important to note that deployed services within PAC are set with an auto-expiry feature to ensure efficient resource utilization. Users should keep track of the expiration date and request extensions if required, following the approval process outlined in PAC.
                   </p>
-                  <Button href="/services">Services</Button>
+                  <Link to="/services"><Button>Services</Button></Link>
                 </Column>
               </Grid>
             </TabPanel>
