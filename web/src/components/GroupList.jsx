@@ -84,11 +84,23 @@ const GroupList = () => {
     ? headers // Display all buttons for admin users
     : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
 
-  const fetchData = async () => {
-    let data = await allGroups();
-    setRows(data?.payload);
-    setLoading(false);
-  };
+    const fetchData = async () => {
+      let data = [];
+      data = await allGroups();
+        data?.payload.sort((a, b) => {
+          let fa = a.quota.cpu,
+            fb = b.quota.cpu;
+          if (fa < fb) {
+            return -1;
+          }
+          if (fa > fb) {
+            return 1;
+          }
+          return 0;
+        });
+      setRows(data?.payload);
+      setLoading(false);
+    };
 
   const handleResponse = (title, message, errored) => {
     setTitle(title);
@@ -120,6 +132,7 @@ const GroupList = () => {
       />
     );
   };
+
   const renderActionModals = () => {
     return (
       <React.Fragment>
