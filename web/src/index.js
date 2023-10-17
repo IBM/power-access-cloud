@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import {BrowserRouter} from "react-router-dom" 
 import "./index.scss";
 import App from "./components/App";
 import reportWebVitals from "./reportWebVitals";
@@ -14,7 +15,9 @@ const renderApp = () => {
     <React.StrictMode>
       <Provider store={store}>
         <GlobalTheme theme={"g100"}>
-          <App />
+          <BrowserRouter forceRefresh={false}>
+           <App />
+          </BrowserRouter>
         </GlobalTheme>
       </Provider>
     </React.StrictMode>
