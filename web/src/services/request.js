@@ -12,6 +12,38 @@ _axios.interceptors.request.use((config) => {
   }
 });
 
+export const tncStatus = () => {
+const url = "/pac-go-server/tnc";
+  return _axios.get(url)
+        .then((response) => ({
+          acceptance: response.data.accepted
+        }))
+        .catch((error) => {
+          console.log(error)
+        });    
+}
+
+export const getTnCText = () => {
+  const url = "https://raw.githubusercontent.com/PDeXchange/pac-support/main/Terms%20and%20Conditions.md";
+  return axios.get(url).then((response) => ({
+    text: response.data
+  }))
+  .catch((error) => {
+    console.log(error)
+  });      
+}
+
+export const acceptTnC = () => {
+    const url1 = "/pac-go-server/tnc";
+    return _axios.post(url1)
+        .then((response) => {
+          console.log(response.data)
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+    }
+    
 export const allGroups = () => {
   const url = "/pac-go-server/groups";
 
