@@ -147,7 +147,7 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		return
 	}
 
-	event, err := models.NewEvent(c.Request.Context(), userID, originator, models.EventServiceExpiryRequest)
+	event, err := models.NewEvent(userID, originator, models.EventServiceExpiryRequest)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create event, err: %s", err.Error())})
@@ -244,7 +244,7 @@ func NewGroupRequest(c *gin.Context) {
 		return
 	}
 
-	event, err := models.NewEvent(c.Request.Context(), userID, originator, models.EventGroupJoinRequest)
+	event, err := models.NewEvent(userID, originator, models.EventGroupJoinRequest)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create event, err: %s", err.Error())})
@@ -344,7 +344,7 @@ func ExitGroup(c *gin.Context) {
 		return
 	}
 
-	event, err := models.NewEvent(c.Request.Context(), userID, userID, models.EventGroupExitRequest)
+	event, err := models.NewEvent(userID, userID, models.EventGroupExitRequest)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create event, err: %s", err.Error())})
@@ -429,7 +429,7 @@ func ApproveRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to update the state field in the db, err: %s", err.Error())})
 		return
 	}
-	event, err := models.NewEvent(c.Request.Context(), request.UserID, originator, models.EventTypeRequestApproved)
+	event, err := models.NewEvent(request.UserID, originator, models.EventTypeRequestApproved)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create event, err: %s", err.Error())})
@@ -491,7 +491,7 @@ func RejectRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to update the state field in the db, err: %s", err.Error())})
 		return
 	}
-	event, err := models.NewEvent(c.Request.Context(), req.UserID, originator, models.EventTypeRequestRejected)
+	event, err := models.NewEvent(req.UserID, originator, models.EventTypeRequestRejected)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create event, err: %s", err.Error())})
@@ -536,7 +536,7 @@ func DeleteRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to delete the record from the db, err: %s", err.Error())})
 		return
 	}
-	event, err := models.NewEvent(c.Request.Context(), request.UserID, originator, models.EventTypeRequestDeleted)
+	event, err := models.NewEvent(request.UserID, originator, models.EventTypeRequestDeleted)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create event, err: %s", err.Error())})

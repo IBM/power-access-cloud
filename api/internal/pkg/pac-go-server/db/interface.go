@@ -31,6 +31,7 @@ type DB interface {
 
 	NewEvent(*models.Event) error
 	GetEventsByUserID(string, int64, int64) ([]models.Event, int64, error)
+	GetEventsByType(models.EventType, uint) ([]models.Event, int64, error)
 	WatchEvents(chan<- *models.Event) error
 	MarkEventAsNotified(string) error
 

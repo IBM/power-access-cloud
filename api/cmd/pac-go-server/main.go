@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	flag "github.com/spf13/pflag"
 	"go.uber.org/zap"
 
@@ -21,7 +23,9 @@ var (
 func initFlags() {
 	flag.StringVar(&servicePort, "port", "8000", "port to run the service on")
 	flag.StringSliceVar(&models.ExcludeGroups, "exclude-groups", []string{"admin"}, "comma separated list of groups to exclude")
-
+	flag.DurationVar(&models.ExpiryNotificationDuration, "expiry-notification-duration", 48*time.Hour,
+		`set duration for notification for about-to-expire services,
+		e.g. 45s, 2m, 1h30m, 20h, default: 48h which means that user will start receiving expiry notifications 48 hrs before service expiry, once a day`)
 	flag.Parse()
 }
 
@@ -46,6 +50,9 @@ func main() {
 	logger.Info("Attempting to connect to Kubernetes cluster...")
 	kubeClient := kubernetes.NewClient()
 	services.SetKubeClient(kubeClient)
+
+	logger.Info("Starting service expiry notifier")
+	go services.ExpiryNotification()
 
 	var appRouter = router.CreateRouter()
 	logger.Info("PAC server is up and running", zap.String("port", servicePort))

@@ -18,8 +18,7 @@ var (
 	clientSecret = os.Getenv("KEYCLOAK_CLIENT_SECRET")
 	realm        = os.Getenv("KEYCLOAK_REALM")
 	hostname     = os.Getenv("KEYCLOAK_HOSTNAME")
-
-	client *gocloak.GoCloak
+	client       *gocloak.GoCloak
 )
 
 func init() {
