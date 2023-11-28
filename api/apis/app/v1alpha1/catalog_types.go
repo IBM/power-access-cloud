@@ -47,6 +47,10 @@ type CatalogSpec struct {
 	Retired bool `json:"retired"`
 	// +kubebuilder:validation:Required
 	Expiry int `json:"expiry"`
+	// Thumbnail reference for image in Catalog which consists of URL for the catalog used by the UI component to display the thumbnail.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern=`^https?:\/\/.+$`
+	ImageThumbnailReference string `json:"image_thumbnail_reference"`
 	// +optional
 	VM VMCatalog `json:"vm"`
 }

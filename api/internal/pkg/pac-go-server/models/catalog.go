@@ -1,15 +1,16 @@
 package models
 
 type Catalog struct {
-	ID          string        `json:"id"`
-	Type        string        `json:"type"`
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Capacity    Capacity      `json:"capacity"`
-	Retired     bool          `json:"retired"`
-	Expiry      int           `json:"expiry"`
-	VM          VM            `json:"vm"`
-	Status      CatalogStatus `json:"status"`
+	ID                      string        `json:"id"`
+	Type                    string        `json:"type"`
+	Name                    string        `json:"name"`
+	Description             string        `json:"description"`
+	Capacity                Capacity      `json:"capacity"`
+	Retired                 bool          `json:"retired"`
+	Expiry                  int           `json:"expiry"`
+	ImageThumbnailReference string        `json:"image_thumbnail_reference"`
+	VM                      VM            `json:"vm"`
+	Status                  CatalogStatus `json:"status"`
 }
 
 type CatalogStatus struct {

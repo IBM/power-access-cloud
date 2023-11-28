@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -164,8 +165,9 @@ func convertToCatalog(catalogItem pac.Catalog) models.Catalog {
 		Capacity: models.Capacity{
 			Memory: catalogItem.Spec.Capacity.Memory,
 		},
-		Retired: catalogItem.Spec.Retired,
-		Expiry:  catalogItem.Spec.Expiry,
+		Retired:                 catalogItem.Spec.Retired,
+		Expiry:                  catalogItem.Spec.Expiry,
+		ImageThumbnailReference: catalogItem.Spec.ImageThumbnailReference,
 		Status: models.CatalogStatus{
 			Ready:   catalogItem.Status.Ready,
 			Message: catalogItem.Status.Message,
@@ -220,6 +222,9 @@ func validateCreateCatalogParams(catalog models.Catalog) []error {
 	if catalog.Expiry == 0 {
 		errs = append(errs, errors.New("catalog expiry should be set"))
 	}
+	if _, err := url.ParseRequestURI(catalog.ImageThumbnailReference); err != nil {
+		errs = append(errs, errors.New("catalog image not valid"))
+	}
 	switch catalog.Type {
 	case string(pac.CatalogTypeVM):
 		vm := catalog.VM
@@ -258,7 +263,8 @@ func createCatalogObject(catalog models.Catalog) pac.Catalog {
 				CPU:    utils.CastFloatToStr(catalog.Capacity.CPU),
 				Memory: catalog.Capacity.Memory,
 			},
-			Expiry: catalog.Expiry,
+			Expiry:                  catalog.Expiry,
+			ImageThumbnailReference: catalog.ImageThumbnailReference,
 		},
 	}
 	switch catalog.Type {

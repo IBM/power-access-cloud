@@ -15,6 +15,7 @@ spec:
     memory: 8
   description: 'Medium size vm'
   expiry: 20
+  image_thumbnail_reference: 'https://sample-image/centos-symbol-x256.png'
   vm:
     crn: 'crn:v1:bluemix:public:power-iaas:lon06:a/<accountID>:<powerVSInstanceID>::'
     image: <sampleImageName>

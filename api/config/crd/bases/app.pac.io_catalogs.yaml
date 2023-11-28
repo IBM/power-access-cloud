@@ -49,6 +49,11 @@ spec:
                 type: string
               expiry:
                 type: integer
+              image_thumbnail_reference:
+                description: Thumbnail reference for image in Catalog which consists
+                  of URL for the catalog used by the UI component to display the thumbnail.
+                pattern: ^https?:\/\/.+$
+                type: string
               retired:
                 description: Retired says whether the Catalog is retired or not, if
                   retired then it will not be available for provisioning
@@ -90,6 +95,7 @@ spec:
             - capacity
             - description
             - expiry
+            - image_thumbnail_reference
             - retired
             - type
             type: object
