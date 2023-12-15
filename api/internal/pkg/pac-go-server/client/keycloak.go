@@ -60,6 +60,10 @@ func (k *KeyClockClient) DeleteUserFromGroup(userID, groupID string) error {
 	return k.client.DeleteUserFromGroup(k.ctx, k.accessToken, k.realm, userID, groupID)
 }
 
+func (k *KeyClockClient) GetUserGroups(userID string) ([]*gocloak.Group, error) {
+	return k.client.GetUserGroups(k.ctx, k.accessToken, k.realm, userID, gocloak.GetGroupsParams{})
+}
+
 func (k *KeyClockClient) IsRole(name string) bool {
 	roles := k.ctx.Value("roles").([]string)
 

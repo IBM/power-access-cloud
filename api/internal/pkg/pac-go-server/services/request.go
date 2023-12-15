@@ -364,6 +364,25 @@ func ExitGroup(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+func deleteUserFromPreviousGroups(c *gin.Context, request *models.Request) {
+	logger := log.GetLogger()
+	groups, err := client.NewKeyClockClient(c.Request.Context()).GetUserGroups(request.UserID)
+	if err != nil {
+		logger.Error("failed to get groups for user", zap.String("user id", request.UserID))
+		return
+	}
+	for _, group := range groups {
+		// Not revoking access for recently added group
+		if *group.ID == request.GroupAdmission.GroupID {
+			continue
+		}
+		if err := client.NewKeyClockClient(c.Request.Context()).DeleteUserFromGroup(request.UserID, *group.ID); err != nil {
+			logger.Error("failed to remove user from group", zap.String("user id", request.UserID),
+				zap.String("group id", *group.ID), zap.Error(err))
+		}
+	}
+}
+
 func ApproveRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -390,6 +409,7 @@ func ApproveRequest(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		deleteUserFromPreviousGroups(c, request)
 	case models.RequestExitFromGroup:
 		if err := client.NewKeyClockClient(c.Request.Context()).DeleteUserFromGroup(request.UserID, request.GroupAdmission.GroupID); err != nil {
 			logger.Error("failed to remove user from group", zap.String("user id", request.UserID),
