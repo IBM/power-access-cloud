@@ -5,7 +5,7 @@ go 1.19
 replace github.com/Nerzal/gocloak/v13 => github.com/PDeXchange/gocloak/v13 v13.7.0-p1
 
 require (
-	github.com/IBM-Cloud/power-go-client v1.5.5
+	github.com/IBM-Cloud/power-go-client v1.5.7
 	github.com/IBM/go-sdk-core/v5 v5.15.0
 	github.com/IBM/platform-services-go-sdk v0.55.0
 	github.com/IBM/vpc-go-sdk v0.46.0
@@ -55,10 +55,10 @@ require (
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/loads v0.21.2 // indirect
 	github.com/go-openapi/runtime v0.26.0 // indirect
-	github.com/go-openapi/spec v0.20.9 // indirect
-	github.com/go-openapi/strfmt v0.21.7 // indirect
+	github.com/go-openapi/spec v0.20.11 // indirect
+	github.com/go-openapi/strfmt v0.21.9 // indirect
 	github.com/go-openapi/swag v0.22.4 // indirect
-	github.com/go-openapi/validate v0.22.2 // indirect
+	github.com/go-openapi/validate v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.1 // indirect
@@ -76,7 +76,7 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.4.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
