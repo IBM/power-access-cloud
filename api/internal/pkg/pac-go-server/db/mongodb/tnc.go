@@ -38,8 +38,8 @@ func (db *MongoDB) AcceptTermsAndConditions(terms *models.TermsAndConditions) er
 	collection := db.Database.Collection("tnc")
 	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
 	defer cancel()
-	filter := bson.D{{"user_id", terms.UserID}}
-	update := bson.D{{"$set", bson.D{{"user_id", terms.UserID}, {"accepted", terms.Accepted}, {"accepted_at", terms.AcceptedAt}}}}
+	filter := bson.D{{Key: "user_id", Value: terms.UserID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "user_id", Value: terms.UserID}, {Key: "accepted", Value: terms.Accepted}, {Key: "accepted_at", Value: terms.AcceptedAt}}}}
 	opts := options.Update().SetUpsert(true)
 	_, err := collection.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
