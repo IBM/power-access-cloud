@@ -209,7 +209,7 @@ func CreateService(c *gin.Context) {
 	// create service
 	logger.Debug("service create params", zap.String("service name", serviceName), zap.Any("service", service), zap.Any("sshKey", sshKeys))
 	if err := kubeClient.CreateService(createServiceObject(serviceName, keys, service)); err != nil {
-		logger.Error("failed to service service", zap.Error(err))
+		logger.Error("failed to create service", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}

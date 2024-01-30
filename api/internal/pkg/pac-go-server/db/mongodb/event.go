@@ -60,6 +60,36 @@ func (db *MongoDB) GetEventsByUserID(id string, startIndex, perPage int64) ([]mo
 	return events, totalCount, nil
 }
 
+// GetEventsByType returns all events of specified type within specified duration
+func (db *MongoDB) GetEventsByType(eventType models.EventType, duration uint) ([]models.Event, int64, error) {
+	events := []models.Event{}
+	var totalCount int64
+
+	startTime := time.Now().Add(-time.Duration(duration) * time.Hour)
+
+	filter := bson.D{{}}
+	if eventType != "" {
+		filter = bson.D{
+			{Key: "type", Value: eventType},
+			{Key: "created_at", Value: bson.D{{Key: "$gt", Value: startTime}}},
+		}
+	}
+	findOptions := options.Find()
+	collection := db.Database.Collection("events")
+	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
+	defer cancel()
+	cur, err := collection.Find(ctx, filter, findOptions)
+	if err != nil {
+		return nil, totalCount, fmt.Errorf("error getting events: %w", err)
+	}
+	defer cur.Close(ctx)
+
+	if err = cur.All(context.Background(), &events); err != nil {
+		return nil, totalCount, fmt.Errorf("error fetching events: %w", err)
+	}
+	return events, totalCount, nil
+}
+
 // WatchEvents watches the events collection for changes
 func (db *MongoDB) WatchEvents(eventCh chan<- *models.Event) error {
 	collection := db.Database.Collection("events")

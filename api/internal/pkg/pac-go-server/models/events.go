@@ -2,21 +2,22 @@ package models
 
 import (
 	"bytes"
-	"context"
 	"html/template"
 	"time"
 
-	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/client"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type EventType string
 type EventLogLevel string
 
+var ExpiryNotificationDuration time.Duration
+
 const (
-	EventGroupJoinRequest     EventType = "GROUP_JOIN_REQUEST"
-	EventServiceExpiryRequest EventType = "SERVICE_EXPIRY_REQUEST"
-	EventGroupExitRequest     EventType = "GROUP_EXIT_REQUEST"
+	EventGroupJoinRequest          EventType = "GROUP_JOIN_REQUEST"
+	EventServiceExpiryRequest      EventType = "SERVICE_EXPIRY_REQUEST"
+	EventGroupExitRequest          EventType = "GROUP_EXIT_REQUEST"
+	EventServiceExpiryNotification EventType = "SERVICE_EXPIRY_NOTIFICATION"
 
 	EventTypeRequestApproved EventType = "REQUEST_APPROVED"
 	EventTypeRequestRejected EventType = "REQUEST_REJECTED"
@@ -74,30 +75,12 @@ type EventResponse struct {
 	Links Links `json:"links"`
 }
 
-func NewEvent(ctx context.Context, userid, originator string, typ EventType) (*Event, error) {
-	email := ""
-	// if originator is not the same as userid, then the event is created by an admin, hence get the user info for the supplied userid
-	if originator != userid {
-		user, err := client.NewKeyClockClient(ctx).GetUser(userid)
-		if err != nil {
-			return nil, err
-		}
-		email = *user.Email
-	} else {
-		// Get user info for the token in the context for the non-admin user
-		usr, err := client.NewKeyClockClient(ctx).GetUserInfo()
-		if err != nil {
-			return nil, err
-		}
-		email = *usr.Email
-	}
-
+func NewEvent(userid, originator string, typ EventType) (*Event, error) {
 	return &Event{
 		Type:      typ,
 		CreatedAt: time.Now(),
 
 		UserID:     userid,
-		UserEmail:  email,
 		Originator: originator,
 	}, nil
 }
