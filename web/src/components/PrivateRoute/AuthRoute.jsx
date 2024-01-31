@@ -5,13 +5,20 @@ import UserService from "../../services/UserService";
 const AuthRoute = ({ Component }) => {
   const navigate = useNavigate();
   const auth = UserService.isLoggedIn();
-  
   useEffect(()=>{
-    if (auth === false)
-      navigate("/login");
+    
+      if (auth === false){
+
+        const just = sessionStorage.getItem("Justification");
+        const tnc_acc = sessionStorage.getItem("TnC_acceptance");
+        if(just!=='' && tnc_acc){
+          UserService.doLogin();
+        }
+      }
   },[auth, navigate])
 
-  return <Component />;
+    return <Component />;
+
 };
 
 export default AuthRoute;

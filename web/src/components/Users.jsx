@@ -63,7 +63,7 @@ const Users = () => {
         columnCount={headerLabels?.length}
         compact={false}
         headers={headerLabels}
-        rowCount={10}
+        rowCount={3}
         zebra={false}
       />
     );

@@ -27,7 +27,7 @@ const DeleteCatalog = ({ selectRows, setActionProps, response }) => {
         title = "The deletion of the catalog was successful.";
       }
     } catch (error) {
-      console.log(error);
+      
     }
     response(title, message, errored)
     setActionProps("");

@@ -24,7 +24,7 @@ const ApproveRequest = ({ selectRows, setActionProps, response }) => {
         title = "Approved request successfully.";
       }
     } catch (error) {
-      console.log(error);
+      
     }
     response(title, message, errored)
     setActionProps("");

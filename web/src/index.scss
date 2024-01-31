@@ -39,21 +39,6 @@
   padding: 0;
 }
 
-.tnc{
-  h1{
-    font-size:200%;
-  }
-  h2 {
-      font-size: 150%;
-    }
-  
-  p{
-  font-size: 100%;
-  }
-
-  padding-bottom: 50px;
-}
-
 .landing-page__illo {
   max-width: 100%;
 }
@@ -79,7 +64,9 @@
 .landing-page__heading {
   @include type-style("productive-heading-05");
 }
-
+.landing-page__sub_heading {
+  @include type-style("productive-heading-04");
+}
 .landing-page__r2 {
   margin-top: rem(-40px);
 }
@@ -130,3 +117,4 @@
     padding-right: 20px;
   }
 }
+

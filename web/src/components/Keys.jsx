@@ -23,10 +23,8 @@ import {
 } from "@carbon/react";
 import DeleteKey from "./PopUp/DeleteKey";
 import Notify from "./utils/Notify";
-
 const BUTTON_REQUEST = "BUTTON_REQUEST";
 const BUTTON_DELETE = "BUTTON_DELETE";
-
 const headers = [
   {
     key: "id",
@@ -47,7 +45,6 @@ const headers = [
     header: "Content",
   },
 ];
-
 const TABLE_BUTTONS = [
   {
     key: BUTTON_DELETE,
@@ -66,7 +63,6 @@ const TABLE_BUTTONS = [
   },
 ];
 let selectRows = [];
-
 const Keys = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -76,33 +72,26 @@ const Keys = () => {
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
   const isAdmin = UserService.isAdminUser();
-
   const filteredHeaders = isAdmin
     ? headers // Display all buttons for admin users
     : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
-
   const fetchData = async () => {
     let data = await allKeys();
     setRows(data?.payload);
     setLoading(false);
   };
-
   const handleResponse = (title, message, errored) => {
     setErrorTitle(title);
     setErrorMsg(message);
     errored ? setNotifyKind("error") : setNotifyKind("success");
   };
-
   const selectionHandler = (rows = []) => {
     selectRows = rows;
   };
-
   useEffect(() => {
     fetchData();
   }, [isAdmin, headers, actionProps]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const displayData = clientSearchFilter(searchText, rows);
-
   const renderSkeleton = () => {
     const headerLabels = filteredHeaders?.map((x) => x?.header);
     return (
@@ -134,7 +123,6 @@ const Keys = () => {
       </React.Fragment>
     );
   };
-
   return (
     <>
       <Notify title={errorTitle} message={errorMsg} nkind={notifyKind} setTitle={setErrorTitle} />

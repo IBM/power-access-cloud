@@ -42,7 +42,7 @@ export const allRequests = () => ({
 
 export const addRequest = (group) => {
   const username = UserService.getUsername();
-  console.log(`${username} added the request ${group.name}`);
+  
 
   const requestData = {
     group: group.name,
@@ -73,7 +73,7 @@ export const getGroup = (id) => ({
 
 export const newRequest = (group) => {
     const username = UserService.getUsername();
-    console.log(`${username} added the request ${group.name}`);
+    
   
     const requestData = {
       justification: group.justification,
@@ -102,7 +102,7 @@ export const newRequest = (group) => {
   });
   
   export const deleteGroup = (group) => {
-    console.log(`${UserService.getUsername()} exits the group ${group.name}`);
+    
     return {
       type: DELETE_GROUP,
       payload: {

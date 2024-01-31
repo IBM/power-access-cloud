@@ -1,41 +1,83 @@
-.jumbotron {
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #f9f9f9;
-}
+
 .login-page {
   font-family: "Arial", sans-serif;
+  background-color: white;
+  padding: 50px 50px 0 0;
+ }
+
+ .about-page{
+    font-family: "Arial", sans-serif;
+    text-align: center;
+    margin-bottom: 150px;
+    .welcome {
+      width: 70%;
+    }
+  
+ }
+p {
+  font-size: 1.1vw;
+  margin-bottom: 10vh;
+}
+
+.graphic{
+  width:60vw;
+  height:100vh;
+  margin:-50px 0 0 -100px;
+}
+
+.feedback {
+  background: #ddd;
+  display: flex;
+  flex-wrap: wrap;
+  width:45%
+}
+
+.unselected {
+  flex-grow: 1;
+  width: 33%;
+  height: 6.8rem;
+  border: 1px #eee solid;
   text-align: center;
-  margin-bottom: 150px;
-  .welcome {
-    width: 70%;
+  padding-top:10px
+}
+.feedback>div:hover{
+  background-color: #bbb;
+}
+.ratingSelected{
+  border: 2px solid rgb(132, 132, 132);
+  background-color: #aaa;
+  flex-grow: 1;
+  width: 33%;
+  height: 6.8rem;
+  text-align: center;
+  padding-top:10px
+}
+
+.feedback>div>div {
+  font-size: 14px;
+}
+@media (max-width: 1250px) {
+  p {
+    font-size: 1.5vw;
+    margin-bottom: 10vh;
+  }
+  
+  .graphic{
+    width:55vw;
+    height:80vh;
   }
 }
 
-h1 {
-  font-size: 32px;
-  margin-bottom: 20px;
-}
-
-p {
-  font-size: 18px;
-  margin-bottom: 40px;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
+@media (max-width: 667px) {
+  p {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .graphic{
+    display:none;
+  }
+  .feedback {
+    width:100%
+  }
 }

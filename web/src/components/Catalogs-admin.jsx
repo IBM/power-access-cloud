@@ -15,77 +15,82 @@ import {
   TableSelectAll,
   DataTableSkeleton,
 } from "@carbon/react";
-import { CalendarAddAlt, TrashCan } from "@carbon/icons-react";
+import { MobileAdd, TrashCan, AlarmSubtract } from "@carbon/icons-react";
 import { clientSearchFilter } from "../utils/Search";
 import FooterPagination from "../utils/Pagination";
 import { flattenArrayOfObject } from "./commonUtils";
-import { getServices } from "../services/request";
-import DeleteService from "./PopUp/DeleteService";
-import ServiceExtend from "./PopUp/ServiceExtend";
+import { getAllCatalogs } from "../services/request";
+import DeployCatalog from "./PopUp/DeployCatalog";
+import DeleteCatalog from "./PopUp/DeleteCatalog";
+import RetireCatalog from "./PopUp/RetireCatalog";
 import UserService from "../services/UserService";
+import QuotaWarning from "./PopUp/QuotaWarning";
 import Notify from "./utils/Notify";
 
 const BUTTON_REQUEST = "BUTTON_REQUEST";
-const BUTTON_EXTEND = "BUTTON_EXTEND";
+const BUTTON_DELETE = "BUTTON_DELETE";
+const BUTTON_RETIRE = "BUTTON_RETIRE";
 
 const headers = [
   {
-    key: "user_id",
-    header: "User ID",
-    adminOnly: true,
-  },
-  {
     key: "name",
     header: "Name",
-    adminOnly: true,
   },
   {
-    key: "display_name",
-    header: "Display name",
+    key: "type",
+    header: "Type",
   },
   {
-    key: "catalog_name",
-    header: "Catalog",
+    key: "description",
+    header: "Description",
   },
   {
-    key: "expiry",
-    header: "Expiry",
+    key: "status.ready",
+    header: "Status",
   },
   {
-    key: "status.state",
-    header: "State",
+    key: "retired",
+    header: "Retired",
   },
   {
     key: "status.message",
     header: "Message",
   },
-  {
-    key: "status.access_info",
-    header: "Access Information",
-  },
 ];
 
 const TABLE_BUTTONS = [
   {
-    key: BUTTON_EXTEND,
-    label: "Change Expiry",
+    key: BUTTON_RETIRE,
+    label: "Retire",
     kind: "ghost",
-    icon: CalendarAddAlt,
+    icon: AlarmSubtract,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: true,
   },
   {
-    key: BUTTON_REQUEST,
+    key: BUTTON_DELETE,
     label: "Delete",
     kind: "ghost",
     icon: TrashCan,
     standalone: true,
     hasIconOnly: true,
+    adminOnly: true,
+  },
+  {
+    key: BUTTON_REQUEST,
+    label: "Deploy",
+    kind: "ghost",
+    icon: MobileAdd,
+    standalone: true,
+    hasIconOnly: true,
+    adminOnly: false,
   },
 ];
 
 let selectRows = [];
-const Services = () => {
+const CatalogsAdmin = () => {
+  const isAdmin = UserService.isAdminUser();
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [title, setTitle] = useState("");
@@ -93,17 +98,21 @@ const Services = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
-  const isAdmin = UserService.isAdminUser();
 
-  const filteredHeaders = isAdmin
-    ? headers // Display all buttons for admin users
-    : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
+  const filteredButtons = isAdmin
+    ? TABLE_BUTTONS // Display all buttons for admin users
+    : TABLE_BUTTONS.filter((button) => !button.adminOnly); // Filter out admin-only buttons for non-admin users
 
   const fetchData = async () => {
-    let data = await getServices();
-    // override the id field to be the name of the service to make it easier for the actions like expiry or delete
-    setRows(data?.payload.map((row) => ({ ...row, id: row.name })));
+    let data = await getAllCatalogs();
+    setRows(data?.payload);
     setLoading(false);
+  };
+
+  const handleResponse = (title, message, errored) => {
+    setTitle(title);
+    setMessage(message);
+    errored ? setNotifyKind("error") : setNotifyKind("success");
   };
 
   const selectionHandler = (rows = []) => {
@@ -117,15 +126,8 @@ const Services = () => {
   const displayData = flattenArrayOfObject(
     clientSearchFilter(searchText, rows)
   );
-
-  const handleResponse = (title, message, errored) => {
-    setTitle(title);
-    setMessage(message);
-    errored ? setNotifyKind("error") : setNotifyKind("success");
-  };
-
   const renderSkeleton = () => {
-    const headerLabels = filteredHeaders?.map((x) => x?.header);
+    const headerLabels = headers?.map((x) => x?.header);
     return (
       <DataTableSkeleton
         columnCount={headerLabels?.length}
@@ -139,15 +141,22 @@ const Services = () => {
   const renderActionModals = () => {
     return (
       <React.Fragment>
-        {actionProps?.key === BUTTON_REQUEST && (
-          <DeleteService
+        {actionProps?.key === BUTTON_RETIRE && (
+          <RetireCatalog
             selectRows={selectRows}
             setActionProps={setActionProps}
             response={handleResponse}
           />
         )}
-        {actionProps?.key === BUTTON_EXTEND && (
-          <ServiceExtend
+        {actionProps?.key === BUTTON_DELETE && (
+          <DeleteCatalog
+            selectRows={selectRows}
+            setActionProps={setActionProps}
+            response={handleResponse}
+          />
+        )}
+        {actionProps?.key === BUTTON_REQUEST && (
+          <DeployCatalog
             selectRows={selectRows}
             setActionProps={setActionProps}
             response={handleResponse}
@@ -163,7 +172,8 @@ const Services = () => {
       {loading ? (renderSkeleton()) : (
         <>
           {renderActionModals()}
-          <DataTable rows={displayData} headers={filteredHeaders} isSortable>
+          <QuotaWarning />
+          <DataTable rows={displayData} headers={headers} isSortable>
             {({
               rows,
               headers,
@@ -181,7 +191,7 @@ const Services = () => {
               });
               return (
                 <TableContainer
-                  title={"Service Details"}
+                  title={"Catalog Detail"}
                   {...getTableContainerProps()}
                 >
                   {selectionHandler && selectionHandler(selectedRows)}
@@ -195,16 +205,21 @@ const Services = () => {
                       placeholder={"Search"}
                     />
                     {batchActionProps.batchActions.map((action) => {
-                      return (
-                        <TableBatchAction
-                          key={action.key}
-                          renderIcon={action.icon}
-                          disabled={!(selectRows.length === 1)}
-                          onClick={() => setActionProps(action)}
-                        >
-                          {action.label}
-                        </TableBatchAction>
-                      );
+                      return filteredButtons.map((btn) => {
+                        if (btn.key === action.key) {
+                          return (
+                            <TableBatchAction
+                              renderIcon={btn.icon}
+                              disabled={!(selectRows.length === 1)}
+                              onClick={() => setActionProps(btn)}
+                              key={btn.key} // Add a unique key for each rendered component
+                            >
+                              {btn.label}
+                            </TableBatchAction>
+                          );
+                        }
+                        return null;
+                      });
                     })}
                   </TableToolbar>
                   <Table {...getTableProps()}>
@@ -239,4 +254,4 @@ const Services = () => {
     </>
   );
 };
-export default Services;
+export default CatalogsAdmin;

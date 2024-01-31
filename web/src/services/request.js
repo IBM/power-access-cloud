@@ -24,7 +24,7 @@ const url = "/pac-go-server/tnc";
 }
 
 export const getTnCText = () => {
-  const url = "https://raw.githubusercontent.com/PDeXchange/pac-support/main/Terms%20and%20Conditions.md";
+  const url = "https://isv-graphics.s3.us-south.cloud-object-storage.appdomain.cloud/TnC.txt";
   return axios.get(url).then((response) => ({
     text: response.data
   }))
@@ -37,7 +37,7 @@ export const acceptTnC = () => {
     const url1 = "/pac-go-server/tnc";
     return _axios.post(url1)
         .then((response) => {
-          console.log(response.data)
+          
         })
         .catch((error) => {
           console.log(error)

@@ -16,7 +16,11 @@ const ProfileSection = () => {
             size="lg"
             className="logout-button"
             style={{ width: "100%" }}
-            onClick={() => UserService.doLogout()}
+            onClick={() => { 
+              sessionStorage.setItem("Justification", '');
+              sessionStorage.setItem("TnC_acceptance", false);
+              UserService.doLogout()
+            }}
           >
             Log out <ArrowRight />
           </Button>

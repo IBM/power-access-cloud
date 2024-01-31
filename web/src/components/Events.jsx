@@ -54,7 +54,7 @@ const Events = () => {
 
   const fetchData = async () => {
     let data = await getEvents(page, pageSize);
-    console.log(data?.payload);
+    
     setTotalItems(data?.payload.total_items);
     setRows(data?.payload.events);
     setLoading(false);
@@ -83,7 +83,7 @@ const Events = () => {
         columnCount={headerLabels?.length}
         compact={false}
         headers={headerLabels}
-        rowCount={10}
+        rowCount={3}
         zebra={false}
       />
     );

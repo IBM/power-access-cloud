@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { allGroups } from "../services/request";
-
 import {
   DataTable,
   Table,
@@ -14,68 +12,85 @@ import {
   TableBatchAction,
   TableSelectRow,
   TableToolbarSearch,
+  TableSelectAll,
   DataTableSkeleton,
 } from "@carbon/react";
-import { MobileAdd, TrashCan } from "@carbon/icons-react";
+import { CalendarAddAlt, TrashCan } from "@carbon/icons-react";
 import { clientSearchFilter } from "../utils/Search";
 import FooterPagination from "../utils/Pagination";
 import { flattenArrayOfObject } from "./commonUtils";
-import NewRequest from "./PopUp/NewRequest";
-import ExitGroup from "./PopUp/ExitGroup";
+import { getServices } from "../services/request";
+import DeleteService from "./PopUp/DeleteService";
+import ServiceExtend from "./PopUp/ServiceExtend";
 import UserService from "../services/UserService";
 import Notify from "./utils/Notify";
 
 const BUTTON_REQUEST = "BUTTON_REQUEST";
-const BUTTON_DELETE = "BUTTON_DELETE";
+const BUTTON_EXTEND = "BUTTON_EXTEND";
 
 const headers = [
   {
-    key: "id",
-    header: "ID",
+    key: "user_id",
+    header: "User ID",
     adminOnly: true,
   },
   {
     key: "name",
-    header: "Groups",
+    header: "Name",
+    adminOnly: true,
   },
   {
-    key: "quota.cpu",
-    header: "Quota CPU",
+    key: "display_name",
+    header: "Display name",
   },
   {
-    key: "quota.memory",
-    header: "Quota Memory(GB)",
+    key: "catalog_name",
+    header: "Catalog",
   },
   {
-    key: "membership",
-    header: "Membership",
+    key: "expiry",
+    header: "Expiry",
+  },
+  {
+    key: "status.state",
+    header: "State",
+  },
+  {
+    key: "status.message",
+    header: "Message",
+  },
+  {
+    key: "status.access_info",
+    header: "Access Information",
   },
 ];
 
 const TABLE_BUTTONS = [
   {
-    key: BUTTON_REQUEST,
-    label: "Request",
+    key: BUTTON_EXTEND,
+    label: "Change Expiry",
     kind: "ghost",
-    icon: MobileAdd,
+    icon: CalendarAddAlt,
     standalone: true,
     hasIconOnly: true,
   },
   {
-    key: BUTTON_DELETE,
-    label: "Exit",
+    key: BUTTON_REQUEST,
+    label: "Delete",
     kind: "ghost",
     icon: TrashCan,
     standalone: true,
+    hasIconOnly: true,
   },
 ];
+
 let selectRows = [];
-const GroupList = () => {
+const ServicesAdmin = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
   const [notifyKind, setNotifyKind] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionProps, setActionProps] = useState("");
   const isAdmin = UserService.isAdminUser();
@@ -84,28 +99,11 @@ const GroupList = () => {
     ? headers // Display all buttons for admin users
     : headers.filter((header) => !header.adminOnly); // Filter out admin-only buttons for non-admin users
 
-    const fetchData = async () => {
-      let data = [];
-      data = await allGroups();
-        data?.payload.sort((a, b) => {
-          let fa = a.quota.cpu,
-            fb = b.quota.cpu;
-          if (fa < fb) {
-            return -1;
-          }
-          if (fa > fb) {
-            return 1;
-          }
-          return 0;
-        });
-      setRows(data?.payload);
-      setLoading(false);
-    };
-
-  const handleResponse = (title, message, errored) => {
-    setTitle(title);
-    setMessage(message);
-    errored ? setNotifyKind("error") : setNotifyKind("success");
+  const fetchData = async () => {
+    let data = await getServices();
+    // override the id field to be the name of the service to make it easier for the actions like expiry or delete
+    setRows(data?.payload.map((row) => ({ ...row, id: row.name })));
+    setLoading(false);
   };
 
   const selectionHandler = (rows = []) => {
@@ -120,6 +118,12 @@ const GroupList = () => {
     clientSearchFilter(searchText, rows)
   );
 
+  const handleResponse = (title, message, errored) => {
+    setTitle(title);
+    setMessage(message);
+    errored ? setNotifyKind("error") : setNotifyKind("success");
+  };
+
   const renderSkeleton = () => {
     const headerLabels = filteredHeaders?.map((x) => x?.header);
     return (
@@ -132,19 +136,18 @@ const GroupList = () => {
       />
     );
   };
-
   const renderActionModals = () => {
     return (
       <React.Fragment>
         {actionProps?.key === BUTTON_REQUEST && (
-          <NewRequest
+          <DeleteService
             selectRows={selectRows}
             setActionProps={setActionProps}
             response={handleResponse}
           />
         )}
-        {actionProps?.key === BUTTON_DELETE && (
-          <ExitGroup
+        {actionProps?.key === BUTTON_EXTEND && (
+          <ServiceExtend
             selectRows={selectRows}
             setActionProps={setActionProps}
             response={handleResponse}
@@ -160,7 +163,7 @@ const GroupList = () => {
       {loading ? (renderSkeleton()) : (
         <>
           {renderActionModals()}
-          <DataTable rows={displayData} headers={filteredHeaders} isSortable radio>
+          <DataTable rows={displayData} headers={filteredHeaders} isSortable>
             {({
               rows,
               headers,
@@ -178,7 +181,7 @@ const GroupList = () => {
               });
               return (
                 <TableContainer
-                  title={"Groups Detail"}
+                  title={"Service Details"}
                   {...getTableContainerProps()}
                 >
                   {selectionHandler && selectionHandler(selectedRows)}
@@ -207,7 +210,7 @@ const GroupList = () => {
                   <Table {...getTableProps()}>
                     <TableHead>
                       <TableRow>
-                        <TableHeader />
+                        <TableSelectAll {...getSelectionProps()} />
                         {headers.map((header) => (
                           <TableHeader {...getHeaderProps({ header })}>
                             {header.header}
@@ -236,4 +239,4 @@ const GroupList = () => {
     </>
   );
 };
-export default GroupList;
+export default ServicesAdmin;

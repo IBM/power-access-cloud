@@ -4,17 +4,22 @@ import { extendServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal, DatePicker, DatePickerInput } from "@carbon/react";
 
-const ServiceExtend = ({ selectRows, setActionProps, response }) => {
+const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
+  console.log(selectRows.display_name)
   const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
   const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
-  const name = selectRows[0]?.id;
+  const name = selectRows[0]?.name;
   const [justification, setJustification] = useState("");
   let expiry = "";
-  selectRows[0].cells.forEach((item) => {
-    if (item.id.split(":")[1] === "expiry") {
-      expiry = new Date(item?.value);
-    }
-  });
+  // selectRows[0].cells.forEach((item) => {
+  //   if (item.id.split(":")[1] === "expiry") {
+  //     expiry = new Date(item?.value);
+  //   }
+  // });
+
+  expiry=new Date(selectRows[0].expiry.split(" ")[0])
+
+  console.log(expiry)
   const [date, setDate] = useState(expiry);
 
   let navigate = useNavigate();
@@ -45,7 +50,7 @@ const ServiceExtend = ({ selectRows, setActionProps, response }) => {
     }
     response(title, message, errored)
     setActionProps("");
-    navigate("/services");
+    navigate(pagename);
   };
 
   return (
@@ -72,12 +77,15 @@ const ServiceExtend = ({ selectRows, setActionProps, response }) => {
           <input
             type={"text"}
             className="form-control"
-            placeholder="Justification to extend the expiry for the sevice"
+            placeholder="Enter your justification for extending the service."
             name="justification"
             value={justification}
             onChange={(e) => setJustification(e.target.value)}
           />
         </div>
+        <label htmlFor="Name" className="form-label">
+            Select date<span className="text-danger">*</span>
+          </label>
         <DatePicker
           allowInput={true}
           locale="en"

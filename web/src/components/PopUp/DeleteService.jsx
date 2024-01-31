@@ -4,10 +4,11 @@ import { deleteServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "@carbon/react";
 
-const DeleteService = ({ selectRows, setActionProps, response }) => {
+const DeleteService = ({pagename, selectRows, setActionProps, response }) => {
   const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
   const [primaryButtonText, setPrimaryButtonText] = useState("Delete");
-  const name = selectRows[0]?.id;
+  // const name = selectRows[0]?.id;
+  const name = selectRows[0]?.name;
   let navigate = useNavigate();
 
   const onSubmit = async () => {
@@ -24,11 +25,11 @@ const DeleteService = ({ selectRows, setActionProps, response }) => {
         title = "Service deleted successfully.";
       }
     } catch (error) {
-      console.log(error);
+      
     }
     response(title, message, errored)
     setActionProps("");
-    navigate("/services");
+    navigate(pagename);
   };
 
   return (

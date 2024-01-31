@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UserService from "../../services/UserService";
-import { tncStatus } from "../../services/request";
+import { tncStatus, acceptTnC, newRequest} from "../../services/request";
 
 const TnCRoute = ({ Component }) => {
   const navigate = useNavigate();
@@ -11,14 +11,28 @@ const TnCRoute = ({ Component }) => {
     const fetchStatus = async () => {
       let TnCdata = await tncStatus();
       
-      if (!TnCdata.acceptance) {   
-        navigate("/terms");
+      if (!TnCdata.acceptance) {  
+        const just = sessionStorage.getItem("Justification");
+      const tnc_acc = sessionStorage.getItem("TnC_acceptance");
+      if(just!=='' && tnc_acc){
+        await acceptTnC(); 
+        await newRequest({
+          name: "bronze",
+          id: "474fb329-de64-4e2f-bab5-4fec06c489ed",
+          justification: just
+        });
+        navigate("/dashboard");
+        
+      }else{ 
+        alert("You need to register before you can log in");
+        navigate("/register");
       }
+    }
       setIsLoading(false);
     };
     if (auth=== false){
       setIsLoading(false);
-      navigate("/login");
+      navigate("/login")
     }else{
       fetchStatus();       
     }
