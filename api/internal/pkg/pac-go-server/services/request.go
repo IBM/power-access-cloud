@@ -569,6 +569,8 @@ func validateCreateRequestParams(request models.Request) []error {
 	case models.RequestExtendServiceExpiry:
 		if request.ServiceExpiry == nil || request.ServiceExpiry.Expiry.IsZero() {
 			errs = append(errs, errors.New("expiry time should be set"))
+		} else if time.Now().After(request.ServiceExpiry.Expiry) {
+			errs = append(errs, errors.New("expiry time should be in future"))
 		}
 	default:
 		errs = append(errs, fmt.Errorf("invalid request_type: \"%s\" is set, valid values are %s %s %s", request.RequestType, models.RequestAddToGroup, models.RequestExitFromGroup, models.RequestExtendServiceExpiry))
