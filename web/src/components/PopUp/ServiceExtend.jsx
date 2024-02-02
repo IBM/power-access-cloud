@@ -91,6 +91,7 @@ const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
           locale="en"
           dateFormat="m/d/Y"
           value={date}
+          minDate={new Date()}
           datePickerType="single"
           onChange={(value) => {
             setDate(value);
