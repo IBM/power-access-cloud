@@ -16,6 +16,7 @@ const (
 	RequestAddToGroup          RequestType      = "GROUP"
 	RequestExitFromGroup       RequestType      = "GROUP_EXIT"
 	RequestExtendServiceExpiry RequestType      = "SERVICE_EXPIRY"
+	RequestStateExpired        RequestStateType = "EXPIRED"
 )
 
 type Request struct {

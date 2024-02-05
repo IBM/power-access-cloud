@@ -19,7 +19,10 @@ const (
 	pastDay  = 24
 )
 
-var serviceExpiryMsg = "Service %s is expiring on %s. It will be deleted post-expiry, if not extended"
+var (
+	serviceExpiryMsg = "Service %s is expiring on %s. It will be deleted post-expiry, if not extended"
+	requestExpiryMsg = "Service is expired, hence request is no longer needed"
+)
 
 func raiseNotification() {
 	logger := log.GetLogger()
@@ -40,12 +43,16 @@ func raiseNotification() {
 		fewDaysAgo := service.Expiry.Add(time.Duration(-(models.ExpiryNotificationDuration)) * time.Hour)
 
 		if !fewDaysAgo.Before(time.Now()) {
-			logger.Debug("expiry notification not required for service yet", zap.Any("service", service))
+			logger.Debug("expiry notification not required for service", zap.Any("service", service.Name))
 			continue
 		}
-
+		if isServiceExpired(service) {
+			logger.Debug("service is expired, expiry notification is not required", zap.Any("service", service.Name))
+			updateExpiryRequestinDB(service.Name)
+			continue
+		}
 		if expiryNotificationSentRecently(service.Name, service.Expiry.String()) {
-			logger.Debug("notification already sent", zap.Any("service", service))
+			logger.Debug("notification already sent", zap.Any("service", service.Name))
 			continue
 		}
 		logger.Debug("raising service-expiry-notification for service", zap.Any("service", service.Name))
@@ -59,6 +66,35 @@ func raiseNotification() {
 			log.GetLogger().Error("failed to create event", zap.Error(err))
 			return
 		}
+	}
+}
+
+func isServiceExpired(service models.Service) bool {
+	logger := log.GetLogger()
+	now := time.Now()
+	if now.After(service.Expiry) {
+		logger.Error("service expired", zap.String("service name", service.Name))
+		return true
+	}
+	return false
+}
+
+func updateExpiryRequestinDB(serviceName string) {
+	logger := log.GetLogger()
+	req, err := dbCon.GetRequestByServiceName(serviceName)
+	if err != nil {
+		logger.Error("failed to fetch the request", zap.String("service name", serviceName), zap.Error(err))
+		return
+	}
+	// Updating state of service-expiry-extension request to "EXPIRED" since associated service is expired
+	logger.Debug("fetched request", zap.Any("request", req))
+	for _, request := range req {
+		if request.RequestType == models.RequestExtendServiceExpiry && request.State != models.RequestStateExpired {
+			if err := dbCon.UpdateRequestStateWithComment(request.ID.String(), models.RequestStateExpired, requestExpiryMsg); err != nil {
+				logger.Error("failed to update request in database", zap.String("id", request.ID.String()), zap.Error(err))
+			}
+		}
+
 	}
 }
 
