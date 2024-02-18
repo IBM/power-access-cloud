@@ -10,7 +10,7 @@ sync-theme: clean
 	$(eval UUID=$(shell docker run --entrypoint bash -itd --name keycloak_themes ${KEYCLOCK_IMAGE}))
 	docker exec $(UUID) bash -c "mkdir -p /tmp/extract; cp -f /opt/keycloak/lib/lib/main/org.keycloak.keycloak-themes* /tmp/extract/keycloak-themes.jar"
 	docker cp $(UUID):/tmp/extract/keycloak-themes.jar .
-	tar xvf keycloak-themes.jar
+	jar xf keycloak-themes.jar
 	rm -rf META-INF
 	rm -rf keycloak-themes.jar
 	cp -r pac/ theme/pac
