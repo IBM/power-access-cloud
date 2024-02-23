@@ -5,7 +5,7 @@ go 1.19
 replace github.com/Nerzal/gocloak/v13 => github.com/PDeXchange/gocloak/v13 v13.7.0-p1
 
 require (
-	github.com/IBM-Cloud/power-go-client v1.5.8
+	github.com/IBM-Cloud/power-go-client v1.5.9
 	github.com/IBM/go-sdk-core/v5 v5.15.1
 	github.com/IBM/platform-services-go-sdk v0.59.0
 	github.com/IBM/vpc-go-sdk v0.48.0
