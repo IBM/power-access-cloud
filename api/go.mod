@@ -23,7 +23,7 @@ require (
 	github.com/tbaehler/gin-keycloak v1.5.1
 	go.mongodb.org/mongo-driver v1.14.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.19.0
+	golang.org/x/crypto v0.20.0
 	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v0.27.2
@@ -112,7 +112,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.4.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
