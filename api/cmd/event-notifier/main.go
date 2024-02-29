@@ -43,7 +43,12 @@ func main() {
 	if err := db.Connect(); err != nil {
 		l.Fatal("Error connecting to MongoDB", zap.Error(err))
 	}
-	defer db.Disconnect()
+	disconnect := func() {
+		if err := db.Disconnect(); err != nil {
+			l.Debug("Db disconnect failed", zap.Any("error", err))
+		}
+	}
+	defer disconnect()
 	mailClient := mail.New()
 	notifier(db, mailClient)
 }

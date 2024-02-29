@@ -32,11 +32,6 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/client/powervs"
 )
 
-const (
-	catalogController = "catalog"
-	serviceController = "service"
-)
-
 type ControllerScopeParams struct {
 	Logger  logr.Logger
 	Client  client.Client

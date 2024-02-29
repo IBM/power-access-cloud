@@ -19,6 +19,10 @@ package manageiq
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
+	"time"
+
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
 	"github.com/IBM/vpc-go-sdk/vpcv1"
@@ -31,13 +35,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	t "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/rand"
-	"net/url"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"strings"
-	"time"
 
 	manageiqv1alpha1 "github.com/PDeXchange/pac/apis/manageiq/v1alpha1"
 )
@@ -517,40 +518,6 @@ func reconcileIngress(scope *ServiceScope) error {
 	}
 
 	return nil
-}
-
-func reconcileIPAddress(scope *ServiceScope) error {
-	l := scope.Logger
-
-	l.V(4).Info("in the reconcileIPAddress")
-
-	vmStatus := &scope.Service.Status.VirtualMachine
-
-	if vmStatus.Network == "" {
-		l.Error(fmt.Errorf("network information is not yet available"), "retry after sometime")
-		return fmt.Errorf("network information is not yet available")
-	}
-	dhcpservers, err := scope.PowerVSClient.GetAllDHCPServers()
-	if err != nil {
-		return err
-	}
-
-	for _, dhcpserver := range dhcpservers {
-		if *dhcpserver.Network.Name == vmStatus.Network {
-			s, err := scope.PowerVSClient.GetDHCPServer(*dhcpserver.ID)
-			if err != nil {
-				return err
-			}
-			for _, lease := range s.Leases {
-				if *lease.InstanceMacAddress == vmStatus.MACAddress && *lease.InstanceIP != "" {
-					vmStatus.IPAddress = *lease.InstanceIP
-					return nil
-				}
-			}
-		}
-	}
-
-	return fmt.Errorf("no lease found for the assigned mac address")
 }
 
 func reconcileNetwork(scope *ServiceScope) error {

@@ -146,6 +146,8 @@ func (e *Event) ComposeMailBody() (string, error) {
 		return "", err
 	}
 	var tpl bytes.Buffer
-	tmpl.Execute(&tpl, e)
+	if err := tmpl.Execute(&tpl, e); err != nil {
+		return "", err
+	}
 	return tpl.String(), nil
 }

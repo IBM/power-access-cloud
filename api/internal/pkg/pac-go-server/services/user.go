@@ -55,5 +55,4 @@ func GetUser(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-	return
 }

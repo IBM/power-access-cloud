@@ -23,8 +23,11 @@ func AllowAdminOnly(c *gin.Context) {
 }
 
 func RetrospectKeycloakToken(c *gin.Context) {
+	//nolint:staticcheck
 	ctx := context.WithValue(c.Request.Context(), "keyclock_client", client)
+	//nolint:staticcheck
 	ctx = context.WithValue(ctx, "keycloak_realm", realm)
+	//nolint:staticcheck
 	ctx = context.WithValue(ctx, "keycloak_hostname", hostname)
 
 	authHeader := c.GetHeader("Authorization")
@@ -33,6 +36,7 @@ func RetrospectKeycloakToken(c *gin.Context) {
 		return
 	}
 	accessToken := strings.Split(authHeader, " ")[1]
+	//nolint:staticcheck
 	ctx = context.WithValue(ctx, "keycloak_access_token", accessToken)
 	rptResult, err := client.RetrospectToken(c.Request.Context(), accessToken, clientId, clientSecret, realm)
 	if err != nil {
@@ -52,7 +56,9 @@ func RetrospectKeycloakToken(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		//nolint:staticcheck
 		ctx = context.WithValue(ctx, "username", *user.PreferredUsername)
+		//nolint:staticcheck
 		ctx = context.WithValue(ctx, "userid", *user.Sub)
 	}
 
@@ -71,6 +77,7 @@ func RetrospectKeycloakToken(c *gin.Context) {
 			}
 			return grps
 		}
+		//nolint:staticcheck
 		ctx = context.WithValue(ctx, "groups", getGroups())
 	}
 
@@ -101,6 +108,7 @@ func RetrospectKeycloakToken(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to get roles of a user: %s", err.Error())})
 		return
 	} else {
+		//nolint:staticcheck
 		ctx = context.WithValue(ctx, "roles", roles)
 	}
 

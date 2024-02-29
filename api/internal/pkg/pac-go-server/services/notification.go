@@ -130,11 +130,8 @@ func ExpiryNotification() {
 		ticker := time.NewTicker(every)
 		defer ticker.Stop()
 
-		for {
-			select {
-			case <-ticker.C:
-				raiseNotification()
-			}
+		for range ticker.C {
+			raiseNotification()
 		}
 	}()
 }

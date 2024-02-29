@@ -55,9 +55,13 @@ func getEmailForEvent(event *models.Event) (string, error) {
 	}
 
 	// Build Context
+	//nolint:staticcheck
 	ctx := context.WithValue(context.Background(), "keyclock_client", kc)
+	//nolint:staticcheck
 	ctx = context.WithValue(ctx, "keycloak_realm", realm)
+	//nolint:staticcheck
 	ctx = context.WithValue(ctx, "keycloak_hostname", hostname)
+	//nolint:staticcheck
 	ctx = context.WithValue(ctx, "keycloak_access_token", token.AccessToken)
 
 	user, err := client.NewKeyClockClient(ctx).GetUser(event.UserID)

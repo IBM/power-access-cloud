@@ -339,11 +339,7 @@ func getUsedQuota(userId string) (models.Capacity, error) {
 		if svc.Status.State == pac.ServiceStateExpired {
 			continue
 		}
-		if _, ok := catalogMap[svc.Spec.Catalog.Name]; ok {
-			catalogMap[svc.Spec.Catalog.Name] += 1
-		} else {
-			catalogMap[svc.Spec.Catalog.Name] = 1
-		}
+		catalogMap[svc.Spec.Catalog.Name] += 1
 	}
 
 	// calculate the total capacity of all the services
