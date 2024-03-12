@@ -7,7 +7,7 @@ replace github.com/Nerzal/gocloak/v13 => github.com/PDeXchange/gocloak/v13 v13.7
 require (
 	github.com/IBM-Cloud/power-go-client v1.5.9
 	github.com/IBM/go-sdk-core/v5 v5.15.3
-	github.com/IBM/platform-services-go-sdk v0.59.3
+	github.com/IBM/platform-services-go-sdk v0.60.0
 	github.com/IBM/vpc-go-sdk v0.48.0
 	github.com/Nerzal/gocloak/v13 v13.7.0
 	github.com/gin-gonic/gin v1.9.1
