@@ -599,8 +599,8 @@ gioui.org v0.0.0-20210308172011-57750fc8a0a6/go.mod h1:RSH6KIUZ0p2xy5zHDxgAM4zum
 git.sr.ht/~sbinet/gg v0.3.1/go.mod h1:KGYtlADtqsqANL9ueOFkWymvzUvLMQllU5Ixo+8v3pc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/IBM-Cloud/power-go-client v1.5.9 h1:WRsw55lRdASGAqk9jzI0H2WJ3j7Pr9mc5o3ssBTj/iA=
-github.com/IBM-Cloud/power-go-client v1.5.9/go.mod h1:ZJXBj6/gc5tszHMZMzm3MjPy79ahj/IuJTBXL2RcGz4=
+github.com/IBM-Cloud/power-go-client v1.6.0 h1:X+QX+WSF66+aouyaf4r+IeBLXUurAJj9+Bd+vH7G5I0=
+github.com/IBM-Cloud/power-go-client v1.6.0/go.mod h1:0ad5Lcq1utoYVJx0uqooMjCpUaYaK0ItP9QJYtY6k0Y=
 github.com/IBM/go-sdk-core/v5 v5.15.3 h1:yBSSYLuQSO9Ip+j3mONsTcymoYQyxarQ6rh3aU9cVt8=
 github.com/IBM/go-sdk-core/v5 v5.15.3/go.mod h1:ee+AZaB15yUwZigJdRCwZZ3u7HIvEQzxNUdxVpnJHY8=
 github.com/IBM/platform-services-go-sdk v0.60.0 h1:DXCp5hAtFO6quUmb5qKeosQw0ln/fYE5nrKjgXbiSBU=
@@ -1058,8 +1058,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
+github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/tbaehler/gin-keycloak v1.5.1 h1:v5w9UHkwNMyTR8KMEju31PMTTxuxpnpefnv8i9BnS38=
 github.com/tbaehler/gin-keycloak v1.5.1/go.mod h1:BBbEKUbVkd1kFoA5VE5r31wNFzTrhZHLxJ37KZsdj6A=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
