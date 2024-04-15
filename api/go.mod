@@ -6,8 +6,8 @@ replace github.com/Nerzal/gocloak/v13 => github.com/PDeXchange/gocloak/v13 v13.7
 
 require (
 	github.com/IBM-Cloud/power-go-client v1.6.0
-	github.com/IBM/go-sdk-core/v5 v5.16.3
-	github.com/IBM/platform-services-go-sdk v0.62.0
+	github.com/IBM/go-sdk-core/v5 v5.16.5
+	github.com/IBM/platform-services-go-sdk v0.62.5
 	github.com/IBM/vpc-go-sdk v0.50.0
 	github.com/Nerzal/gocloak/v13 v13.7.0
 	github.com/gin-gonic/gin v1.9.1
@@ -61,7 +61,7 @@ require (
 	github.com/go-openapi/validate v0.22.4 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.18.0 // indirect
+	github.com/go-playground/validator/v10 v10.19.0 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/gobuffalo/flect v1.0.2 // indirect
@@ -112,7 +112,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.4.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
