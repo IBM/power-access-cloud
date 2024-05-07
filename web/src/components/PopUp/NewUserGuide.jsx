@@ -1,6 +1,6 @@
 // import axios from "axios";
 import React from "react";
-import { Modal, Button } from "@carbon/react";
+import { Modal } from "@carbon/react";
 
 
 const NewUserGuide = ({ setActionProps }) => {

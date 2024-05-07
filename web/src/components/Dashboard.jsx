@@ -14,13 +14,14 @@ const BUTTON_USER_GUIDE="BUTTON_USER_GUIDE";
 const Dashboard = () => {
 
   const [allGroupdata,setAllGroupsdata]=useState([]);
-  const [approvedGroups,setApprovedGroups]=useState([]);
   const [actionProps, setActionProps] = useState("");
 
-  const userGuideAction={
-    key: BUTTON_USER_GUIDE,
-    label: "User Guide"
-};
+// Uncomment this once user guide text is ready in the modal
+
+//   const userGuideAction={
+//     key: BUTTON_USER_GUIDE,
+//     label: "User Guide"
+// };
 
   const fetchData = async () => {
     let data = [];
@@ -37,14 +38,13 @@ const Dashboard = () => {
       }
       return 0;
     });
-    const dataMember=data.payload.filter((i)=>i.membership===true)
-    setApprovedGroups(dataMember)
+    // Uncomment this once user guide text is ready in the modal
 
-    // if(dataMember.length>0){
-      
+    // const dataMember=data.payload.filter((i)=>i.membership===true)
+
+    // if(dataMember.length>0){  
     //   setActionProps("")
-    // }else{
-      
+    // }else{  
     //   setActionProps(userGuideAction)
     // }
     

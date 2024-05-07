@@ -65,7 +65,7 @@ const Register = () => {
         <Column lg={16} md={8} sm={4} >
           <p className="text">Read and accept the Power Access Cloud usage terms and conditions and then click <strong>Submit</strong> to log into the PAC dashboard with your IBMid or GitHub account. You will be notified within 2 business days at the email you provide when your request is approved. You can also check status directly from the dashboard.
 </p>
-<span><span className="cb"><Checkbox labelText="" lg={1} md={1} sm={1} id="tnc_cb" disabled checked={tnc_acc} /></span><span>  I have read and accept the <a className="hyperlink" onClick={() => setOpen(true)}>Power Access Cloud terms and conditions</a>.</span></span>
+<span><span className="cb"><Checkbox labelText="" lg={1} md={1} sm={1} id="tnc_cb" disabled checked={tnc_acc} /></span><span>  I have read and accept the <a className="hyperlink" onClick={() => setOpen(true)} href="#/">Power Access Cloud terms and conditions</a>.</span></span>
 <Modal 
 aria-label=""
 size="lg" 

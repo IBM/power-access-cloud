@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { allKeys } from "../services/request";
 import { MobileAdd, TrashCan, Information } from "@carbon/icons-react";
-import { clientSearchFilter } from "../utils/Search";
 import UserService from "../services/UserService";
 import AddKey from "./PopUp/AddKey";
 //import { NoDataEmptyState } from "@carbon/ibm-products";
