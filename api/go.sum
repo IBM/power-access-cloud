@@ -603,8 +603,8 @@ github.com/IBM-Cloud/power-go-client v1.6.0 h1:X+QX+WSF66+aouyaf4r+IeBLXUurAJj9+
 github.com/IBM-Cloud/power-go-client v1.6.0/go.mod h1:0ad5Lcq1utoYVJx0uqooMjCpUaYaK0ItP9QJYtY6k0Y=
 github.com/IBM/go-sdk-core/v5 v5.17.0 h1:J/8by7r70JmCYqXL/NHFcgpneFAqv16oKMtif+syA14=
 github.com/IBM/go-sdk-core/v5 v5.17.0/go.mod h1:GatGZpxlo1KaxiRN6E10/rNgWtUtx1hN/GoHSCaSPKA=
-github.com/IBM/platform-services-go-sdk v0.62.10 h1:b/gI3eA3TX1Kos3xbTEHgg8e98RKptBHaEZiaJ/5BF8=
-github.com/IBM/platform-services-go-sdk v0.62.10/go.mod h1:M26dloj9C48k9AjfMcKGsgH/acEjaUvxjVS8z41Q8dg=
+github.com/IBM/platform-services-go-sdk v0.62.11 h1:EGsiY90bM9M9sSdBVgpsX4QK1z99JZzedVDlrY2gzmc=
+github.com/IBM/platform-services-go-sdk v0.62.11/go.mod h1:M26dloj9C48k9AjfMcKGsgH/acEjaUvxjVS8z41Q8dg=
 github.com/IBM/vpc-go-sdk v0.51.0 h1:JfeE/TnPm/NFU59UctiPzjxEhHtmBqXxG6zHH5eTI8I=
 github.com/IBM/vpc-go-sdk v0.51.0/go.mod h1:3+zQ0dqiv46ALjRXXVrser+dCdAVXOHVwlYkCCX4bNU=
 github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c/go.mod h1:X0CRv0ky0k6m906ixxpzmDRLvX58TFUKS2eePweuyxk=
