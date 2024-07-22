@@ -605,8 +605,8 @@ github.com/IBM/go-sdk-core/v5 v5.17.4 h1:VGb9+mRrnS2HpHZFM5hy4J6ppIWnwNrw0G+tLSg
 github.com/IBM/go-sdk-core/v5 v5.17.4/go.mod h1:KsAAI7eStAWwQa4F96MLy+whYSh39JzNjklZRbN/8ns=
 github.com/IBM/platform-services-go-sdk v0.64.3 h1:AKDrLXjybG09i5MyqptY0UpyejeiYrTbdylDC7FQM1k=
 github.com/IBM/platform-services-go-sdk v0.64.3/go.mod h1:6rYd3stLSnotYmZlxclw45EJPaQuLmh5f7c+Mg7rOg4=
-github.com/IBM/vpc-go-sdk v0.54.0 h1:yJggwRb/WbLcyamfvJSExsWa/txS8Mct1ZZi54ZYhmA=
-github.com/IBM/vpc-go-sdk v0.54.0/go.mod h1:BpIOxz9FRDsAY7NQFUYdxiPWjqvcRbBrw8fiAvzNqDE=
+github.com/IBM/vpc-go-sdk v0.56.0 h1:GVlehMD2rYxETF2S/OSIgPHW7xZlfNsz1C59YLTVPis=
+github.com/IBM/vpc-go-sdk v0.56.0/go.mod h1:BpIOxz9FRDsAY7NQFUYdxiPWjqvcRbBrw8fiAvzNqDE=
 github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c/go.mod h1:X0CRv0ky0k6m906ixxpzmDRLvX58TFUKS2eePweuyxk=
 github.com/MakeNowJust/heredoc v1.0.0 h1:cXCdzVdstXyiTqTvfqk9SDHpKNjxuom+DOlyEeQ4pzQ=
 github.com/Masterminds/goutils v1.1.1 h1:5nUrii3FMTL5diU80unEVvNevw1nH4+ZV4DSLVJLSYI=
