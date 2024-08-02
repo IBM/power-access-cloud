@@ -19,10 +19,11 @@ package app
 import (
 	"context"
 	"fmt"
+	"net/url"
+
 	manageiqv1alpha1 "github.com/PDeXchange/pac/apis/manageiq/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"net/url"
 
 	"github.com/ppc64le-cloud/manageiq-client-go"
 	corev1 "k8s.io/api/core/v1"
@@ -34,10 +35,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
-)
-
-var (
-	MQClientSecret = "mq-client"
 )
 
 // ConfigReconciler reconciles a Config object
