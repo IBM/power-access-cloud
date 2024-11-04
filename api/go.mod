@@ -21,7 +21,7 @@ require (
 	github.com/sendgrid/sendgrid-go v3.16.0+incompatible
 	github.com/spf13/pflag v1.0.5
 	github.com/tbaehler/gin-keycloak v1.6.1
-	go.mongodb.org/mongo-driver v1.16.1
+	go.mongodb.org/mongo-driver v1.17.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.28.0
 	k8s.io/api v0.27.2
@@ -108,7 +108,7 @@ require (
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
-	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
+	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
