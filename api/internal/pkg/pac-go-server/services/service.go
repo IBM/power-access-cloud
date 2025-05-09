@@ -35,7 +35,16 @@ func SetKubeClient(client kubernetes.Client) {
 	kubeClient = client
 }
 
-func GetAllServices(c *gin.Context) {
+func GetAllServicesHandler(c *gin.Context) {
+	serviceItems, err := getAllServices(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+	c.JSON(http.StatusOK, serviceItems)
+}
+
+func getAllServices(c *gin.Context) ([]models.Service, error) {
 	logger := log.GetLogger()
 	var services pac.ServiceList
 	var err error
@@ -51,21 +60,19 @@ func GetAllServices(c *gin.Context) {
 		services, err = kubeClient.GetServices("")
 		if err != nil {
 			logger.Error("failed to get services", zap.Error(err))
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
-			return
+			return nil, err
 		}
 	} else {
 		logger.Debug("listing all the services of user", zap.String("user id", userId))
 		services, err = kubeClient.GetServices(userId)
 		if err != nil {
 			logger.Error("failed to get services", zap.Error(err))
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
-			return
+			return nil, err
 		}
 	}
 	serviceItems := convertToServices(services)
 	logger.Debug("fetched services", zap.Any("services", serviceItems))
-	c.JSON(http.StatusOK, serviceItems)
+	return serviceItems, nil
 }
 
 func GetService(c *gin.Context) {
@@ -217,13 +224,19 @@ func CreateService(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func DeleteService(c *gin.Context) {
+func DeleteServiceHandler(c *gin.Context) {
+	err := deleteService(c, c.Param("name"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+	}
+	c.Status(http.StatusNoContent)
+}
+
+func deleteService(c *gin.Context, serviceName string) error {
 	logger := log.GetLogger()
-	serviceName := c.Param("name")
 	if serviceName == "" {
 		logger.Error("service name is not set")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "service name is not set"})
-		return
+		return fmt.Errorf("error : %s", "service name is not set")
 	}
 	kc := client.NewKeyClockClient(c.Request.Context())
 	userId := kc.GetUserID()
@@ -234,8 +247,18 @@ func DeleteService(c *gin.Context) {
 	}
 	if err := kubeClient.DeleteService(serviceName, userId); err != nil {
 		logger.Error("failed to delete service", zap.String("service name", serviceName), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
-		return
+		// Notifying administrator that service may be in pending delete stage
+		event, err := models.NewEvent(userId, userId, models.EventServiceDeleteFailed)
+		if err != nil {
+			logger.Error("failed to create event", zap.Error(err))
+		}
+		if err := dbCon.NewEvent(event); err != nil {
+			logger.Error("failed to create event in db", zap.Error(err))
+		}
+		event.SetNotifyAdmin()
+		event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("Admin has been notified that service deletion has failed, service-name: %s", serviceName))
+
+		return fmt.Errorf("failed to delete service : %s", serviceName)
 	}
 	logger.Debug("successfully deleted service", zap.String("service name", serviceName))
 
@@ -245,7 +268,7 @@ func DeleteService(c *gin.Context) {
 	if err != nil {
 		logger.Error("failed to fetch the request", zap.String("service name", serviceName), zap.Error(err))
 		c.Status(http.StatusNoContent)
-		return
+		return fmt.Errorf("failed to fetch the request for service : %s", serviceName)
 	}
 	logger.Debug("fetched request", zap.Any("request", req))
 	for _, request := range req {
@@ -256,7 +279,7 @@ func DeleteService(c *gin.Context) {
 		}
 
 	}
-	c.Status(http.StatusNoContent)
+	return nil
 }
 
 func convertToService(serviceItem pac.Service) models.Service {

@@ -7,7 +7,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 
+	log "github.com/PDeXchange/pac/internal/pkg/pac-go-server/logger"
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 )
 
@@ -46,5 +48,23 @@ func (db *MongoDB) AcceptTermsAndConditions(terms *models.TermsAndConditions) er
 		return fmt.Errorf("error updating terms and coditions: %w", err)
 	}
 
+	return nil
+}
+
+// DeleteTermsAndConditionsByUserID deletes the terms and conditions status for a user.
+func (db *MongoDB) DeleteTermsAndConditionsByUserID(id string) error {
+	if id == "" {
+		return fmt.Errorf("user id is required")
+	}
+	logger := log.GetLogger()
+	logger.Debug("deleting tnc status stored in db for the user", zap.String("user-id", id))
+	collection := db.Database.Collection("tnc")
+	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
+	defer cancel()
+	filter := bson.D{{Key: "user_id", Value: id}}
+	_, err := collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("error deleting tnc status: %w", err)
+	}
 	return nil
 }

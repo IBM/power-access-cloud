@@ -12,7 +12,15 @@ import (
 )
 
 // Get the Key values and update.
-func GetAllKeys(c *gin.Context) {
+func GetAllKeysHandler(c *gin.Context) {
+	keys, err := getAllKeys(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	c.JSON(http.StatusOK, keys)
+}
+
+func getAllKeys(c *gin.Context) ([]models.Key, error) {
 	kc := client.NewKeyClockClient(c.Request.Context())
 
 	var userID string
@@ -22,10 +30,9 @@ func GetAllKeys(c *gin.Context) {
 	}
 	keys, err := dbCon.GetKeyByUserID(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return nil, fmt.Errorf("failed to get all keys, err : %w", err)
 	}
-	c.JSON(http.StatusOK, keys)
+	return keys, nil
 }
 
 func GetKey(c *gin.Context) {
@@ -83,24 +90,27 @@ func CreateKey(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func DeleteKey(c *gin.Context) {
-	id := c.Param("id")
+func DeleteKeyHandler(c *gin.Context) {
+	err := deleteKey(c, c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
+	}
+	c.Status(http.StatusNoContent)
+}
+
+func deleteKey(c *gin.Context, id string) error {
 	key, err := dbCon.GetKeyByID(id)
 	kc := client.NewKeyClockClient(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to fetch the requested record from the db, err: %s", err.Error())})
-		return
+		return fmt.Errorf("failed to fetch the requested record from the db, err: %w", err)
 	}
 
 	if key.UserID != c.Request.Context().Value("userid").(string) && !kc.IsRole(utils.ManagerRole) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "You do not have permission to delete this key."})
-		return
-	}
+		return fmt.Errorf("%s", "you do not have permission to delete this key.")
 
+	}
 	if err := dbCon.DeleteKey(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to delete the key from the db, err: %s", err.Error())})
-		return
+		return fmt.Errorf("failed to delete the key from the db, err: %w", err)
 	}
-
-	c.Status(http.StatusNoContent)
+	return nil
 }

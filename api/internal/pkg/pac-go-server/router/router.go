@@ -60,10 +60,10 @@ func CreateRouter() *gin.Engine {
 
 	// key related routes
 
-	authorized.GET("/keys", services.GetAllKeys)
+	authorized.GET("/keys", services.GetAllKeysHandler)
 	authorized.GET("/keys/:id", services.GetKey)
 	authorized.POST("/keys", services.CreateKey)
-	authorized.DELETE("/keys/:id", services.DeleteKey)
+	authorized.DELETE("/keys/:id", services.DeleteKeyHandler)
 
 	// catalog related endpoints
 
@@ -85,14 +85,17 @@ func CreateRouter() *gin.Engine {
 		authorizedAdmin.GET("/users/:id", services.GetUser)
 	}
 
+	// user related endpoints
+	authorized.DELETE("/users", services.DeleteUser)
+
 	// service related endpoints
 
 	// List all user provisioned services
 	// services?all=true for admin to list all provisioned services
-	authorized.GET("/services", services.GetAllServices)
+	authorized.GET("/services", services.GetAllServicesHandler)
 	authorized.GET("/services/:name", services.GetService)
 	authorized.POST("/services", services.CreateService)
-	authorized.DELETE("/services/:name", services.DeleteService)
+	authorized.DELETE("/services/:name", services.DeleteServiceHandler)
 	// Currently, for extending the service expiry
 	authorized.PUT("/services/:name/expiry", services.UpdateServiceExpiryRequest)
 

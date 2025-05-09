@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"net/http"
+	"strings"
 
 	"github.com/Nerzal/gocloak/v13"
 
@@ -49,4 +51,32 @@ func filterExcludedGroups(groups []*gocloak.Group) []*gocloak.Group {
 		}
 	}
 	return filteredGroups
+}
+
+// getKeycloakHttpStatus returns keycloak http status code on the basis of error message
+func getKeycloakHttpStatus(err error) int {
+	errMsg := strings.ToLower(err.Error())
+
+	switch {
+	case strings.Contains(errMsg, "unauthorized"):
+		return http.StatusUnauthorized
+
+	case strings.Contains(errMsg, "forbidden"):
+		return http.StatusForbidden
+
+	case strings.Contains(errMsg, "invalid") || strings.Contains(errMsg, "bad request"):
+		return http.StatusBadRequest
+
+	case strings.Contains(errMsg, "not found"):
+		return http.StatusNotFound
+
+	case strings.Contains(errMsg, "timeout"):
+		return http.StatusGatewayTimeout
+
+	case strings.Contains(errMsg, "connection refused") || strings.Contains(errMsg, "connection reset"):
+		return http.StatusServiceUnavailable
+
+	default:
+		return http.StatusInternalServerError
+	}
 }
