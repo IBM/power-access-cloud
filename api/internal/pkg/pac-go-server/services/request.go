@@ -364,6 +364,105 @@ func ExitGroup(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+func deleteUserRequest(c *gin.Context) error {
+	logger := log.GetLogger()
+
+	var request = models.GetRequest()
+	userID := c.Request.Context().Value("userid").(string)
+
+	// TODO : Request details has to be send by UI
+	// if err := c.BindJSON(&request); err != nil {
+	// 	logger.Error("failed to bind request", zap.Error(err))
+	// 	return fmt.Errorf("failed to bind request body, err: %s", err.Error())
+	// }
+
+	request.Justification = "User personal information to be deleted"
+
+	logger.Debug("request body", zap.Any("request", request))
+
+	// validate request params
+	// TODO : Enable validation once information is coming from UI
+	// if err := validateCreateRequestParams(request); len(err) > 0 {
+	// 	logger.Error("error in delete user request validation", zap.Errors("errors", err))
+	// 	return fmt.Errorf("failed to validate request body, err: %s", err.Error())
+	// }
+
+	// insert the request into the database
+	id, err := dbCon.NewRequest(&models.Request{
+		UserID:        userID,
+		CreatedAt:     time.Now(),
+		State:         models.RequestStateNew,
+		Justification: request.Justification,
+		RequestType:   models.RequestDeleteUser,
+	})
+	if err != nil {
+		logger.Error("failed to create request", zap.Error(err))
+		return fmt.Errorf("failed to insert the request into the db, err: %s", err.Error())
+	}
+
+	event, err := models.NewEvent(userID, userID, models.EventDeletUserRequest)
+	if err != nil {
+		logger.Error("failed to create event", zap.Error(err))
+		return fmt.Errorf("failed to create event, err: %s", err.Error())
+	}
+
+	defer func() {
+		if err := dbCon.NewEvent(event); err != nil {
+			log.GetLogger().Error("failed to create event", zap.Error(err))
+		}
+	}()
+
+	event.SetNotifyAdmin()
+	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("Request has been submitted for deleting the user with request-id: %s", id))
+
+	logger.Debug("successfully created request")
+	return nil
+}
+
+func DeleteUser(c *gin.Context) {
+	logger := log.GetLogger()
+
+	// Delete services
+	var services []models.Service
+	services, err := getAllServices(c)
+	if err != nil {
+		logger.Error("failed to get all services", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+	for _, service := range services {
+		err := deleteService(c, service.Name)
+		if err != nil {
+			logger.Error("failed to delete service", zap.Error(err))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
+			return
+		}
+	}
+
+	// Delete keys
+	var keys []models.Key
+	keys, err = getAllKeys(c)
+	if err != nil {
+		logger.Error("failed to get all keys", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+	for _, key := range keys {
+		if err := deleteKey(c, key.ID.Hex()); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
+			return
+		}
+	}
+	// Raise request to delete user
+	err = deleteUserRequest(c)
+	if err != nil {
+		logger.Error("failed to raise request for user deletion", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+	c.Status(http.StatusCreated)
+}
+
 func deleteUserFromPreviousGroups(c *gin.Context, request *models.Request) {
 	logger := log.GetLogger()
 	groups, err := client.NewKeyClockClient(c.Request.Context()).GetUserGroups(request.UserID)
@@ -414,6 +513,17 @@ func ApproveRequest(c *gin.Context) {
 		if err := client.NewKeyClockClient(c.Request.Context()).DeleteUserFromGroup(request.UserID, request.GroupAdmission.GroupID); err != nil {
 			logger.Error("failed to remove user from group", zap.String("user id", request.UserID),
 				zap.String("group id", request.GroupAdmission.GroupID), zap.Error(err))
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	case models.RequestDeleteUser:
+		if err := client.NewKeyClockClient(c.Request.Context()).DeleteUser(request.UserID); err != nil {
+			logger.Error("failed to delete user", zap.String("user id", request.UserID))
+			c.JSON(getKeycloakHttpStatus(err), gin.H{"error": err.Error()})
+			return
+		}
+		if err := dbCon.DeleteTermsAndConditionsByUserID(request.UserID); err != nil {
+			logger.Error("failed to delete tnc status for user", zap.String("user id", request.UserID), zap.Error(err))
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

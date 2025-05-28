@@ -19,6 +19,7 @@ const (
 	EventGroupExitRequest           EventType = "GROUP_EXIT_REQUEST"
 	EventServiceExpiryNotification  EventType = "SERVICE_EXPIRY_NOTIFICATION"
 	EventServiceExpiredNotification EventType = "SERVICE_EXPIRED_NOTIFICATION"
+	EventDeletUserRequest           EventType = "DELETE_USER_REQUEST"
 
 	EventTypeRequestApproved EventType = "REQUEST_APPROVED"
 	EventTypeRequestRejected EventType = "REQUEST_REJECTED"
@@ -29,9 +30,10 @@ const (
 	EventCatalogDelete EventType = "CATALOG_DELETE"
 	EventCatalogRetire EventType = "CATALOG_RETIRE"
 
-	EventServiceCreate EventType = "SERVICE_CREATE"
-	EventServiceUpdate EventType = "SERVICE_UPDATE"
-	EventServiceDelete EventType = "SERVICE_DELETE"
+	EventServiceCreate       EventType = "SERVICE_CREATE"
+	EventServiceUpdate       EventType = "SERVICE_UPDATE"
+	EventServiceDelete       EventType = "SERVICE_DELETE"
+	EventServiceDeleteFailed EventType = "SERVICE_DELETE_FAILED"
 
 	EventLogLevelINFO  EventLogLevel = "INFO"
 	EventLogLevelERROR EventLogLevel = "ERROR"
