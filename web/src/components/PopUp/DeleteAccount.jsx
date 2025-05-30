@@ -1,12 +1,10 @@
 // import axios from "axios";
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { Modal, Theme } from "@carbon/react";
 import { deleteUser } from "../../services/request";
 import UserService from "../../services/UserService";
 
 const DeleteAccount = ({ setActionProps }) => {
-	let navigate = useNavigate();
 
 	const onSubmit = async () => {
 	let title = "";
@@ -22,7 +20,7 @@ const DeleteAccount = ({ setActionProps }) => {
 				errored = true;
 				} else {
 				title = "Service deleted successfully.";
-				navigate("/login");
+				UserService.doLogout()
 				}
 		} catch (error) {
 				console.log("Delete failed : ", error)
