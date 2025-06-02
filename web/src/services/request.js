@@ -340,8 +340,8 @@ export const allUsers = () => {
     }));
 };
 
-export const deleteUser = () => {
-  const url = `/pac-go-server/user`;
+export const deleteUser = (name) => {
+  const url = `/pac-go-server/users`;
   return _axios
     .delete(url)
     .then((response) => ({
