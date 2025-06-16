@@ -21,7 +21,7 @@ require (
 	github.com/sendgrid/sendgrid-go v3.16.0+incompatible
 	github.com/spf13/pflag v1.0.6
 	github.com/tbaehler/gin-keycloak v1.6.1
-	go.mongodb.org/mongo-driver v1.17.3
+	go.mongodb.org/mongo-driver v1.17.4
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.31.0
 	k8s.io/api v0.27.2
