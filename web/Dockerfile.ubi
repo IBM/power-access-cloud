@@ -1,0 +1,53 @@
+FROM registry.access.redhat.com/ubi9/nodejs-22:9.6 AS builder
+
+# Switch to root to install global tools
+USER 0
+RUN npm install -g yarn
+
+# Create app directory and give access to default user (1001)
+RUN mkdir /app && chown -R 1001:0 /app
+WORKDIR /app
+
+# Switch to default user (recommended)
+USER 1001
+
+# Install dependencies and build
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+COPY . .
+RUN yarn build
+
+# Stage 2: Production image with NGINX on UBI
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
+
+# Install nginx
+# RUN dnf install -y nginx gettext && \
+#     dnf clean all && \
+#     rm -rf /var/cache/dnf && \
+#     mkdir -p /var/log/nginx && \
+#     chown -R nginx:root /var/log/nginx
+
+RUN microdnf install -y nginx gettext && \
+    microdnf clean all && \
+    rm -rf /var/cache/dnf && \
+    mkdir -p /var/log/nginx && \
+    chown -R nginx:root /var/log/nginx
+
+# Nginx config
+RUN rm -rf /etc/nginx/conf.d
+COPY --chown=nginx:root conf /etc/nginx
+COPY --chown=nginx:root nginx.conf /etc/nginx
+
+# Static build
+COPY --from=builder /app/build /usr/share/nginx/html/
+
+WORKDIR /usr/share/nginx/html
+COPY ./env.sh .
+COPY .env .
+COPY ./entrypoint.sh .
+
+# Set correct permissions for nginx to serve content
+RUN chown -R nginx:root /usr/share/nginx/html
+
+EXPOSE 8080
+CMD ["/bin/bash", "/usr/share/nginx/html/entrypoint.sh"]
