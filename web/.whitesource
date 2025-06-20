@@ -1,3 +1,11 @@
 {
-  "settingsInheritedFrom": "whitesource-config/whitesource-config@master"
+  "settingsInheritedFrom": "whitesource-config/whitesource-config@master",
+  "remediateSettings": {
+    "workflowRules": {
+        "enabled": true
+    },
+    "transitiveRemediation": true,
+    "enableRenovate": true,
+    "extends": ["config:recommended"]
+  }
 }
