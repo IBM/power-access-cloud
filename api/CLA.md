@@ -1,41 +1,90 @@
-**Contributor License Agreement (CLA) for Power Access Cloud**
+        International Business Machines, Inc. (IBM)
+     Individual Contributor License Agreement ("Agreement")
+            https://github.com/PDeXchange/pac/CLA.md
 
-This Contribution License Agreement ("Agreement") is made and entered into between the Power Access Cloud project (the "Project"), hosted on GitHub, and you (the "Contributor").
+Thank you for your interest in the PAC project ("Power Access Cloud").
 
-**1. Contributions**
+In order to clarify the intellectual property license granted with Contributions from any person or entity, IBM must have a Contributor License Agreement ("CLA") on file that has been signed by each Contributor, indicating agreement to the license terms below. This license is for your protection as a Contributor as well as the protection of IBM and its customers; it does not change your rights to use your own Contributions for any other purpose.
+If you have not already done so, please complete and sign, then scan
+and email a pdf file of this Agreement to abhishek.kr.srivastav@ibm.com.
 
-a. "Contributions" means any code, documentation, bug fixes, patches, or other material that you submit to the Project through a pull request or any other means.
+The original signed agreement should be sent to:
 
-b. By submitting Contributions to the Project, you agree to voluntarily license your Contributions under the terms of this Agreement.
+IBM Corporation
+EGL, Bengaluru, Karnataka
+Attn: Abhishek Kr Srivastav
 
-**2. Grant of License**
+Please read this document carefully before signing and keep a copy for your records.
 
-a. You retain all ownership rights to your Contributions.
+  Full name: ______________________________________________________
 
-b. You hereby grant to the Project and its users a perpetual, worldwide, non-exclusive, royalty-free, irrevocable, sublicensable, non-transferable license to use, reproduce, modify, prepare derivative works of, distribute, perform, and display your Contributions and any derivative works thereof.
+  (optional) Public name: _________________________________________
 
-c. You agree that the Project may modify your Contributions in order to merge them into the Project or to comply with the Project's coding standards.
+  Mailing Address: ________________________________________________
 
-**3. Representations and Warranties**
+                   ________________________________________________
 
-a. You represent and warrant that you have the authority to enter into this Agreement and to grant the License set forth herein.
+  Country:   ______________________________________________________
 
-b. You represent and warrant that your Contributions are original to you or that you have the necessary licenses, rights, consents, and permissions to grant the License set forth herein.
+  Telephone: ______________________________________________________
 
-c. You represent and warrant that your Contributions do not infringe upon or violate any intellectual property or other right of any third party.
+  E-Mail:    ______________________________________________________
 
-**4. Disclaimer of Warranty**
 
-THE PROJECT IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE. THE PROJECT USERS USE THE PROJECT AT THEIR OWN RISK.
+You accept and agree to the following terms and conditions for Your present and future Contributions submitted to the Project. Except for the license granted herein to IBM and recipients of software distributed by IBM, You reserve all right, title, and interest in and to Your Contributions.
 
-**5. Term and Termination**
+1. Definitions.
 
-This Agreement shall remain in full force and effect until terminated by you or the Project.
+   "You" (or "Your") shall mean the copyright owner or legal entity
+   authorized by the copyright owner that is making this Agreement
+with IBM. For legal entities, the entity making a Contribution and all other entities that control, are controlled by, or are under common control with that entity are considered to be a single Contributor. For the purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
 
-a. You may terminate this Agreement by ceasing to contribute to the Project.
+   "Contribution" shall mean any original work of authorship,
+   including any modifications or additions to an existing work, that
+   is intentionally submitted by You to the Project for inclusion
+in, or documentation of, the Project (”the Work”). For the purposes of this definition, "submitted" means any form of electronic, verbal, or written communication sent to the Project or its representatives,including but not limited to communication on electronic mailing lists, source code control systems, and issue tracking systems that are managed by, or on behalf of, the Project for the purpose of discussing and improving the Work, but excluding communication that is conspicuously marked or otherwise designated in writing by You as "Not a Contribution."
 
-b. The Project may terminate this Agreement by notifying you in writing of its termination, in which case all licenses granted hereunder shall automatically terminate.
+2. Grant of Copyright License. Subject to the terms and conditions of
+this Agreement, You hereby grant to IBM and to recipients of software distributed by IBM a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare derivative works of, publicly display, publicly perform, sublicense, and distribute Your Contributions and such derivative works.
 
-c. Upon termination of this Agreement, all provisions of this Agreement that by their nature survive termination shall continue in full force and effect.
+3. Grant of Patent License. Subject to the terms and conditions of
+this Agreement, You hereby grant to IBM and to recipients of software distributed by IBM a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) patent license to make, have made, use, offer to sell, sell, import, and otherwise transfer the Work to which Your Contribution(s) were submitted, where such license applies only to those patent claims licensable by You that are necessarily infringed by Your Contribution(s) alone or by combination of Your Contribution(s) with the Work to which such Contribution(s) was submitted. If any entity institutes patent litigation against You or any other entity (including a cross-claim or counterclaim in a lawsuit) alleging that your Contribution, or the Work to which you have contributed, constitutes direct or contributory patent infringement, then any patent licenses granted to that entity under this Agreement for that Contribution or Work shall terminate as of the date such litigation is filed.
 
-**6. BY SUBMITTING CONTRIBUTIONS TO THE PROJECT, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT, UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.**
+4. You represent that you are legally entitled to grant the above
+   license. If your employer(s) has rights to intellectual property
+   that you create that includes your Contributions, you represent
+   that you have received permission to make Contributions on behalf
+   of that employer, that your employer has waived such rights for
+   your Contributions to the Project, or that your employer has
+   executed a separate Corporate CLA with IBM.
+
+5. You represent that each of Your Contributions is Your original
+   creation (see section 7 for submissions on behalf of others).  You
+   represent that Your Contribution submissions include complete
+   details of any third-party license or other restriction (including,
+   but not limited to, related patents and trademarks) of which you
+   are personally aware and which are associated with any part of Your
+   Contributions.
+
+6. You are not expected to provide support for Your Contributions,
+   except to the extent You desire to provide support. You may provide
+   support for free, for a fee, or not at all. Unless required by
+   applicable law or agreed to in writing, You provide Your
+   Contributions on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+   OF ANY KIND, either express or implied, including, without
+   limitation, any warranties or conditions of TITLE, NON-
+   INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE.
+
+7. Should You wish to submit work that is not Your original creation,
+   You may submit it to the Project separately from any
+   Contribution, identifying the complete details of its source and of
+   any license or other restriction (including, but not limited to,
+   related patents, trademarks, and license agreements) of which you
+   are personally aware, and conspicuously marking the work as
+   "Submitted on behalf of a third-party: [named here]".
+
+8. You agree to notify IBM of any facts or circumstances of
+   which you become aware that would make these representations
+   inaccurate in any respect.
+
+Please sign: __________________________________ Date: ________________
