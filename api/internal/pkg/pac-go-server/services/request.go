@@ -15,6 +15,15 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
+// GetAllRequests		godoc
+// @Summary			Get all requests
+// @Description		Get all requests
+// @Tags			requests
+// @Accept			json
+// @Produce			json
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/requests [get]
 func GetAllRequests(c *gin.Context) {
 	logger := log.GetLogger()
 	config := client.GetConfigFromContext(c.Request.Context())
@@ -50,6 +59,16 @@ func GetAllRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, requests)
 }
 
+// GetRequest			godoc
+// @Summary			Get request
+// @Description		Get request
+// @Tags			requests
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "request-id for request to be fetched"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/requests/{id} [get]
 func GetRequest(c *gin.Context) {
 	logger := log.GetLogger()
 	id := c.Param("id")
@@ -66,6 +85,16 @@ func GetRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, request)
 }
 
+// UpdateServiceExpiryRequest			godoc
+// @Summary					Update service expiry request
+// @Description				Update service expiry for a particular service
+// @Tags					requests
+// @Accept					json
+// @Produce					json
+// @Param					name path string true "service name"
+// @Param					Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success					200
+// @Router					/api/v1/services/{name}/expiry [put]
 func UpdateServiceExpiryRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -180,6 +209,16 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// NewGroupRequest			godoc
+// @Summary				New group request
+// @Description			Request to switch to new group
+// @Tags				requests
+// @Accept				json
+// @Produce				json
+// @Param				id path string true "group-id for the requested group"
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success				200
+// @Router				/api/v1/groups/{id}/request [post]
 func NewGroupRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -276,6 +315,16 @@ func NewGroupRequest(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// ExitGroup			godoc
+// @Summary			Exit group request
+// @Description		Request to exit from group
+// @Tags			requests
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "group-id for the group to be exited from"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/groups/{id}/exit [post]
 func ExitGroup(c *gin.Context) {
 	logger := log.GetLogger()
 
@@ -495,6 +544,16 @@ func deleteUserFromPreviousGroups(c *gin.Context, request *models.Request) {
 	}
 }
 
+// ApproveRequest		godoc
+// @Summary			Approve request
+// @Description		Approve request
+// @Tags			requests
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "request-id for the request to be approved"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/requests/{id}/approve [post]
 func ApproveRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -580,6 +639,16 @@ func ApproveRequest(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// RejectRequest		godoc
+// @Summary			Reject request
+// @Description		Reject request
+// @Tags			requests
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "request-id for the request to be rejected"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/requests/{id}/reject [post]
 func RejectRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -646,6 +715,16 @@ func RejectRequest(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// DeleteRequest		godoc
+// @Summary			Delete request
+// @Description		Delete request
+// @Tags			requests
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "request-id for the request to be deleted"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/requests/{id} [delete]
 func DeleteRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()

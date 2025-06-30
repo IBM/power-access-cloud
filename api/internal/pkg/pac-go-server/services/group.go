@@ -13,6 +13,15 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 )
 
+// GetAllGroups			godoc
+// @Summary				Get all groups
+// @Description			Get all groups
+// @Tags				groups
+// @Accept				json
+// @Produce				json
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success				200
+// @Router				/api/v1/groups [get]
 func GetAllGroups(c *gin.Context) {
 	logger := log.GetLogger()
 	var err error
@@ -57,6 +66,16 @@ func GetAllGroups(c *gin.Context) {
 	c.JSON(http.StatusOK, groups)
 }
 
+// GetGroup				godoc
+// @Summary				Get group
+// @Description			Get group as specified in request
+// @Tags				groups
+// @Accept				json
+// @Produce				json
+// @Param				id path string true "group-id to be fetched"
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success				200
+// @Router				/api/v1/groups/{id} [get]
 func GetGroup(c *gin.Context) {
 	id := c.Param("id")
 	grp, err := getGroup(c.Request.Context(), id)

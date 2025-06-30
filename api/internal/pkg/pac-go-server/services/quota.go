@@ -15,6 +15,16 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
+// GetQuota				godoc
+// @Summary				Get quota
+// @Description			Get quota
+// @Tags				quota
+// @Accept				json
+// @Produce				json
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Param				id path string true "group-id to be fetched"
+// @Success				200
+// @Router				/api/v1/groups/{id}/quota [get]
 // Get the respective quota of the group ID passed.
 func GetQuota(c *gin.Context) {
 	logger := log.GetLogger()
@@ -41,6 +51,17 @@ func GetQuota(c *gin.Context) {
 	c.JSON(http.StatusOK, &quotaDb)
 }
 
+// CreateQuota			godoc
+// @Summary			Create quota
+// @Description		Create quota
+// @Tags			quota
+// @Accept			json
+// @Produce			json
+// @Param			quota body models.Quota true "Create quota"
+// @Param			id path string true "group-id where quota has to be created"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/groups/{id}/quota [post]
 func CreateQuota(c *gin.Context) {
 	var quota models.Quota
 	logger := log.GetLogger()
@@ -97,6 +118,17 @@ func CreateQuota(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// UpdateQuota			godoc
+// @Summary			Update quota
+// @Description		Update quota
+// @Tags			quota
+// @Accept			json
+// @Produce			json
+// @Param			quota body models.Quota true "Update quota"
+// @Param			id path string true "group-id where quota has to be updated"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/groups/{id}/quota [put]
 func UpdateQuota(c *gin.Context) {
 	var quota models.Quota
 	logger := log.GetLogger()
@@ -153,6 +185,16 @@ func UpdateQuota(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// DeleteQuota			godoc
+// @Summary			Delete quota
+// @Description		Delete quota
+// @Tags			quota
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "group-id where quota has to be deleted"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/groups/{id}/quota [delete]
 func DeleteQuota(c *gin.Context) {
 	logger := log.GetLogger()
 
@@ -192,6 +234,15 @@ func checkGroupExists(c *gin.Context, gid string) error {
 	return nil
 }
 
+// GetUserQuota			godoc
+// @Summary				Get user quota
+// @Description			Get user quota
+// @Tags				quota
+// @Accept				json
+// @Produce				json
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success				200
+// @Router				/api/v1/quota [get]
 func GetUserQuota(c *gin.Context) {
 	logger := log.GetLogger()
 	var userQuota, usedQuota, availableQuota models.Capacity

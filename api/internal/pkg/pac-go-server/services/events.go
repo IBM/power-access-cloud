@@ -10,6 +10,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetEvents			godoc
+// @Summary			Get events
+// @Description		Get events
+// @Tags			events
+// @Accept			json
+// @Produce			json
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/events [get]
 // GetEvents returns all events
 func GetEvents(c *gin.Context) {
 	config := client.GetConfigFromContext(c.Request.Context())

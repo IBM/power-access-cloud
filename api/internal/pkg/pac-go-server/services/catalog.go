@@ -17,6 +17,15 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
+// GetAllCatalogs	godoc
+// @Summary		Get all catalogs
+// @Description	Get all catalogs resource
+// @Tags		catalogs
+// @Accept		json
+// @Produce		json
+// @Param		Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success		200
+// @Router		/api/v1/catalogs [get]
 func GetAllCatalogs(c *gin.Context) {
 	logger := log.GetLogger()
 	catalogs, err := kubeClient.GetCatalogs()
@@ -30,6 +39,16 @@ func GetAllCatalogs(c *gin.Context) {
 	c.JSON(http.StatusOK, catalogsItems)
 }
 
+// GetCatalog			godoc
+// @Summary			Get catalog as specified in request
+// @Description		Get catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "catalog name to be fetched"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs/{name} [get]
 func GetCatalog(c *gin.Context) {
 	logger := log.GetLogger()
 	catalogName := c.Param("name")
@@ -55,6 +74,16 @@ func GetCatalog(c *gin.Context) {
 	c.JSON(http.StatusOK, catalogItem)
 }
 
+// CreateCatalog		godoc
+// @Summary			Create catalog
+// @Description		Create catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			catalog body models.Catalog true "Create catalog"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs [post]
 func CreateCatalog(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -108,6 +137,16 @@ func CreateCatalog(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// DeleteCatalog		godoc
+// @Summary			Delete catalog
+// @Description		Delete catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "catalog name to be deleted"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs/{name} [delete]
 func DeleteCatalog(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -146,6 +185,16 @@ func DeleteCatalog(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// RetireCatalog		godoc
+// @Summary			Reire catalog
+// @Description		Reire catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "catalog name to be retired"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs/{name}/retire [put]
 func RetireCatalog(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
