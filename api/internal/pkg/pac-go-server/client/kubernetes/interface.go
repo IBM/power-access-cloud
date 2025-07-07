@@ -6,6 +6,7 @@ import (
 	pac "github.com/PDeXchange/pac/apis/app/v1alpha1"
 )
 
+//go:generate mockgen -destination=mock_kubernetes_client.go -package=kubernetes . Client
 type Client interface {
 	GetCatalogs() (pac.CatalogList, error)
 	GetCatalog(string) (pac.Catalog, error)
