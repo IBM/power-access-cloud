@@ -1,0 +1,32 @@
+name: Fetch Go Version
+
+on:
+  workflow_call:  # Allow other workflows to call this one
+    outputs:
+      go-version:
+        description: "Go Version"
+        value: ${{ jobs.fetch-go-version.outputs.version }}
+
+jobs:
+  fetch-go-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Read Go version
+        id: go-version
+        run: |
+          # Read the Go version from constants.yml
+          GO_VERSION=$(cat .github/config/constants.yml | grep GO_VERSION | cut -d: -f2 | tr -d ' "')
+
+          # Set the Go version as an environment variable
+          echo "GO_VERSION=${GO_VERSION}" >> $GITHUB_ENV
+
+      - name: Output Go Version
+        run: |
+          echo "Go version fetched: ${{ env.GO_VERSION }}"
+
+    outputs:
+      version: ${{ env.GO_VERSION }}

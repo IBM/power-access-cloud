@@ -1,5 +1,9 @@
 # Build the manager binary
-FROM --platform=$BUILDPLATFORM golang:1.23 as builder
+
+# Define a default value for GO_VERSION if not passed
+ARG GO_VERSION=1.23
+
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} as builder
 ARG TARGETOS
 ARG TARGETARCH
 
