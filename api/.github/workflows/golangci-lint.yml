@@ -11,15 +11,24 @@ permissions:
   # pull-requests: read
 
 jobs:
+  # Calling reusable workflow
+  call-fetch-go-version:
+    uses: ./.github/workflows/fetch-go-version.yml
+
   golangci:
     name: lint
     runs-on: ubuntu-latest
+    needs: call-fetch-go-version
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: ${{ needs.call-fetch-go-version.outputs.go-version }}
           cache: false
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
