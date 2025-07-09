@@ -34,7 +34,7 @@ const Welcome = () => {
    <br/>
         <p>PAC offers a comprehensive catalog of free Power hardware resources for developers who want to explore, develop, and optimize their open source software on the Power architecture. 
 </p>
-        <p>Our self-service dashboard allows you to select the resources you need and deploy them according to your specific requirements. After you register, you'll have access to your resources for 14 days with an option to extend if needed. Read our <a href="/" target="_blank">FAQ</a> to learn more.
+        <p>Our self-service dashboard allows you to select the resources you need and deploy them according to your specific requirements. After you register, you'll have access to your resources for 5 days with an option to extend if needed. Read our <a href="/" target="_blank">FAQ</a> to learn more.
 </p>
         <p>Click <strong>Register</strong> to get started. You'll need a valid <a href="https://www.ibm.com/account/us-en/signup/register.html" target="_blank">IBMid</a> or <a href="https://github.com/join" target="_blank">GitHub</a> account to complete the registration. If you've already registered, click <strong>Log in</strong> to go directly to the PAC dashboard. 
 </p>
