@@ -180,7 +180,7 @@ const renderNoDataEmptyState=()=>{
               return (
                 <>
                 <div style={{padding:"1rem", border: "1px solid #E4E5E6",minHeight:"22rem",overflow:"hidden"}}>
-                  <h4> My keys <Tooltip align="bottom-left" size="lg" label="Placeholder text">
+                  <h4> My keys <Tooltip align="bottom-left" size="lg" label="Secure authentication to your services requires the use of keys. Multiple keys can be created using Add Key. Click on View Details to learn more about a specific key, and you can also delete any unused keys.">
                     <Button className="sb-tooltip-trigger" kind="ghost" size="sm">
                             <Information />
                           </Button>
