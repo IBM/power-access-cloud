@@ -46,7 +46,7 @@ func CreateRouter() *gin.Engine {
 	authorized.GET("/groups", services.GetAllGroups)
 	authorized.GET("/groups/:id", services.GetGroup)
 	authorized.POST("/groups/:id/request", services.NewGroupRequest)
-	authorized.POST("/groups/:id/exit", services.ExitGroup)
+	// authorized.POST("/groups/:id/exit", services.ExitGroup)
 
 	authorized.GET("/groups/:id/quota", services.GetQuota)
 
