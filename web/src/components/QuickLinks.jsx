@@ -43,7 +43,7 @@ const QuickLinks=()=> {
         <h4>Quick links</h4>
         <div style={{marginTop:"2rem"}}>
         <Link size="20"/> <a href="https://community.ibm.com/community/user/powerdeveloper/home">Join the Power Developer eXchange Community</a><br /><br />
-        <Link size="20"/> <a href="/">Read the FAQ</a><br /><br />
+        <Link size="20"/> <a href="https://github.com/PDeXchange/pac-support/blob/main/docs/FAQ.md" target="_blank" rel="noopener noreferrer">Read the FAQ</a><br /><br />
         <Link size="20"/> <a style={{color: "rgb(13, 110, 253)", textDecoration: "underline", cursor: "pointer"}} onClick={() => setActionProps(action)} href="#/">Provide feedback</a><br /><br />
         <Link size="20"/> <a style={{color: "rgb(13, 110, 253)", textDecoration: "underline", cursor: "pointer"}} onClick={() => setActionProps(userGuideAction)} href="#/">User Guide</a>
         </div>
