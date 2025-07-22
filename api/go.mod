@@ -1,8 +1,8 @@
 module github.com/PDeXchange/pac
 
-go 1.23.0
+go 1.24.0
 
-toolchain go1.23.1
+toolchain go1.24.1
 
 replace github.com/Nerzal/gocloak/v13 => github.com/PDeXchange/gocloak/v13 v13.7.0-p1
 
