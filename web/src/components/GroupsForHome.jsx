@@ -25,20 +25,10 @@ import UpgradeGroup from "./PopUp/UpgradeGroup";
 
 import UserService from "../services/UserService";
 import Notify from "./utils/Notify";
-import ExitGroup from "./PopUp/ExitGroup";
 
 import DeleteRequest from './PopUp/DeleteRequest'
 const BUTTON_REQUEST = "BUTTON_REQUEST";
-const BUTTON_DELETE = "BUTTON_DELETE";
 const BUTTON_DELETE_REQUEST="DELETE_REQUEST"
-
-const delete_action={
-  key: BUTTON_DELETE,
-  label: "Exit",
-  kind: "ghost",
-  icon: TrashCan,
-  standalone: true,
-};
 
 const new_request={
   key: BUTTON_REQUEST,
@@ -173,14 +163,6 @@ const GroupsForHome = () => {
             response={handleResponse}
           />
         )}
-        {actionProps?.key === BUTTON_DELETE && (
-          <ExitGroup
-            selectRows={selectRows}
-            pagename=''
-            setActionProps={setActionProps}
-            response={handleResponse}
-          />
-        )}
         {actionProps?.key === BUTTON_DELETE_REQUEST && (
           <DeleteRequest
             selectRows={selectRows}
@@ -254,27 +236,12 @@ const GroupsForHome = () => {
                     </TableHead>
                     <TableBody>
                       {rows.map((row) => (
-                        
                         <TableRow key={row.id}>
                           {row.cells.map((cell,i) => (cell.value &&
                             // <TableCell key={cell.id}>{cell.value}</TableCell>
                             ((i!==3)?<TableCell key={cell.id}>{cell.value}</TableCell>:<TableCell key={cell.id}>{(row.cells[i].value==="Active"&&"Approved")}{(row.cells[i].value==="Inactive"&&"Pending")}</TableCell>)
                           ))}
                           <TableCell >
-                            {row.cells[3].value==="Active"&&  <OverflowMenu size="sm" flipped>
-                              
-                              <OverflowMenuItem 
-                              key={delete_action.key}
-                              
-                              onClick={() => 
-                                {
-                                  selectRows=[];
-                                  selectRows.push(row);
-                                  setActionProps(delete_action)
-                                }
-                                }
-                              itemText="Leave group" />
-                            </OverflowMenu>}
                             {row.cells[3].value==="Inactive"&&  <OverflowMenu size="sm" flipped>
                               <OverflowMenuItem 
                               key={delete_request.key}
