@@ -138,7 +138,7 @@ const KeysForHome = () => {
   };
 
 const renderNoDataEmptyState=()=>{
-  return (<div>There are no keys to display. PAC requires a SSH public key to deploy services. Click Add key to proceed.</div>)
+  return (<div>There are no keys to display. IBM&reg; Power&reg; Access Cloud requires a SSH public key to deploy services. Click Add key to proceed.</div>)
 }
   return (
     <>

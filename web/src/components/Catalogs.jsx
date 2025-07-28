@@ -106,7 +106,7 @@ const Catalogs = () => {
                       <h1 className="landing-page__sub_heading banner-header">
                       Catalog
                       </h1>
-                      <p className="banner-text">Explore the catalog of Power Access Cloud services and select the one that best suits your project needs. Note: You must <a style={{color:"blue", textDecoration:"underline", cursor:"pointer"}} onClick={() => setActionProps(action)} href="#/">add a SSH key</a> before deploying a service.</p>
+                      <p className="banner-text">Explore the catalog of IBM&reg; Power&reg; Access Cloud services and select the one that best suits your project needs. Note: You must <a style={{color:"blue", textDecoration:"underline", cursor:"pointer"}} onClick={() => setActionProps(action)} href="#/">add a SSH key</a> before deploying a service.</p>
                   </div>
                   </Grid>
     
