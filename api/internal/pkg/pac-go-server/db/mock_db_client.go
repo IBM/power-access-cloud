@@ -178,6 +178,21 @@ func (mr *MockDBMockRecorder) GetEventsByUserID(arg0, arg1, arg2 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEventsByUserID", reflect.TypeOf((*MockDB)(nil).GetEventsByUserID), arg0, arg1, arg2)
 }
 
+// GetFeedbacks mocks base method.
+func (m *MockDB) GetFeedbacks(arg0 models.FeedbacksFilter) ([]models.Feedback, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFeedbacks", arg0)
+	ret0, _ := ret[0].([]models.Feedback)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFeedbacks indicates an expected call of GetFeedbacks.
+func (mr *MockDBMockRecorder) GetFeedbacks(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeedbacks", reflect.TypeOf((*MockDB)(nil).GetFeedbacks), arg0)
+}
+
 // GetGroupsQuota mocks base method.
 func (m *MockDB) GetGroupsQuota(arg0 []string) ([]models.Quota, error) {
 	m.ctrl.T.Helper()
@@ -311,6 +326,20 @@ func (m *MockDB) GetTermsAndConditionsByUserID(arg0 string) (*models.TermsAndCon
 func (mr *MockDBMockRecorder) GetTermsAndConditionsByUserID(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTermsAndConditionsByUserID", reflect.TypeOf((*MockDB)(nil).GetTermsAndConditionsByUserID), arg0)
+}
+
+// InsertFeedback mocks base method.
+func (m *MockDB) InsertFeedback(arg0 *models.Feedback) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertFeedback", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertFeedback indicates an expected call of InsertFeedback.
+func (mr *MockDBMockRecorder) InsertFeedback(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertFeedback", reflect.TypeOf((*MockDB)(nil).InsertFeedback), arg0)
 }
 
 // MarkEventAsNotified mocks base method.

@@ -39,4 +39,7 @@ type DB interface {
 	AcceptTermsAndConditions(*models.TermsAndConditions) error
 	GetTermsAndConditionsByUserID(string) (*models.TermsAndConditions, error)
 	DeleteTermsAndConditionsByUserID(string) error
+
+	InsertFeedback(*models.Feedback) error
+	GetFeedbacks(models.FeedbacksFilter) ([]models.Feedback, error)
 }
