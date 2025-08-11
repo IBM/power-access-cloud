@@ -511,6 +511,23 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 			LastName:  utils.Ptr("lastname"),
 		}
 		return []*gocloak.User{&user}
+	case "create-feedback":
+		feedback := models.Feedback{
+			ID:        [12]byte{1},
+			UserID:    "12345",
+			Rating:    "Positive",
+			Comment:   "good",
+			CreatedAt: time.Now(),
+		}
+		// Update service with custom values if provided
+		for key, value := range customValues {
+			if fieldValue := reflect.ValueOf(&feedback).Elem().FieldByName(key); fieldValue.IsValid() {
+				if value != nil {
+					fieldValue.Set(reflect.ValueOf(value))
+				}
+			}
+		}
+		return &feedback
 	default:
 		return nil
 	}
@@ -646,4 +663,8 @@ func formQuota(params customValues) models.Capacity {
 		}
 	}
 	return cap
+}
+
+func getComment() string {
+	return "This is a very long comment that is intended to exceed the two hundred and fifty character limit. It keeps going with additional words and filler content just to make sure that the total length crosses the specified threshold. This helps in testing validation logic."
 }

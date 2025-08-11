@@ -116,5 +116,8 @@ func CreateRouter() *gin.Engine {
 	authorized.GET("/tnc", services.GetTermsAndConditionsStatus)
 	authorized.POST("/tnc", services.AcceptTermsAndConditions)
 
+	// feedback related endpoints
+	authorized.POST("/feedbacks", services.CreateFeedback)
+
 	return router
 }
