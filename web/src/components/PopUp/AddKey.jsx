@@ -117,7 +117,7 @@ const AddKey = ({ pagename,setActionProps, response }) => {
         </div>
         <div className="mb-3">
           <label htmlFor="Justifcation" className="form-label">
-            Key<span className="text-danger">*</span><Tooltip align="bottom-left" size="sm" label="Placeholder text">
+            Key<span className="text-danger">*</span><Tooltip align="bottom-left" size="sm" label="Please paste your public SSH key here to enable secure authentication. You can generate your SSH key pair using tools like ssh-keygen or similar SSH utilities.">
                     <Button className="sb-tooltip-trigger" kind="ghost" size="sm">
                             <Information size="14"/>
                           </Button>
@@ -126,7 +126,7 @@ const AddKey = ({ pagename,setActionProps, response }) => {
           <textarea
             type={"text"}
             className="form-control"
-            placeholder="Enter the public key"
+            placeholder="Enter Your Public SSH Key"
             name="content"
             value={g?.justification}
             onChange={(e) => {

@@ -7,7 +7,7 @@ const QuotaWarning = () => {
   const [showModal, setShowModal] = useState(false);
   const [quotaMessage, setQuotaMessage] = useState("");
   const [primaryButtonText, setPrimaryButtonText] = useState("");
-  const [nagivateTo, setNagivateTo] = useState("");
+  const [navigateTo, setNavigateTo] = useState("");
   let navigate = useNavigate();
 
   useEffect(() => {
@@ -19,10 +19,10 @@ const QuotaWarning = () => {
       ) {
         setShowModal(true);
         setQuotaMessage(
-          "Quota is not set for the user, please request to any group to use catalogs"
+          "Quota is not set for the user. Please request access or wait until you are added to a group to use the Catalog."
         );
-        setPrimaryButtonText("Request Group");
-        setNagivateTo("/groups");
+        setPrimaryButtonText("Go to Dashboard");
+        setNavigateTo("/");
       } else if (
         data.payload.available_quota.cpu === 0 ||
         data.payload.available_quota.memory === 0
@@ -31,8 +31,8 @@ const QuotaWarning = () => {
         setQuotaMessage(
           "You are running out of quota, please make some space by deleting services or request to a higher quota group"
         );
-        setPrimaryButtonText("Delete Services");
-        setNagivateTo("/services");
+        setPrimaryButtonText("Go to Dashboard");
+        setNavigateTo("/");
       }
     };
     fetchData();
@@ -47,7 +47,7 @@ const QuotaWarning = () => {
       size="sm"
       onRequestClose={onCancel}
       onRequestSubmit={() => {
-        navigate(nagivateTo);
+        navigate(navigateTo);
       }}
       open={showModal}
       modalHeading={quotaMessage}

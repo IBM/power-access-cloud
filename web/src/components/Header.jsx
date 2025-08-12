@@ -62,11 +62,11 @@ const HeaderNav = () => {
               aria-expanded={isSideNavExpanded}
             />}
             <HeaderName as={Link} to="/" prefix="">
-             Power Access Cloud
+             IBM&reg; Power&reg; Access Cloud
             </HeaderName>
             {!isAdmin&&<HeaderNavigation aria-label="">
               <HeaderMenuItem as={Link} to="catalogs">Catalog</HeaderMenuItem>
-              <HeaderMenuItem as={Link} to="/">FAQ</HeaderMenuItem>
+              <HeaderMenuItem as={Link} to="https://github.com/PDeXchange/pac-support/blob/main/docs/FAQ.md">FAQ</HeaderMenuItem>
               <HeaderMenuItem onClick={() => setActionProps(action)}>Feedback</HeaderMenuItem>
             </HeaderNavigation>}
             <HeaderGlobalBar>
