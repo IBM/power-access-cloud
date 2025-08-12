@@ -399,6 +399,20 @@ func (mr *MockDBMockRecorder) NewRequest(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewRequest", reflect.TypeOf((*MockDB)(nil).NewRequest), arg0)
 }
 
+// SetEventCapping mocks base method.
+func (m *MockDB) SetEventCapping(arg0 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetEventCapping", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetEventCapping indicates an expected call of SetEventCapping.
+func (mr *MockDBMockRecorder) SetEventCapping(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetEventCapping", reflect.TypeOf((*MockDB)(nil).SetEventCapping), arg0)
+}
+
 // UpdateQuota mocks base method.
 func (m *MockDB) UpdateQuota(arg0 *models.Quota) error {
 	m.ctrl.T.Helper()
