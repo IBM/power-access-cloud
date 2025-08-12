@@ -17,12 +17,21 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
+// GetAllCatalogs	godoc
+// @Summary		Get all catalogs
+// @Description	Get all catalogs resource
+// @Tags		catalogs
+// @Accept		json
+// @Produce		json
+// @Param		Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success		200
+// @Router		/api/v1/catalogs [get]
 func GetAllCatalogs(c *gin.Context) {
 	logger := log.GetLogger()
 	catalogs, err := kubeClient.GetCatalogs()
 	if err != nil {
 		logger.Error("failed to get catalogs", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	catalogsItems := convertToCatalogs(catalogs)
@@ -30,6 +39,16 @@ func GetAllCatalogs(c *gin.Context) {
 	c.JSON(http.StatusOK, catalogsItems)
 }
 
+// GetCatalog			godoc
+// @Summary			Get catalog as specified in request
+// @Description		Get catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "catalog name to be fetched"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs/{name} [get]
 func GetCatalog(c *gin.Context) {
 	logger := log.GetLogger()
 	catalogName := c.Param("name")
@@ -41,8 +60,13 @@ func GetCatalog(c *gin.Context) {
 
 	catalog, err := kubeClient.GetCatalog(catalogName)
 	if err != nil {
+		if errors.Is(err, utils.ErrResourceNotFound) {
+			logger.Error("catalog does not exists", zap.String("catalog name", catalogName))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("catalog with name %s does not exists", catalogName)})
+			return
+		}
 		logger.Error("failed to get catalog", zap.String("catalog name", catalogName), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	catalogItem := convertToCatalog(catalog)
@@ -50,31 +74,54 @@ func GetCatalog(c *gin.Context) {
 	c.JSON(http.StatusOK, catalogItem)
 }
 
+// CreateCatalog		godoc
+// @Summary			Create catalog
+// @Description		Create catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			catalog body models.Catalog true "Create catalog"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs [post]
 func CreateCatalog(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
 	catalog := models.Catalog{}
 	if err := c.BindJSON(&catalog); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to bind request, Error: %v", err.Error())})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to bind request, Error: %v", err.Error())})
 		return
 	}
+
 	logger.Debug("create catalog request", zap.Any("request", catalog))
 	if err := validateCreateCatalogParams(catalog); len(err) > 0 {
 		logger.Error("error in create catalog validation", zap.Errors("errors", err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
+
+	// if Expiry is not set, use Default value
+	if catalog.Expiry == 0 {
+		logger.Info("Catalog expiry is set to 0, which is invalid, using default expiry", zap.String("catalogName", catalog.Name), zap.Int("defaultExpiry", utils.DefaultExpirationDays))
+		catalog.Expiry = utils.DefaultExpirationDays
+	}
+
 	if err := kubeClient.CreateCatalog(createCatalogObject(catalog)); err != nil {
+		if errors.Is(err, utils.ErrResourceAlreadyExists) {
+			logger.Error("catalog already exists", zap.String("catalog name", catalog.Name))
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("catalog with name %s already exists", catalog.Name)})
+			return
+		}
 		logger.Error("failed to create catalog", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 
 	event, err := models.NewEvent(originator, originator, models.EventCatalogCreate)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 
@@ -90,6 +137,16 @@ func CreateCatalog(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// DeleteCatalog		godoc
+// @Summary			Delete catalog
+// @Description		Delete catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "catalog name to be deleted"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs/{name} [delete]
 func DeleteCatalog(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -101,14 +158,19 @@ func DeleteCatalog(c *gin.Context) {
 	}
 
 	if err := kubeClient.DeleteCatalog(catalogName); err != nil {
+		if errors.Is(err, utils.ErrResourceNotFound) {
+			logger.Error("catalog does not exists", zap.String("catalog name", catalogName))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("catalog with name %s does not exists", catalogName)})
+			return
+		}
 		logger.Error("failed to delete catalog", zap.String("catalog name", catalogName), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	event, err := models.NewEvent(originator, originator, models.EventCatalogDelete)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 
@@ -123,6 +185,16 @@ func DeleteCatalog(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// RetireCatalog		godoc
+// @Summary			Reire catalog
+// @Description		Reire catalog resource
+// @Tags			catalogs
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "catalog name to be retired"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/catalogs/{name}/retire [put]
 func RetireCatalog(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
@@ -134,8 +206,13 @@ func RetireCatalog(c *gin.Context) {
 	}
 
 	if err := kubeClient.RetireCatalog(catalogName); err != nil {
+		if errors.Is(err, utils.ErrResourceNotFound) {
+			logger.Error("catalog does not exists", zap.String("catalog name", catalogName))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("catalog with name %s does not exists", catalogName)})
+			return
+		}
 		logger.Error("failed to retire catalog", zap.String("catalog name", catalogName), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	event, err := models.NewEvent(originator, originator, models.EventCatalogRetire)
@@ -218,9 +295,6 @@ func validateCreateCatalogParams(catalog models.Catalog) []error {
 	}
 	if catalog.Capacity.Memory == 0 {
 		errs = append(errs, errors.New("catalog memory capacity should be set"))
-	}
-	if catalog.Expiry == 0 {
-		errs = append(errs, errors.New("catalog expiry should be set"))
 	}
 	if _, err := url.ParseRequestURI(catalog.ImageThumbnailReference); err != nil {
 		errs = append(errs, errors.New("catalog image not valid"))

@@ -67,11 +67,11 @@ type ServiceStatus struct {
 	VM VM `json:"vm,omitempty"`
 	// +optional
 	AccessInfo string `json:"accessInfo"`
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	Expired bool `json:"expired,omitempty"`
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	Message string `json:"message,omitempty"`
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	State ServiceState `json:"state,omitempty"`
 	// Successful indicates if the service was provisioned successfully
 	Successful bool `json:"successful,omitempty"`

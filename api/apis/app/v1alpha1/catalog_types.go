@@ -45,7 +45,7 @@ type CatalogSpec struct {
 	Capacity Capacity `json:"capacity"`
 	// Retired says whether the Catalog is retired or not, if retired then it will not be available for provisioning
 	Retired bool `json:"retired"`
-	// +kubebuilder:validation:Required
+	// +kubebuilder:default=5
 	Expiry int `json:"expiry"`
 	// Thumbnail reference for image in Catalog which consists of URL for the catalog used by the UI component to display the thumbnail.
 	// +kubebuilder:validation:Required

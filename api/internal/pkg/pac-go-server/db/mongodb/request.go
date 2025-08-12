@@ -97,7 +97,7 @@ func (db *MongoDB) GetRequestByID(id string) (*models.Request, error) {
 	err = collection.FindOne(ctx, filter).Decode(&request)
 	if err == mongo.ErrNoDocuments {
 		log.Println("no documents found")
-		return nil, fmt.Errorf("request not found with id: %s", id)
+		return nil, err
 	}
 	if err != nil {
 		return nil, fmt.Errorf("error getting request: %w", err)

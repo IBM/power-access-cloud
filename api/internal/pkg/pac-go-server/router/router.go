@@ -6,6 +6,9 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/services"
@@ -31,6 +34,9 @@ func CreateRouter() *gin.Engine {
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
+	if os.Getenv("ENABLE_SWAGGER") == "true" {
+		router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	authorized := router.Group("/api/v1")
 	authorized.Use(ginkeycloak.Auth(ginkeycloak.AuthCheck(), ginkeycloak.KeycloakConfig{
@@ -46,7 +52,7 @@ func CreateRouter() *gin.Engine {
 	authorized.GET("/groups", services.GetAllGroups)
 	authorized.GET("/groups/:id", services.GetGroup)
 	authorized.POST("/groups/:id/request", services.NewGroupRequest)
-	authorized.POST("/groups/:id/exit", services.ExitGroup)
+	// authorized.POST("/groups/:id/exit", services.ExitGroup)
 
 	authorized.GET("/groups/:id/quota", services.GetQuota)
 

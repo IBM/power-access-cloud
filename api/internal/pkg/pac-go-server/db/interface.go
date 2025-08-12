@@ -4,6 +4,7 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 )
 
+//go:generate mockgen -destination=mock_db_client.go -package=db . DB
 type DB interface {
 	Connect() error
 	Disconnect() error
@@ -38,4 +39,7 @@ type DB interface {
 	AcceptTermsAndConditions(*models.TermsAndConditions) error
 	GetTermsAndConditionsByUserID(string) (*models.TermsAndConditions, error)
 	DeleteTermsAndConditionsByUserID(string) error
+
+	InsertFeedback(*models.Feedback) error
+	GetFeedbacks(models.FeedbacksFilter) ([]models.Feedback, error)
 }

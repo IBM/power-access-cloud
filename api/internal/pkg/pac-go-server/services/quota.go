@@ -15,19 +15,33 @@ import (
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
+// GetQuota				godoc
+// @Summary				Get quota
+// @Description			Get quota
+// @Tags				quota
+// @Accept				json
+// @Produce				json
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Param				id path string true "group-id to be fetched"
+// @Success				200
+// @Router				/api/v1/groups/{id}/quota [get]
 // Get the respective quota of the group ID passed.
 func GetQuota(c *gin.Context) {
 	logger := log.GetLogger()
 	gid := c.Param("id")
 	if err := checkGroupExists(c, gid); err != nil {
+		if errors.Is(err, client.ErrorGroupNotFound) {
+			logger.Error("group does not exists", zap.String("group id", gid))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("the group ID %s does not exist", gid)})
+		}
 		logger.Error("cannot find group by ID", zap.String("id", gid), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("The group ID %s does not exist.", gid)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("error occured while fetching group with id %s, err: %v", gid, err)})
 		return
 	}
 	quotaDb, err := dbCon.GetQuotaForGroupID(gid)
 	if err != nil && err != mongo.ErrNoDocuments {
 		logger.Error("error occured while checking quota", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("An error occured while retriving quota, contact PAC support. Error: %s", err.Error())})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("An error occured while retriving quota, contact PAC support. Error: %s", err.Error())})
 		return
 	}
 	if quotaDb == nil {
@@ -37,20 +51,35 @@ func GetQuota(c *gin.Context) {
 	c.JSON(http.StatusOK, &quotaDb)
 }
 
+// CreateQuota			godoc
+// @Summary			Create quota
+// @Description		Create quota
+// @Tags			quota
+// @Accept			json
+// @Produce			json
+// @Param			quota body models.Quota true "Create quota"
+// @Param			id path string true "group-id where quota has to be created"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/groups/{id}/quota [post]
 func CreateQuota(c *gin.Context) {
 	var quota models.Quota
 	logger := log.GetLogger()
 	gid := c.Param("id")
 
 	if err := checkGroupExists(c, gid); err != nil {
-		logger.Error("cannot find group by ID", zap.String("id", gid))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("The group ID %s does not exist.", gid)})
+		if errors.Is(err, client.ErrorGroupNotFound) {
+			logger.Error("group does not exists", zap.String("group id", gid))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("The group ID %s does not exist.", gid)})
+		}
+		logger.Error("cannot find group by ID", zap.String("id", gid), zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("error occured while fetching group with id %s, err: %s", gid, err)})
 		return
 	}
 
 	if err := c.BindJSON(&quota); err != nil {
 		logger.Error("error while creating quota for group", zap.String("id", gid), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -81,7 +110,7 @@ func CreateQuota(c *gin.Context) {
 		GroupID:  gid,
 		Capacity: quota.Capacity,
 	}); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to insert the quota into the database, Error: %s", err.Error())})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to insert the quota into the database, Error: %s", err.Error())})
 		return
 	}
 
@@ -89,20 +118,35 @@ func CreateQuota(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// UpdateQuota			godoc
+// @Summary			Update quota
+// @Description		Update quota
+// @Tags			quota
+// @Accept			json
+// @Produce			json
+// @Param			quota body models.Quota true "Update quota"
+// @Param			id path string true "group-id where quota has to be updated"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/groups/{id}/quota [put]
 func UpdateQuota(c *gin.Context) {
 	var quota models.Quota
 	logger := log.GetLogger()
 	gid := c.Param("id")
 
 	if err := checkGroupExists(c, gid); err != nil {
-		logger.Error("cannot find group by ID", zap.String("id", gid))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("The group ID %s does not exist.", gid)})
+		if errors.Is(err, client.ErrorGroupNotFound) {
+			logger.Error("group does not exists", zap.String("group id", gid))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("The group ID %s does not exist.", gid)})
+		}
+		logger.Error("cannot find group by ID", zap.String("id", gid), zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("error occured while fetching group with id %s, err: %s", gid, err)})
 		return
 	}
 
 	if err := c.BindJSON(&quota); err != nil {
 		logger.Error("error while updating quota", zap.String("groupID", gid), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -133,7 +177,7 @@ func UpdateQuota(c *gin.Context) {
 		GroupID:  gid,
 		Capacity: quota.Capacity,
 	}); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to insert the quota into the database, Error: %s", err.Error())})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to insert the quota into the database, Error: %s", err.Error())})
 		return
 	}
 
@@ -141,6 +185,16 @@ func UpdateQuota(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// DeleteQuota			godoc
+// @Summary			Delete quota
+// @Description		Delete quota
+// @Tags			quota
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "group-id where quota has to be deleted"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/groups/{id}/quota [delete]
 func DeleteQuota(c *gin.Context) {
 	logger := log.GetLogger()
 
@@ -148,14 +202,18 @@ func DeleteQuota(c *gin.Context) {
 
 	// Check if the group ID is valid, else return 404
 	if err := checkGroupExists(c, gid); err != nil {
-		logger.Error("cannot find group by ID", zap.String("id", gid))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("The group ID %s does not exist.", gid)})
+		if errors.Is(err, client.ErrorGroupNotFound) {
+			logger.Error("group does not exists", zap.String("group id", gid))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("The group ID %s does not exist.", gid)})
+		}
+		logger.Error("cannot find group by ID", zap.String("id", gid), zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("error occured while fetching group with id %s, err: %s", gid, err)})
 		return
 	}
 
 	if err := dbCon.DeleteQuota(gid); err != nil {
 		logger.Error("quota could not be deleted", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while deleting quota"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while deleting quota"})
 		return
 	}
 
@@ -176,11 +234,21 @@ func checkGroupExists(c *gin.Context, gid string) error {
 	return nil
 }
 
+// GetUserQuota			godoc
+// @Summary				Get user quota
+// @Description			Get user quota
+// @Tags				quota
+// @Accept				json
+// @Produce				json
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success				200
+// @Router				/api/v1/quota [get]
 func GetUserQuota(c *gin.Context) {
 	logger := log.GetLogger()
 	var userQuota, usedQuota, availableQuota models.Capacity
 	var err error
-	kc := client.NewKeyClockClient(c.Request.Context())
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
 	userID := kc.GetUserID()
 	userQuota, err = getUserQuota(c)
 	if err != nil {
@@ -229,7 +297,8 @@ func getMaxCapacity(quotas []models.Quota) models.Capacity {
 func getUserQuota(c *gin.Context) (models.Capacity, error) {
 	logger := log.GetLogger()
 	var userQuota models.Capacity
-	kc := client.NewKeyClockClient(c.Request.Context())
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
 	userID := kc.GetUserID()
 	logger.Debug("getting quota for user", zap.String("user id", userID))
 	userGroups := c.Request.Context().Value("groups").([]models.Group)

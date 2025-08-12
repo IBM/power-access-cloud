@@ -1,7 +1,7 @@
-# Event Notifier for Power Access Cloud
+# Event Notifier for IBM&reg; Power&reg; Access Cloud
 
 ## Overview
-The Event Notifier is a system that sends notifications for various events on a PAC portal, such as group membership requests, approvals, and rejections etc. 
+The Event Notifier is a system that sends notifications for various events on a IBM&reg; Power&reg; Access Cloud portal, such as group membership requests, approvals, and rejections etc. 
 
 ## Integration with Notification Service
 Notification integration is pretty flexible and can be implemented in any way. Right now, we have implemented email notifications via the [Email Delivery][sendgrid] service in the IBM Cloud.

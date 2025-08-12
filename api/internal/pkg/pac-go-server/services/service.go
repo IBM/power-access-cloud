@@ -35,10 +35,19 @@ func SetKubeClient(client kubernetes.Client) {
 	kubeClient = client
 }
 
+// GetAllServices		godoc
+// @Summary			Get all services
+// @Description		Get all services
+// @Tags			services
+// @Accept			json
+// @Produce			json
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/services [get]
 func GetAllServicesHandler(c *gin.Context) {
 	serviceItems, err := getAllServices(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, serviceItems)
@@ -49,7 +58,8 @@ func getAllServices(c *gin.Context) ([]models.Service, error) {
 	var services pac.ServiceList
 	var err error
 
-	kc := client.NewKeyClockClient(c.Request.Context())
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
 	userId := kc.GetUserID()
 
 	listAllServices := c.DefaultQuery("all", "false")
@@ -75,6 +85,16 @@ func getAllServices(c *gin.Context) ([]models.Service, error) {
 	return serviceItems, nil
 }
 
+// GetService			godoc
+// @Summary			Get service
+// @Description		Get service
+// @Tags			services
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "service name"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/services/{name} [get]
 func GetService(c *gin.Context) {
 	logger := log.GetLogger()
 	serviceName := c.Param("name")
@@ -89,14 +109,15 @@ func GetService(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
-	kc := client.NewKeyClockClient(c.Request.Context())
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
 	userId := kc.GetUserID()
 
 	// should not return service if the user is not admin or not owner of service
 	if !kc.IsRole(utils.ManagerRole) {
 		if service.Spec.UserID != userId {
 			logger.Error("user is not the owner of service", zap.String("user id", userId), zap.String("service name", serviceName))
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("user id: %s is not owner of service %s", userId, service.Name)})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("user id: %s is not owner of service %s", userId, service.Name)})
 			return
 		}
 	}
@@ -105,6 +126,16 @@ func GetService(c *gin.Context) {
 	c.JSON(http.StatusOK, serviceItem)
 }
 
+// CreateService		godoc
+// @Summary			Create service
+// @Description		Create service
+// @Tags			services
+// @Accept			json
+// @Produce			json
+// @Param			service body models.Service true "Create service"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1//services [post]
 func CreateService(c *gin.Context) {
 	logger := log.GetLogger()
 	service := models.Service{}
@@ -126,6 +157,11 @@ func CreateService(c *gin.Context) {
 	// fetch catalog information
 	catalog, err := kubeClient.GetCatalog(service.CatalogName)
 	if err != nil {
+		if errors.Is(err, utils.ErrResourceNotFound) {
+			logger.Error("catalog does not exists", zap.String("catalog name", service.CatalogName))
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("%v", err)})
+			return
+		}
 		logger.Error("failed to get catalog", zap.String("catalog name", service.CatalogName), zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
@@ -145,7 +181,8 @@ func CreateService(c *gin.Context) {
 	}
 
 	// fetch userId
-	kc := client.NewKeyClockClient(c.Request.Context())
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
 	userId := kc.GetUserID()
 	logger.Debug("user id", zap.String("userid", userId))
 
@@ -153,7 +190,7 @@ func CreateService(c *gin.Context) {
 	sshKeys, err := dbCon.GetKeyByUserID(userId)
 	if err != nil {
 		logger.Error("failed to get ssh key for user", zap.String("userid", userId), zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	if len(sshKeys) == 0 {
@@ -216,18 +253,40 @@ func CreateService(c *gin.Context) {
 	// create service
 	logger.Debug("service create params", zap.String("service name", serviceName), zap.Any("service", service), zap.Any("sshKey", sshKeys))
 	if err := kubeClient.CreateService(createServiceObject(serviceName, keys, service)); err != nil {
+		if errors.Is(err, utils.ErrResourceAlreadyExists) {
+			logger.Error("service already exists", zap.String("service name", serviceName))
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("service with name: %s already exists", serviceName)})
+			return
+		}
 		logger.Error("failed to create service", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	logger.Debug("successfully created service")
 	c.Status(http.StatusCreated)
 }
 
+// DeleteService		godoc
+// @Summary			Delete service
+// @Description		Delete service
+// @Tags			services
+// @Accept			json
+// @Produce			json
+// @Param			name path string true "service name to be deleted"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/services/{name} [delete]
 func DeleteServiceHandler(c *gin.Context) {
-	err := deleteService(c, c.Param("name"))
+	serviceName := c.Param("name")
+	if serviceName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "service name is not set"})
+	}
+	err := deleteService(c, serviceName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		if errors.Is(err, utils.ErrResourceNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("service with name %s already deleted or does not exists", serviceName)})
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 	}
 	c.Status(http.StatusNoContent)
 }
@@ -238,7 +297,8 @@ func deleteService(c *gin.Context, serviceName string) error {
 		logger.Error("service name is not set")
 		return fmt.Errorf("error : %s", "service name is not set")
 	}
-	kc := client.NewKeyClockClient(c.Request.Context())
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
 	userId := kc.GetUserID()
 
 	//allow admin to delete the not owned services as well
@@ -246,6 +306,10 @@ func deleteService(c *gin.Context, serviceName string) error {
 		userId = ""
 	}
 	if err := kubeClient.DeleteService(serviceName, userId); err != nil {
+		if errors.Is(err, utils.ErrResourceNotFound) {
+			logger.Error("service already deleted or does not exists", zap.String("service name", serviceName))
+			return utils.ErrResourceNotFound
+		}
 		logger.Error("failed to delete service", zap.String("service name", serviceName), zap.Error(err))
 		// Notifying administrator that service may be in pending delete stage
 		event, err := models.NewEvent(userId, userId, models.EventServiceDeleteFailed)

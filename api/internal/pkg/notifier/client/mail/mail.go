@@ -38,12 +38,12 @@ func (m *Mail) Notify(event models.Event) error {
 	personalization := mail.NewPersonalization()
 	to := mail.NewEmail("", event.UserEmail)
 	// TODO: Add BCC to all the admins or to the group alias when we have it
-	bcc := mail.NewEmail("Power Access Cloud", "PowerACL@ibm.com")
+	bcc := mail.NewEmail("IBM® Power® Access Cloud", "PowerACL@ibm.com")
 	personalization.AddTos(to)
 	if event.NotifyAdmin {
 		personalization.AddBCCs(bcc)
 	}
-	personalization.Subject = fmt.Sprintf("Power Access Cloud - %s", event.Type)
+	personalization.Subject = fmt.Sprintf("IBM® Power® Access Cloud - %s", event.Type)
 
 	m1.AddPersonalizations(personalization)
 
@@ -71,6 +71,6 @@ func New() client.Notifier {
 	request.Method = "POST"
 	return &Mail{
 		request: request,
-		from:    mail.NewEmail("Power Access Cloud", "PowerACL@ibm.com"),
+		from:    mail.NewEmail("IBM® Power® Access Cloud", "PowerACL@ibm.com"),
 	}
 }

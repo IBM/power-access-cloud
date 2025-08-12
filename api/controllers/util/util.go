@@ -17,10 +17,12 @@ limitations under the License.
 package util
 
 import (
-	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
-	"github.com/pkg/errors"
 	"regexp"
 	"strconv"
+
+	"github.com/pkg/errors"
+
+	appv1alpha1 "github.com/PDeXchange/pac/apis/app/v1alpha1"
 )
 
 var (

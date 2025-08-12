@@ -1,20 +1,17 @@
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	errInvalidCapacity    = errors.New("minimum supported values for CPU and memory capacity on PowerVS is 0.25C and 2GB respectively")
-	errInvalidCPUMultiple = errors.New("the CPU cores that can be provisoned on PowerVC is multiples of 0.25")
-)
-
 const (
 	ManagerRole = "manager"
+
+	// DefaultExpirationDays - default expiration days set for Catalog
+	DefaultExpirationDays = 5
 )
 
 func CastStrToFloat(val string) (float64, error) {
@@ -35,4 +32,8 @@ func ValidateQuotaFields(c *gin.Context, cpuCap float64, memCap int) error {
 		return errInvalidCPUMultiple
 	}
 	return nil
+}
+
+func Ptr[T any](v T) *T {
+	return &v
 }

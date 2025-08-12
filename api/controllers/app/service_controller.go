@@ -100,7 +100,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		service.Status.State = appv1alpha1.ServiceStateError
 		message := fmt.Sprintf("catalog %s not in ready state", service.Spec.Catalog.Name)
 		service.Status.Message = message
-		return ctrl.Result{}, errors.Errorf(message)
+		return ctrl.Result{}, fmt.Errorf("%s", message)
 	}
 
 	service.OwnerReferences = capiutil.EnsureOwnerRef(service.OwnerReferences, metav1.OwnerReference{

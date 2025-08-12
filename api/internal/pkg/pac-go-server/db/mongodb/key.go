@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -9,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
+	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
 func (db *MongoDB) GetKeyByUserID(id string) ([]models.Key, error) {
@@ -47,7 +49,7 @@ func (db *MongoDB) CreateKey(keys *models.Key) error {
 	return nil
 }
 
-// GetRequestByID returns a key by its ID
+// GetKeyByID returns a key by its ID
 func (db *MongoDB) GetKeyByID(id string) (*models.Key, error) {
 	var key models.Key
 
@@ -61,10 +63,10 @@ func (db *MongoDB) GetKeyByID(id string) (*models.Key, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
 	defer cancel()
 	err = collection.FindOne(ctx, filter).Decode(&key)
-	if err == mongo.ErrNoDocuments {
-		return nil, fmt.Errorf("key not found with id: %s", id)
-	}
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, utils.ErrResourceNotFound
+		}
 		return nil, fmt.Errorf("error getting key: %w", err)
 	}
 

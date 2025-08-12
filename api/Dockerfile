@@ -1,5 +1,9 @@
 # Build the manager binary
-FROM --platform=$BUILDPLATFORM golang:1.23 as builder
+
+# Define a default value for GO_VERSION if not passed
+ARG GO_VERSION=1.24
+
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} as builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -17,6 +21,7 @@ COPY cmd/ cmd/
 COPY apis/ apis/
 COPY controllers/ controllers/
 COPY internal/ internal/
+COPY docs/ docs/
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command

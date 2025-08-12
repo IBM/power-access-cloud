@@ -14,7 +14,8 @@ import (
 )
 
 func AllowAdminOnly(c *gin.Context) {
-	kc := pacClient.NewKeyClockClient(c.Request.Context())
+	config := pacClient.GetConfigFromContext(c.Request.Context())
+	kc := pacClient.NewKeyCloakClient(config, c)
 	if !kc.IsRole(utils.ManagerRole) {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Not authorized to perform this action"})
 		return
@@ -24,7 +25,7 @@ func AllowAdminOnly(c *gin.Context) {
 
 func RetrospectKeycloakToken(c *gin.Context) {
 	//nolint:staticcheck
-	ctx := context.WithValue(c.Request.Context(), "keyclock_client", client)
+	ctx := context.WithValue(c.Request.Context(), "keycloak_client", client)
 	//nolint:staticcheck
 	ctx = context.WithValue(ctx, "keycloak_realm", realm)
 	//nolint:staticcheck

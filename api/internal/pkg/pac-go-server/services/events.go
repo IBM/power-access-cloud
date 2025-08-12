@@ -10,9 +10,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetEvents			godoc
+// @Summary			Get events
+// @Description		Get events
+// @Tags			events
+// @Accept			json
+// @Produce			json
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/events [get]
 // GetEvents returns all events
 func GetEvents(c *gin.Context) {
-	kc := client.NewKeyClockClient(c.Request.Context())
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
 
 	page := c.DefaultQuery("page", "1")         // Get the page number from the query parameter
 	perPage := c.DefaultQuery("per_page", "10") // Get the number of items per page from the query parameter
@@ -31,7 +41,7 @@ func GetEvents(c *gin.Context) {
 	}
 	events, totalCount, err := dbCon.GetEventsByUserID(userID, startIndex, perPageInt)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

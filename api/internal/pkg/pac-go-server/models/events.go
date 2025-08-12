@@ -132,13 +132,13 @@ Hi,
 
 {{ .Log.Message }}
 
-Please visit the PAC portal for more details.
+Please visit the IBM® Power® Access Cloud portal for more details.
 
 Note: This is an auto-generated email. Please do not reply to this email.
 Generated at: {{ .CreatedAt.Format "Jan 02, 2006 15:04:05 UTC" }}
 
 Thanks,
-PAC Support.
+IBM® Power® Access Cloud Support.
 {{- end -}}
 `
 

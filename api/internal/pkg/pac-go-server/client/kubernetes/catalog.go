@@ -8,6 +8,7 @@ import (
 	kClient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	pac "github.com/PDeXchange/pac/apis/app/v1alpha1"
+	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/utils"
 )
 
 func (client KubeClient) GetCatalogs() (pac.CatalogList, error) {
@@ -22,7 +23,7 @@ func (client KubeClient) GetCatalog(name string) (pac.Catalog, error) {
 	catalog := pac.Catalog{}
 	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &catalog); err != nil {
 		if apierrors.IsNotFound(err) {
-			return catalog, fmt.Errorf("catalog with name %s does not exist", name)
+			return catalog, utils.ErrResourceNotFound
 		}
 		return catalog, fmt.Errorf("failed to get catalog with name %s Error: %v", name, err)
 	}
@@ -32,7 +33,7 @@ func (client KubeClient) GetCatalog(name string) (pac.Catalog, error) {
 func (client KubeClient) CreateCatalog(catalog pac.Catalog) error {
 	if err := client.kubeClient.Create(context.Background(), &catalog); err != nil {
 		if apierrors.IsAlreadyExists(err) {
-			return fmt.Errorf("catalog with name %s already exist", catalog.Name)
+			return utils.ErrResourceAlreadyExists
 		}
 		return fmt.Errorf("failed to create catalog Error: %v", err)
 	}
@@ -43,14 +44,11 @@ func (client KubeClient) DeleteCatalog(name string) error {
 	catalog := pac.Catalog{}
 	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &catalog); err != nil {
 		if apierrors.IsNotFound(err) {
-			return fmt.Errorf("catalog with name %s does not exist", name)
+			return utils.ErrResourceNotFound
 		}
 		return fmt.Errorf("failed to delete catalog with name %s Error: %v", name, err)
 	}
 	if err := client.kubeClient.Delete(context.Background(), &catalog); err != nil {
-		if apierrors.IsNotFound(err) {
-			return fmt.Errorf("catalog with name %s does not exist", name)
-		}
 		return fmt.Errorf("failed to delete catalog with name %s Error: %v", name, err)
 	}
 	return nil
@@ -60,7 +58,7 @@ func (client KubeClient) RetireCatalog(name string) error {
 	catalog := pac.Catalog{}
 	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &catalog); err != nil {
 		if apierrors.IsNotFound(err) {
-			return fmt.Errorf("catalog with name %s does not exist", name)
+			return utils.ErrResourceNotFound
 		}
 		return fmt.Errorf("failed to retire catalog with name %s Error: %v", name, err)
 	}

@@ -1,0 +1,886 @@
+definitions:
+  models.Capacity:
+    properties:
+      cpu:
+        type: number
+      memory:
+        type: integer
+    type: object
+  models.Catalog:
+    properties:
+      capacity:
+        $ref: '#/definitions/models.Capacity'
+      description:
+        type: string
+      expiry:
+        type: integer
+      id:
+        type: string
+      image_thumbnail_reference:
+        type: string
+      name:
+        type: string
+      retired:
+        type: boolean
+      status:
+        $ref: '#/definitions/models.CatalogStatus'
+      type:
+        type: string
+      vm:
+        $ref: '#/definitions/models.VM'
+    type: object
+  models.CatalogStatus:
+    properties:
+      message:
+        type: string
+      ready:
+        type: boolean
+    type: object
+  models.Key:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.Quota:
+    properties:
+      capacity:
+        $ref: '#/definitions/models.Capacity'
+      group_id:
+        type: string
+      id:
+        type: string
+    type: object
+  models.Service:
+    properties:
+      catalog_name:
+        type: string
+      display_name:
+        type: string
+      expiry:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/models.ServiceStatus'
+      user_id:
+        type: string
+    type: object
+  models.ServiceStatus:
+    properties:
+      access_info:
+        type: string
+      message:
+        type: string
+      state:
+        type: string
+    type: object
+  models.VM:
+    properties:
+      capacity:
+        $ref: '#/definitions/models.Capacity'
+      crn:
+        type: string
+      image:
+        type: string
+      network:
+        type: string
+      processor_type:
+        type: string
+      system_type:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: Go-server for PAC backend apis in gin
+  title: Pac-go-server APIs
+paths:
+  /api/v1//services:
+    post:
+      consumes:
+      - application/json
+      description: Create service
+      parameters:
+      - description: Create service
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/models.Service'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create service
+      tags:
+      - services
+  /api/v1/catalogs:
+    get:
+      consumes:
+      - application/json
+      description: Get all catalogs resource
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get all catalogs
+      tags:
+      - catalogs
+    post:
+      consumes:
+      - application/json
+      description: Create catalog resource
+      parameters:
+      - description: Create catalog
+        in: body
+        name: catalog
+        required: true
+        schema:
+          $ref: '#/definitions/models.Catalog'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create catalog
+      tags:
+      - catalogs
+  /api/v1/catalogs/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete catalog resource
+      parameters:
+      - description: catalog name to be deleted
+        in: path
+        name: name
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete catalog
+      tags:
+      - catalogs
+    get:
+      consumes:
+      - application/json
+      description: Get catalog resource
+      parameters:
+      - description: catalog name to be fetched
+        in: path
+        name: name
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get catalog as specified in request
+      tags:
+      - catalogs
+  /api/v1/catalogs/{name}/retire:
+    put:
+      consumes:
+      - application/json
+      description: Reire catalog resource
+      parameters:
+      - description: catalog name to be retired
+        in: path
+        name: name
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Reire catalog
+      tags:
+      - catalogs
+  /api/v1/events:
+    get:
+      consumes:
+      - application/json
+      description: Get events
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get events
+      tags:
+      - events
+  /api/v1/groups:
+    get:
+      consumes:
+      - application/json
+      description: Get all groups
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get all groups
+      tags:
+      - groups
+  /api/v1/groups/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get group as specified in request
+      parameters:
+      - description: group-id to be fetched
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get group
+      tags:
+      - groups
+  /api/v1/groups/{id}/exit:
+    post:
+      consumes:
+      - application/json
+      description: Request to exit from group
+      parameters:
+      - description: group-id for the group to be exited from
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Exit group request
+      tags:
+      - requests
+  /api/v1/groups/{id}/quota:
+    delete:
+      consumes:
+      - application/json
+      description: Delete quota
+      parameters:
+      - description: group-id where quota has to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete quota
+      tags:
+      - quota
+    get:
+      consumes:
+      - application/json
+      description: Get quota
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: quota-id to be fetched
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get quota
+      tags:
+      - quota
+    post:
+      consumes:
+      - application/json
+      description: Create quota
+      parameters:
+      - description: Create quota
+        in: body
+        name: quota
+        required: true
+        schema:
+          $ref: '#/definitions/models.Quota'
+      - description: group-id where quota has to be created
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create quota
+      tags:
+      - quota
+    put:
+      consumes:
+      - application/json
+      description: Update quota
+      parameters:
+      - description: Update quota
+        in: body
+        name: quota
+        required: true
+        schema:
+          $ref: '#/definitions/models.Quota'
+      - description: group-id where quota has to be updated
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update quota
+      tags:
+      - quota
+  /api/v1/groups/{id}/request:
+    post:
+      consumes:
+      - application/json
+      description: Request to switch to new group
+      parameters:
+      - description: group-id for the requested group
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: New group request
+      tags:
+      - requests
+  /api/v1/keys:
+    get:
+      consumes:
+      - application/json
+      description: Get all keys
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get all keys
+      tags:
+      - keys
+    post:
+      consumes:
+      - application/json
+      description: Create key
+      parameters:
+      - description: Create key
+        in: body
+        name: key
+        required: true
+        schema:
+          $ref: '#/definitions/models.Key'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create key
+      tags:
+      - keys
+  /api/v1/keys/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete key
+      parameters:
+      - description: key-id to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete key
+      tags:
+      - keys
+    get:
+      consumes:
+      - application/json
+      description: Get key
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: key-id to be fetched
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get key
+      tags:
+      - keys
+  /api/v1/quota:
+    get:
+      consumes:
+      - application/json
+      description: Get user quota
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get user quota
+      tags:
+      - quota
+  /api/v1/requests:
+    get:
+      consumes:
+      - application/json
+      description: Get all requests
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get all requests
+      tags:
+      - requests
+  /api/v1/requests/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete request
+      parameters:
+      - description: request-id for the request to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete request
+      tags:
+      - requests
+    get:
+      consumes:
+      - application/json
+      description: Get request
+      parameters:
+      - description: request-id for request to be fetched
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get request
+      tags:
+      - requests
+  /api/v1/requests/{id}/approve:
+    post:
+      consumes:
+      - application/json
+      description: Approve request
+      parameters:
+      - description: request-id for the request to be approved
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Approve request
+      tags:
+      - requests
+  /api/v1/requests/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      description: Reject request
+      parameters:
+      - description: request-id for the request to be rejected
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Reject request
+      tags:
+      - requests
+  /api/v1/services:
+    get:
+      consumes:
+      - application/json
+      description: Get all services
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get all services
+      tags:
+      - services
+  /api/v1/services/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete service
+      parameters:
+      - description: service name to be deleted
+        in: path
+        name: name
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete service
+      tags:
+      - services
+    get:
+      consumes:
+      - application/json
+      description: Get service
+      parameters:
+      - description: service name
+        in: path
+        name: name
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get service
+      tags:
+      - services
+  /api/v1/services/{name}/expiry:
+    put:
+      consumes:
+      - application/json
+      description: Update service expiry for a particular service
+      parameters:
+      - description: service name
+        in: path
+        name: name
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update service expiry request
+      tags:
+      - requests
+  /api/v1/tnc:
+    get:
+      consumes:
+      - application/json
+      description: Get terms and conditions
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get terms and conditions
+      tags:
+      - tnc
+    post:
+      consumes:
+      - application/json
+      description: Accept terms and conditions
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Accept terms and conditions
+      tags:
+      - tnc
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get all users
+      tags:
+      - user
+  /api/v1/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user based on given id
+      parameters:
+      - description: user-id for user to be fetched
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get user
+      tags:
+      - user
+swagger: "2.0"

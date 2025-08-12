@@ -11,6 +11,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// GetTermsAndConditionsStatus		godoc
+// @Summary				Get terms and conditions
+// @Description			Get terms and conditions
+// @Tags				tnc
+// @Accept				json
+// @Produce				json
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success				200
+// @Router				/api/v1/tnc [get]
 func GetTermsAndConditionsStatus(c *gin.Context) {
 	userID := c.Request.Context().Value("userid").(string)
 	tnc, err := dbCon.GetTermsAndConditionsByUserID(userID)
@@ -24,6 +33,15 @@ func GetTermsAndConditionsStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, tnc)
 }
 
+// AcceptTermsAndConditions		godoc
+// @Summary				Accept terms and conditions
+// @Description			Accept terms and conditions
+// @Tags				tnc
+// @Accept				json
+// @Produce				json
+// @Param				Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success				200
+// @Router				/api/v1/tnc [post]
 func AcceptTermsAndConditions(c *gin.Context) {
 	userID := c.Request.Context().Value("userid").(string)
 	tnc, err := dbCon.GetTermsAndConditionsByUserID(userID)
@@ -42,7 +60,7 @@ func AcceptTermsAndConditions(c *gin.Context) {
 		AcceptedAt: &timestamp,
 	}
 	if err := dbCon.AcceptTermsAndConditions(tnc); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint("failed to accept terms and conditions: ", err.Error())})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprint("failed to accept terms and conditions: ", err.Error())})
 		return
 	}
 	c.Status(http.StatusCreated)
