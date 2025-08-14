@@ -179,18 +179,19 @@ func (mr *MockDBMockRecorder) GetEventsByUserID(arg0, arg1, arg2 interface{}) *g
 }
 
 // GetFeedbacks mocks base method.
-func (m *MockDB) GetFeedbacks(arg0 models.FeedbacksFilter) ([]models.Feedback, error) {
+func (m *MockDB) GetFeedbacks(arg0 models.FeedbacksFilter, arg1, arg2 int64) ([]models.Feedback, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFeedbacks", arg0)
+	ret := m.ctrl.Call(m, "GetFeedbacks", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]models.Feedback)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetFeedbacks indicates an expected call of GetFeedbacks.
-func (mr *MockDBMockRecorder) GetFeedbacks(arg0 interface{}) *gomock.Call {
+func (mr *MockDBMockRecorder) GetFeedbacks(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeedbacks", reflect.TypeOf((*MockDB)(nil).GetFeedbacks), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeedbacks", reflect.TypeOf((*MockDB)(nil).GetFeedbacks), arg0, arg1, arg2)
 }
 
 // GetGroupsQuota mocks base method.

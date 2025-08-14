@@ -261,6 +261,46 @@ const docTemplate = `{
             }
         },
         "/api/v1/feedbacks": {
+            "get": {
+                "description": "Get feedback resource",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "feedbacks"
+                ],
+                "summary": "Get feedbacks submitted by users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number for pagination",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
             "post": {
                 "description": "Create feedback resource",
                 "consumes": [
@@ -1272,6 +1312,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "comment": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "CreatedAt is the time the event was created",
                     "type": "string"
                 },
                 "id": {

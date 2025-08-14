@@ -41,5 +41,5 @@ type DB interface {
 	DeleteTermsAndConditionsByUserID(string) error
 
 	InsertFeedback(*models.Feedback) error
-	GetFeedbacks(models.FeedbacksFilter) ([]models.Feedback, error)
+	GetFeedbacks(models.FeedbacksFilter, int64, int64) ([]models.Feedback, int64, error)
 }

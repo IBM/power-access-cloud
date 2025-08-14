@@ -24,13 +24,7 @@ func GetEvents(c *gin.Context) {
 	config := client.GetConfigFromContext(c.Request.Context())
 	kc := client.NewKeyCloakClient(config, c.Request.Context())
 
-	page := c.DefaultQuery("page", "1")         // Get the page number from the query parameter
-	perPage := c.DefaultQuery("per_page", "10") // Get the number of items per page from the query parameter
-
-	// Convert the page and perPage values to integers
-	pageInt, _ := strconv.ParseInt(page, 10, 64)
-	perPageInt, _ := strconv.ParseInt(perPage, 10, 64)
-
+	pageInt, perPageInt := utils.GetCurrentPageAndPageCount(c)
 	// Calculate the starting index and ending index for the current page
 	startIndex := (pageInt - 1) * perPageInt
 
@@ -46,10 +40,7 @@ func GetEvents(c *gin.Context) {
 	}
 
 	// Calculate the total number of pages based on the perPage value
-	totalPages := totalCount / perPageInt
-	if totalCount%perPageInt != 0 {
-		totalPages++
-	}
+	totalPages := utils.GetTotalPages(totalCount, perPageInt)
 
 	var response = models.EventResponse{
 		TotalPages: totalPages,

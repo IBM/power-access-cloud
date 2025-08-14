@@ -515,7 +515,7 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 		feedback := models.Feedback{
 			ID:        [12]byte{1},
 			UserID:    "12345",
-			Rating:    "Positive",
+			Rating:    models.Rating("Positive"),
 			Comment:   "good",
 			CreatedAt: time.Now(),
 		}
@@ -528,6 +528,15 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 			}
 		}
 		return &feedback
+	case "get-feedbacks":
+		feedback := models.Feedback{
+			Rating:    models.Rating("Positive"),
+			UserID:    "12345",
+			ID:        [12]byte{1},
+			Comment:   "Very good product",
+			CreatedAt: time.Now(),
+		}
+		return []models.Feedback{feedback}
 	default:
 		return nil
 	}

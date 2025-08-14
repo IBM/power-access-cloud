@@ -26,6 +26,16 @@ type Feedback struct {
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 }
 
+type FeedbackResponse struct {
+	// TotalPages is the total number of pages
+	TotalPages int64 `json:"total_pages"`
+	// TotalItems is the total number of items
+	TotalItems int64 `json:"total_items"`
+	// Feedbacks is the list of feedback
+	Feedbacks []Feedback `json:"feedbacks"`
+	// Links contains the links for the current page, next page and last page
+	Links Links `json:"links"`
+}
 type FeedbacksFilter struct {
 	UserID string
 }
