@@ -37,6 +37,8 @@ const (
 
 	EventLogLevelINFO  EventLogLevel = "INFO"
 	EventLogLevelERROR EventLogLevel = "ERROR"
+
+	EventFeedbackCreate EventType = "FEEDBACK_CREATED"
 )
 
 type Event struct {
