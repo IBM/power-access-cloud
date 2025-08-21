@@ -6,11 +6,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 )
 
 func (db *MongoDB) NewEvent(e *models.Event) error {
@@ -154,4 +155,16 @@ func (db *MongoDB) MarkEventAsNotified(id string) error {
 	}
 
 	return nil
+}
+
+// SetEventCapping caps event to given value
+func (db *MongoDB) SetEventCapping(cap int64) error {
+	opts := options.CreateCollection()
+	opts.SetCapped(true)
+	opts.SetSizeInBytes(cap)
+	log.Println("Invoked SetEventCapping...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
+	defer cancel()
+	return db.Database.CreateCollection(ctx, "events", opts)
 }
