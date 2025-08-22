@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UserService from "../../services/UserService";
-import { tncStatus, acceptTnC, newRequest} from "../../services/request";
+import { tncStatus, acceptTnC, newRequest, allGroups } from "../../services/request";
 
 const TnCRoute = ({ Component }) => {
   const navigate = useNavigate();
@@ -16,9 +16,11 @@ const TnCRoute = ({ Component }) => {
       const tnc_acc = sessionStorage.getItem("TnC_acceptance");
       if(just!=='' && tnc_acc){
         await acceptTnC(); 
+        const groups = await allGroups();
+        const group = groups?.payload?.find(g => g.name?.toLowerCase() === "bronze")
         await newRequest({
-          name: "extra-small",
-          id: "2792d119-3f43-4cbb-a903-39ccc6b2517d",
+          name: "bronze",
+          id: group.id,
           justification: just
         });
         navigate("/dashboard");
