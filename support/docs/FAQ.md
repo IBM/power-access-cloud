@@ -43,7 +43,7 @@ Below steps provides the quick guide on how to get started with IBM&reg; Power&r
 ## 4. What is a group and How can I request for more resources?
 
 **Answer:**
-A Group is a logical unit which controls resource allocation by allocating the maximum vCPU and memory quotas. By default, all new users are added to the Extra-small group which includes .5 vCPU and 8 GB of memory. 
+A Group is a logical unit which controls resource allocation by allocating the maximum vCPU and memory quotas. By default, all new users are added to the Bronze group which includes .5 vCPU and 8 GB of memory. 
 
 To request for more CPU and memory resources, you can submit a "Request" by clicking on **Upgrade** and selecting a desired group along with the justification for upgrading.
 Please wait for some time until the request is approved by the **Admin** (You will be notified via email on successful approval/ rejection).
