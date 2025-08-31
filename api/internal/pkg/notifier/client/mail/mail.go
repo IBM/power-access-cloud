@@ -19,19 +19,18 @@ var _ client.Notifier = &Mail{}
 var l = log.GetLogger()
 
 type Mail struct {
-	request rest.Request
-	from    *mail.Email
+	request           rest.Request
+	from              *mail.Email
+	envPrefixForEmail string
 }
 
 func (m *Mail) Notify(event models.Event) error {
 	m1 := mail.NewV3Mail()
 	m1.SetFrom(m.from)
-
 	plainTextContent, err := event.ComposeMailBody()
 	if err != nil {
 		return err
 	}
-
 	content := mail.NewContent("text", plainTextContent)
 	m1.AddContent(content)
 
@@ -44,7 +43,9 @@ func (m *Mail) Notify(event models.Event) error {
 		personalization.AddBCCs(bcc)
 	}
 	personalization.Subject = fmt.Sprintf("IBM® Power® Access Cloud - %s", event.Type)
-
+	if m.envPrefixForEmail != "" {
+		personalization.Subject = fmt.Sprintf("%s %s", m.envPrefixForEmail, personalization.Subject)
+	}
 	m1.AddPersonalizations(personalization)
 
 	req := m.request
@@ -62,7 +63,7 @@ func (m *Mail) Notify(event models.Event) error {
 	return nil
 }
 
-func New() client.Notifier {
+func New(emailSubjectPrefix string) client.Notifier {
 	key := os.Getenv("SENDGRID_API_KEY")
 	if key == "" {
 		l.Fatal("SENDGRID_API_KEY not set")
@@ -70,7 +71,8 @@ func New() client.Notifier {
 	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "")
 	request.Method = "POST"
 	return &Mail{
-		request: request,
-		from:    mail.NewEmail("IBM® Power® Access Cloud", "PowerACL@ibm.com"),
+		request:           request,
+		from:              mail.NewEmail("IBM® Power® Access Cloud", "PowerACL@ibm.com"),
+		envPrefixForEmail: emailSubjectPrefix,
 	}
 }
