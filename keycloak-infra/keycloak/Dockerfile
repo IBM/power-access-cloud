@@ -1,4 +1,4 @@
 ARG KEYCLOAK_BASE_IMAGE
 FROM ${KEYCLOAK_BASE_IMAGE}
 
-COPY theme/ /opt/keycloak/themes/
+COPY /pac /opt/keycloak/themes/pac

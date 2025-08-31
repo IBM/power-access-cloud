@@ -26,7 +26,7 @@ docker-build:
 	docker build --build-arg KEYCLOAK_BASE_IMAGE=$(KEYCLOCK_IMAGE) -t $(REGISTRY)/$(IMG):$(VERSION)-$(KEYCLOCK_IMAGE_TAG) .
 
 .PHONY: build-prod-image
-build-prod-image: clean sync-theme
+build-prod-image: clean
 	docker build --platform=linux/amd64 --build-arg KEYCLOAK_BASE_IMAGE=$(KEYCLOCK_IMAGE) -t $(REGISTRY)/$(IMG):$(VERSION)-$(KEYCLOCK_IMAGE_TAG) .
 
 .PHONY: clean
