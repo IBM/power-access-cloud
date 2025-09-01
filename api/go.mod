@@ -17,7 +17,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/onsi/ginkgo/v2 v2.25.1
-	github.com/onsi/gomega v1.38.0
+	github.com/onsi/gomega v1.38.2
 	github.com/pkg/errors v0.9.1
 	github.com/ppc64le-cloud/manageiq-client-go v0.0.0-20230320063610-157d6ef06ba5
 	github.com/sendgrid/rest v2.6.9+incompatible
@@ -40,7 +40,7 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/Masterminds/semver/v3 v3.3.1 // indirect
+	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Nerzal/gocloak/v11 v11.2.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -123,6 +123,7 @@ require (
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.19.0 // indirect
 	golang.org/x/mod v0.27.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
@@ -134,7 +135,7 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.36.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	google.golang.org/protobuf v1.36.7 // indirect
 	gopkg.in/go-jose/go-jose.v2 v2.6.3 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
