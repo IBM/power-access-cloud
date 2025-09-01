@@ -17,6 +17,7 @@ var (
 	hostname               = os.Getenv("KEYCLOAK_HOSTNAME")
 	serviceAccount         = os.Getenv("KEYCLOAK_SERVICE_ACCOUNT")
 	serviceAccountPassword = os.Getenv("KEYCLOAK_SERVICE_ACCOUNT_PASSWORD")
+	envPrefixForEmail      = os.Getenv("EMAIL_SUBJECT_PREFIX")
 )
 
 const cappedEvents = 30000
@@ -56,6 +57,6 @@ func main() {
 	if err := db.SetEventCapping(cappedEvents); err != nil {
 		l.Fatal("Capping event notifier failed", zap.Error(err))
 	}
-	mailClient := mail.New()
+	mailClient := mail.New(envPrefixForEmail)
 	notifier(db, mailClient)
 }
