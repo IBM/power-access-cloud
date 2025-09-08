@@ -10,7 +10,7 @@ require (
 	github.com/IBM-Cloud/power-go-client v1.6.0
 	github.com/IBM/go-sdk-core/v5 v5.21.0
 	github.com/IBM/platform-services-go-sdk v0.86.1
-	github.com/IBM/vpc-go-sdk v0.70.1
+	github.com/IBM/vpc-go-sdk v0.71.1
 	github.com/Nerzal/gocloak/v13 v13.7.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-logr/logr v1.4.3
