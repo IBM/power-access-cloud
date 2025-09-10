@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
 )
 
@@ -44,4 +46,5 @@ type DB interface {
 
 	InsertFeedback(*models.Feedback) error
 	GetFeedbacks(models.FeedbacksFilter, int64, int64) ([]models.Feedback, int64, error)
+	FeedbackAllowed(context.Context, string) (bool, error)
 }

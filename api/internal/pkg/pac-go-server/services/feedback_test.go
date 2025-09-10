@@ -30,6 +30,7 @@ func TestCreateFeedbackForUserId(t *testing.T) {
 			mockFunc: func() {
 				mockDBClient.EXPECT().InsertFeedback(gomock.Any()).Return(nil).Times(1)
 				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
+				mockDBClient.EXPECT().FeedbackAllowed(gomock.Any(), gomock.Any()).Return(true, nil).Times(1)
 			},
 			requestContext: testContext{
 				userID: "user1",
@@ -59,11 +60,24 @@ func TestCreateFeedbackForUserId(t *testing.T) {
 			name: "create feedback with InternalServerError",
 			mockFunc: func() {
 				mockDBClient.EXPECT().InsertFeedback(gomock.Any()).Return(errors.New("")).Times(1)
+				mockDBClient.EXPECT().FeedbackAllowed(gomock.Any(), gomock.Any()).Return(true, nil).Times(1)
+
 			},
 			requestContext: testContext{
 				userID: "user1",
 			},
 			httpStatus: http.StatusInternalServerError,
+			feedback:   getResource("create-feedback", nil).(*models.Feedback),
+		},
+		{
+			name: "create feedbacks with submission-limit exceeded",
+			mockFunc: func() {
+				mockDBClient.EXPECT().FeedbackAllowed(gomock.Any(), gomock.Any()).Return(false, nil).Times(1)
+			},
+			requestContext: testContext{
+				userID: "user1",
+			},
+			httpStatus: http.StatusTooManyRequests,
 			feedback:   getResource("create-feedback", nil).(*models.Feedback),
 		},
 	}
