@@ -27,13 +27,18 @@ const Feedback = ({ setActionProps, response }) => {
     setLoading(true);
 
     try {
-      const { type } = await createFeedback({
+      const { type, payload } = await createFeedback({
         rating: feedbackRating,
         comment: feedbackText,
       });
       if (type === "API_ERROR") {
-        title = "Submitting Feedback failed. Please try again!";
-        errored = true;
+        if (payload.response?.status === 429) {
+          title = payload.response?.data.error;
+          errored = true;
+        } else {
+          title = "Submitting Feedback failed. Please try again!";
+          errored = true;
+        }
       } else {
         title = "Your feedback has been submitted successfully. Thanks!";
       }
