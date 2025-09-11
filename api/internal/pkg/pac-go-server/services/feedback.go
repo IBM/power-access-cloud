@@ -12,6 +12,11 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	// FeedbackLimit describes maximum number of feedbacks a user can submit in a day.
+	FeedbackLimit = 3
+)
+
 // CreateFeedback		godoc
 // @Summary			Create Feedback given by user
 // @Description		Create feedback resource
@@ -35,6 +40,17 @@ func CreateFeedback(c *gin.Context) {
 	if err := feedback.ValidateFeedback(); len(err) > 0 {
 		logger.Error("error while validating feedback request", zap.Errors("errors", err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+	// check if user has reached the feedback submission limit for that day(currentLimit is 3/day).
+	ok, err := dbCon.FeedbackAllowed(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error while verifying feedback submission, err: %s", err.Error())})
+		return
+	}
+	if !ok {
+		logger.Debug("feedback limit exceeded for the user", zap.String("userID", userID))
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": fmt.Sprintf("You have reached the daily limit of %v feedback submissions. Please try again tomorrow", FeedbackLimit)})
 		return
 	}
 	event, err := models.NewEvent(userID, userID, models.EventFeedbackCreate)

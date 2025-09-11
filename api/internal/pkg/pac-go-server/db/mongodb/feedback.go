@@ -3,8 +3,10 @@ package mongodb
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/models"
+	"github.com/PDeXchange/pac/internal/pkg/pac-go-server/services"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -60,4 +62,25 @@ func buildFilter(filter models.FeedbacksFilter) bson.M {
 	}
 
 	return bsonFilter
+}
+
+// FeedbackAllowed - checks if user has reached the limit of feedback submission.
+func (db *MongoDB) FeedbackAllowed(ctx context.Context, userID string) (bool, error) {
+	startOfDay := time.Now().UTC().Truncate(24 * time.Hour)
+	endOfDay := startOfDay.Add(24 * time.Hour)
+	collection := db.Database.Collection("feedbacks")
+	filter := bson.M{
+		"user_id": userID,
+		"created_at": bson.M{
+			"$gte": startOfDay,
+			"$lt":  endOfDay,
+		},
+	}
+
+	count, err := collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+
+	return count < services.FeedbackLimit, nil
 }
