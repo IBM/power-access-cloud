@@ -117,7 +117,7 @@ const AddKey = ({ pagename,setActionProps, response }) => {
         </div>
         <div className="mb-3">
           <label htmlFor="Justifcation" className="form-label">
-            Key<span className="text-danger">*</span><Tooltip align="bottom-left" size="sm" label="Please paste your public SSH key here to enable secure authentication. You can generate your SSH key pair using tools like ssh-keygen or similar SSH utilities.">
+            Key<span className="text-danger">*</span><Tooltip align="bottom-left" size="sm" label="Please paste your RSA public SSH key here to enable secure authentication. You can generate your RSA SSH key pair using tools like ssh-keygen or similar SSH utilities.">
                     <Button className="sb-tooltip-trigger" kind="ghost" size="sm">
                             <Information size="14"/>
                           </Button>
@@ -152,7 +152,7 @@ const AddKey = ({ pagename,setActionProps, response }) => {
             }}
             required
           />
-          {keyContentValidate&& inlineNotificationComponent('Public Key',':is not valid a valid ssh key')}
+          {keyContentValidate&& inlineNotificationComponent('Public Key',':is not a valid ssh key')}
           {keyContentemptyCheck&& inlineNotificationComponent('Public Key',': field can not be empty')}
         </div>
       </div>

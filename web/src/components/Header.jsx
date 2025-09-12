@@ -19,6 +19,7 @@ import {
 import ProfileSection from "./Profile";
 import UserService from "../services/UserService";
 import ToastNotify from "./utils/ToastNotify";
+import "../styles/carbon-override.scss"
 
 const BUTTON_FEEDBACK = "BUTTON_FEEDBACK";
 const MenuLink = (props) => {

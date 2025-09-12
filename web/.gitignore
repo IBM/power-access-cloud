@@ -26,3 +26,6 @@ yarn-error.log*
 # Temporary env files
 /public/env-config.js
 env-config.js
+
+# dev tools
+.vscode

@@ -24,7 +24,6 @@ import DeployCatalog from "./PopUp/DeployCatalog";
 import DeleteCatalog from "./PopUp/DeleteCatalog";
 import RetireCatalog from "./PopUp/RetireCatalog";
 import UserService from "../services/UserService";
-import QuotaWarning from "./PopUp/QuotaWarning";
 import Notify from "./utils/Notify";
 
 const BUTTON_REQUEST = "BUTTON_REQUEST";
@@ -172,7 +171,6 @@ const CatalogsAdmin = () => {
       {loading ? (renderSkeleton()) : (
         <>
           {renderActionModals()}
-          <QuotaWarning />
           <DataTable rows={displayData} headers={headers} isSortable>
             {({
               rows,

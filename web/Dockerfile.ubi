@@ -20,13 +20,6 @@ RUN yarn build
 # Stage 2: Production image with NGINX on UBI
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
 
-# Install nginx
-# RUN dnf install -y nginx gettext && \
-#     dnf clean all && \
-#     rm -rf /var/cache/dnf && \
-#     mkdir -p /var/log/nginx && \
-#     chown -R nginx:root /var/log/nginx
-
 RUN microdnf install -y nginx gettext && \
     microdnf clean all && \
     rm -rf /var/cache/dnf && \

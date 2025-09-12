@@ -26,7 +26,7 @@ export const tncStatus = () => {
 
 export const getTnCText = () => {
   const url =
-    "https://isv-graphics.s3.us-south.cloud-object-storage.appdomain.cloud/TnC.txt";
+    "https://raw.githubusercontent.com/PDeXchange/pac-support/refs/heads/main/Terms%20and%20Conditions.md";
   return axios
     .get(url)
     .then((response) => ({

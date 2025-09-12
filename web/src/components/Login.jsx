@@ -1,12 +1,14 @@
 import React from "react";
 import UserService from "../services/UserService";
-import "../styles/welcome.scss";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
   Grid,
   Column,
 } from "@carbon/react";
+import "../styles/welcome.scss";
+import pacBackgroundImg from "../assets/images/PAC-background.jpg"
+
 const Welcome = () => {
   let navigate = useNavigate();
   const handleLogin = async () => {
@@ -24,7 +26,7 @@ const Welcome = () => {
   return (
     <Grid className="login-page" fullWidth>
       <Column lg={10} md={4} >
-      <img src={`https://isv-graphics.s3.us-south.cloud-object-storage.appdomain.cloud/PAC-background-new.jpg`} alt="graphic" className="graphic" />
+      <img src={pacBackgroundImg} alt="graphic" className="graphic" />
       </Column>
       <Column lg={6} md={4} sm={4} >
         <h3 className="landing-page__sub_heading">
