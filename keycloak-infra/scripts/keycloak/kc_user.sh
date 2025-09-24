@@ -3,7 +3,10 @@ set -euo pipefail
 
 # ----------------------------
 # Required env vars:
-# BASE_URL, CLIENT_ID, CLIENT_SECRET
+# BASE_URL, CLIENT_SECRET
+#
+# Optional env vars:
+# CLIENT_ID (defaults to 'user-manage-client')
 #
 # Usage:
 #   ./kc_user.sh --disable <username>
@@ -29,8 +32,8 @@ case "$ACTION" in
 esac
 
 : "${BASE_URL:?Please set BASE_URL (eg https://auth.example.com)}"
-: "${CLIENT_ID:?Please set CLIENT_ID}"
-: "${CLIENT_SECRET:?Please set CLIENT_SECRET}"
+CLIENT_ID="${CLIENT_ID:-user-manage-client}" && echo "Using CLIENT_ID: $CLIENT_ID"
+: "${CLIENT_SECRET:?Please set CLIENT_SECRET for the mentioned CLIENT_ID}"
 
 REALM=pac
 TOKEN_ENDPOINT="${BASE_URL%/}/realms/${REALM}/protocol/openid-connect/token"
