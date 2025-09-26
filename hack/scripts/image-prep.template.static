@@ -4,20 +4,30 @@ set -o nounset
 set -o pipefail
 
 mv /etc/resolv.conf /etc/resolv.conf.orig || true
-echo "nameserver 9.9.9.9" | tee /etc/resolv.conf
+echo "nameserver 10.0.10.4" | tee /etc/resolv.conf
+echo "nameserver 10.0.10.5" | tee /etc/resolv.conf
 {{if eq .Dist "rhel"}}
 subscription-manager register --force --auto-attach --username={{ .RHNUser }} --password={{ .RHNPassword }}
 {{end}}
+
 yum update -y && yum install -y yum-utils
-yum install -y cloud-init
+yum install -y cloud-init firewalld
 rm -rf /etc/systemd/system/multi-user.target.wants/firewalld.service
 rpm -vih --nodeps https://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/ibm-power-repo-latest.noarch.rpm
 sed -i 's/^more \/opt\/ibm\/lop\/notice/#more \/opt\/ibm\/lop\/notice/g' /opt/ibm/lop/configure
 sed -i 's/^less \/opt\/ibm\/lop\/notice/#less \/opt\/ibm\/lop\/notice/g' /opt/ibm/lop/configure
 echo 'y' | /opt/ibm/lop/configure
 yum update -y; yum repolist
+
+{{if eq .Dist "rhel"}}
 # Disable the AT repository due to slowness in nature
 #yum-config-manager --disable Advance_Toolchain
+{{end}}
+{{if eq .Dist "centos"}}
+yum-config-manager --add-repo=https://public.dhe.ibm.com/software/server/POWER/Linux/yum/IBM/RHEL/$(rpm -E %{rhel})/ppc64le/
+rpm --import https://public.dhe.ibm.com/software/server/POWER/Linux/yum/IBM/RHEL/$(rpm -E %{rhel})/ppc64le/repodata/repomd.xml.key
+{{end}}
+
 yum install  powerpc-utils librtas DynamicRM  devices.chrp.base.ServiceRM rsct.opt.storagerm rsct.core rsct.basic rsct.core src -y
 yum install -y device-mapper-multipath
 cat <<EOF > /etc/multipath.conf
@@ -45,7 +55,6 @@ do
 done
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
-#curl https://gist.githubusercontent.com/mkumatag/a99ac20b0d1000347f9253d182c33c1e/raw/115a7a99fffd77fb3afd296a57b39fcdf6beb491/prep-pac.sh -o /usr/local/bin/prep-pac.sh
 curl https://raw.githubusercontent.com/PDeXchange/hack/main/scripts/prep-pac.sh -o /usr/local/bin/prep-pac.sh
 chmod +x /usr/local/bin/prep-pac.sh
 
@@ -63,7 +72,7 @@ Type=oneshot
 RemainAfterExit=yes
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=cloud-init.target
 EOT
 
 systemctl enable prep-pac.service
@@ -86,3 +95,42 @@ rpm -e ibm-power-repo-*.noarch
 
 mv /etc/resolv.conf.orig /etc/resolv.conf || true
 touch /.autorelabel
+
+# enabling and configuring firewalld
+systemctl enable firewalld
+
+# Create drop zone configuration for inbound deny-all except SSH
+cat <<EOF > /etc/firewalld/zones/drop.xml
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+  <short>Drop</short>
+  <description>Unsolicited incoming network packets are dropped. Incoming packets that are responses to outgoing network connections are accepted. Outgoing network connections are allowed.</description>
+  <service name="ssh"/>
+</zone>
+EOF
+
+# Create outbound policy configuration
+cat <<EOF > /etc/firewalld/policies/allowInternet.xml
+<?xml version="1.0" encoding="utf-8"?>
+<policy target="ACCEPT">
+  <short>allowInternet</short>
+  <description>Allow only HTTP, HTTPS, DNS outbound</description>
+  <ingress-zone name="ANY"/>
+  <egress-zone name="HOST"/>
+  <port protocol="tcp" port="80"/>
+  <port protocol="tcp" port="443"/>
+  <port protocol="tcp" port="53"/>
+  <port protocol="udp" port="53"/>
+</policy>
+EOF
+
+cat <<EOF > /etc/cloud/cloud.cfg.d/99-firewall-config.cfg
+#cloud-config
+runcmd:
+  # Configure firewalld on first boot
+  - systemctl enable firewalld
+  - systemctl start firewalld
+  - sleep 2
+  - firewall-cmd --set-default-zone=drop
+  - firewall-cmd --reload
+EOF
