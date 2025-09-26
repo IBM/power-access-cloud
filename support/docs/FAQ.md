@@ -123,3 +123,20 @@ If you discover a security vulnerability in this project, we encourage you to re
 We take security seriously and will work with you to resolve any issues as swiftly as possible.
 
 ---
+
+## 12. How can I extend my active service
+
+**Answer:**
+Before your active service expires, you will receive an email notification regarding the service expiry. If you wish to extend your service:
+
+1. Log in to the **[IBM&reg; Power&reg; Access Cloud Portal](https://console.developonpower.ibm.com)**
+
+2. Go to My Service and select the active service you want to extend.
+
+3. From the Actions menu, click Extend Service.
+
+4. Provide the required justification and the new expiration date.
+
+After admin approval, your service will be extended until the requested expiration date.
+
+Important: If you choose not to extend your service, please ensure that you download all required data before the expiry date, as the data will be permanently deleted after service expiry.
