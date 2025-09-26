@@ -32,6 +32,7 @@ IBM&reg; Power&reg; Access Cloud is available for use by Open Source developers 
   - Utilizing security measures such as firewalls and encryption to safeguard their resources and associated network communications.
   - Monitoring and promptly responding to any security alerts or incidents affecting their created resources.
 * IBM&reg; Power&reg; Access Cloud may provide general recommendations or guidelines regarding resource management, but the ultimate responsibility for the security and maintenance of created resources lies with the users.
+* Users are solely responsible for managing and securing their data, including downloading any required content prior to the expiration of the service. Upon expiry, all associated data will be permanently deleted, and no retrieval or recovery will be possible thereafter.
 
 ## 8. Vulnerability Reporting:
 * Users of IBM&reg; Power&reg; Access Cloud are encouraged to report any identified vulnerabilities or security concerns related to the IBM&reg; Power&reg; Access Cloud infrastructure or Power Hardware resources to the designated contact or security team.
