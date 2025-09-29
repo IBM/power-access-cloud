@@ -106,7 +106,7 @@ echo -e "INFO: Installed patch-warning script into $UPGRADE_WARN_SCRIPT\n"
 
 TNC_LINK="https://github.com/PDeXchange/pac-support/blob/main/Terms%20and%20Conditions.md"
 
-cat > /etc/motd <<"EOF"
+cat > /etc/motd <<EOF
 ********************************************************************************
 NOTICE TO USERS
 
