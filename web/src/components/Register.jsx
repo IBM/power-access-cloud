@@ -58,8 +58,10 @@ const Register = () => {
 <strong>Note</strong>: By default, all new users are assigned to the Bronze group, which includes .5 vCPU, 8 GB of memory. <strong>IBM&reg; Power&reg; Access Cloud Groups</strong> control resource allocation by assigning the maximum CPU and memory available to your VM. With a valid use case, you can request additional resources from the IBM&reg; Power&reg; Access Cloud dashboard after your initial registration is approved.
 
 </p>
-       
-<TextArea labelText="Tell us how you plan to use your IBM&reg; Power&reg; Access Cloud service" rows={4} id="justification" onChange={handleChange} value={just} />
+
+<label for="justification">Tell us how you plan to use your IBM&reg; Power&reg; Access Cloud service <span className="text-danger">*</span> </label>
+<TextArea rows={4} id="justification" onChange={handleChange} value={just} />
+
 </Column>
        
         <Column lg={16} md={8} sm={4} >
