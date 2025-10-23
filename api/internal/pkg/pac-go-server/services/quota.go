@@ -77,9 +77,8 @@ func CreateQuota(c *gin.Context) {
 		return
 	}
 
-	if err := c.BindJSON(&quota); err != nil {
+	if err := utils.BindAndValidate(c, &quota); err != nil {
 		logger.Error("error while creating quota for group", zap.String("id", gid), zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -144,9 +143,8 @@ func UpdateQuota(c *gin.Context) {
 		return
 	}
 
-	if err := c.BindJSON(&quota); err != nil {
+	if err := utils.BindAndValidate(c, &quota); err != nil {
 		logger.Error("error while updating quota", zap.String("groupID", gid), zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

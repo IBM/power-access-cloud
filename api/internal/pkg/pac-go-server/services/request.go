@@ -101,9 +101,8 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	var request = models.GetRequest()
 	userID := c.Request.Context().Value("userid").(string)
 
-	if err := c.BindJSON(&request); err != nil {
+	if err := utils.BindAndValidate(c, &request); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	logger.Debug("request body", zap.Any("request", request))
@@ -228,9 +227,8 @@ func NewGroupRequest(c *gin.Context) {
 	username := c.Request.Context().Value("username").(string)
 	userID := c.Request.Context().Value("userid").(string)
 
-	if err := c.BindJSON(&request); err != nil {
+	if err := utils.BindAndValidate(c, &request); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	logger.Debug("request body", zap.Any("request", request))
@@ -333,9 +331,8 @@ func ExitGroup(c *gin.Context) {
 	username := c.Request.Context().Value("username").(string)
 	userID := c.Request.Context().Value("userid").(string)
 
-	if err := c.BindJSON(&request); err != nil {
+	if err := utils.BindAndValidate(c, &request); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to bind request body, err: %s", err.Error())})
 		return
 	}
 	logger.Debug("request body", zap.Any("request", request))
@@ -661,9 +658,8 @@ func RejectRequest(c *gin.Context) {
 	}
 
 	var request models.Request
-	if err := c.BindJSON(&request); err != nil {
+	if err := utils.BindAndValidate(c, &request); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to load the body, please feed the proper json body: %s", err)})
 		return
 	}
 

@@ -1,10 +1,14 @@
 package utils
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -36,4 +40,35 @@ func ValidateQuotaFields(c *gin.Context, cpuCap float64, memCap int) error {
 
 func Ptr[T any](v T) *T {
 	return &v
+}
+
+// BindAndValidate is used to bind unmarshal request and return custom errors if there are any.
+func BindAndValidate(c *gin.Context, obj any) error {
+	if err := c.ShouldBindJSON(obj); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			// validation errors (missing fields, range, etc.)
+			fe := ve[0]
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": translateValidationError(fe),
+				"field": fe.Field(),
+			})
+			return err
+		}
+
+		// handle JSON type mismatch
+		if ute, ok := err.(*json.UnmarshalTypeError); ok {
+			expectedType := getExpectedType(ute.Type)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": fmt.Sprintf("Field '%s' must be %s", ute.Field, expectedType),
+				"field": ute.Field,
+			})
+			return err
+		}
+
+		// fallback (malformed JSON, syntax error, etc.)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return err
+	}
+	return nil
 }

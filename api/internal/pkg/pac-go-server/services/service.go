@@ -140,9 +140,8 @@ func CreateService(c *gin.Context) {
 	logger := log.GetLogger()
 	service := models.Service{}
 	// bind user request
-	if err := c.BindJSON(&service); err != nil {
-		logger.Error("failed to bin request", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to bind request, Error: %v", err.Error())})
+	if err := utils.BindAndValidate(c, &service); err != nil {
+		logger.Error("failed to bind request", zap.Error(err))
 		return
 	}
 	logger.Debug("create service request", zap.Any("request", service))

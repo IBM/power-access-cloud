@@ -29,16 +29,15 @@ const (
 // @Router			/api/v1/feedbacks [post]
 func CreateFeedback(c *gin.Context) {
 	var feedback *models.Feedback
-	if err := c.BindJSON(&feedback); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := utils.BindAndValidate(c, &feedback); err != nil {
 		return
 	}
 	userID := c.Request.Context().Value("userid").(string)
 	feedback.UserID = userID
 	feedback.CreatedAt = time.Now()
 	logger := log.GetLogger()
-	if err := feedback.ValidateFeedback(); len(err) > 0 {
-		logger.Error("error while validating feedback request", zap.Errors("errors", err))
+	if err := feedback.ValidateFeedback(); err != nil {
+		logger.Error("error while validating feedback request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}

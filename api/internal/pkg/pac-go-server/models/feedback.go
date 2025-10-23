@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -21,7 +20,7 @@ type Feedback struct {
 	ID      primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	UserID  string             `json:"user_id" bson:"user_id,omitempty"`
 	Rating  Rating             `json:"rating" bson:"rating,omitempty"`
-	Comment string             `json:"comment" bson:"comment,omitempty"`
+	Comment string             `json:"comment" bson:"comment,omitempty" binding:"max=250"`
 	// CreatedAt is the time the event was created
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 }
@@ -40,15 +39,12 @@ type FeedbacksFilter struct {
 	UserID string
 }
 
-func (f Feedback) ValidateFeedback() []error {
-	var errs []error
+func (f Feedback) ValidateFeedback() error {
+	var err error
 	if !f.Rating.IsValidRating() {
-		errs = append(errs, fmt.Errorf("invalid rating %s, allowed values: Negative, Neutral, Positive", f.Rating))
+		return fmt.Errorf("invalid rating %s, allowed values: Negative, Neutral, Positive", f.Rating)
 	}
-	if len(f.Comment) > 250 {
-		errs = append(errs, errors.New("comment must not exceed 250 characters"))
-	}
-	return errs
+	return err
 }
 
 func (r Rating) IsValidRating() bool {

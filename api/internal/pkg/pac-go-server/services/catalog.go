@@ -88,9 +88,8 @@ func CreateCatalog(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
 	catalog := models.Catalog{}
-	if err := c.BindJSON(&catalog); err != nil {
+	if err := utils.BindAndValidate(c, &catalog); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to bind request, Error: %v", err.Error())})
 		return
 	}
 
