@@ -1,0 +1,73 @@
+version: "3.4"
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.0.2
+    command: start-dev #--log-level=DEBUG
+    restart: always
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_USER: ${KEYCLOAK_USER}
+      KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
+      KC_DB: postgres
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB_URL: jdbc:postgresql://postgres/postgres
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+  react-app:
+    image: myapp/react-app
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      # Local backend server, helpful if backend code modifed
+      # REACT_APP_PAC_GO_SERVER_TARGET: "http://192.168.0.108:8000"
+      REACT_APP_PAC_GO_SERVER_TARGET: "http://backend:8000"
+      REACT_APP_KEYCLOAK_CLIENT_ID: "pac-ui"
+      REACT_APP_KEYCLOAK_REALM: "pac"
+      # Production Keycloak server
+      # REACT_APP_KEYCLOAK_URL: "https://keycloak.developonpower.com"
+      REACT_APP_KEYCLOAK_URL: "http://keycloak:8080"
+    depends_on:
+      - backend
+      - keycloak
+    volumes:
+      - .:/app
+  backend:
+    image: ghcr.io/pdexchange/pac-go-server:main
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      KEYCLOAK_CLIENT_ID: "pac-go-server"
+      # Change the token secret to the one got created from the keycloak admin console
+      KEYCLOAK_CLIENT_SECRET: "SbTbRsRbcsGgoC9JjZuRqDJpk9rBvrDB"
+      KEYCLOAK_REALM: "pac"
+      # Production keycloak server
+      # KEYCLOAK_HOSTNAME: "https://keycloak.developonpower.com"
+      KEYCLOAK_HOSTNAME: "http://keycloak:8080"
+    depends_on:
+      - postgres
+volumes:
+  postgres-data:

@@ -1,0 +1,8 @@
+{
+  "realm": "pac",
+  "auth-server-url": "http://localhost:4080/",
+  "ssl-required": "none",
+  "resource": "pac-ui",
+  "public-client": true,
+  "confidential-port": 0
+}

@@ -1,0 +1,13 @@
+@use "@carbon/react/scss/spacing" as *;
+
+// Toast notifications container - top-right corner
+.toast-notify {
+  position: fixed;
+  top: $spacing-09 + $spacing-03; // 3rem + 0.5rem
+  right: $spacing-05; // 1rem
+  z-index: 10000; // above header and sidenav
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $spacing-03; // space between the toasts
+}
