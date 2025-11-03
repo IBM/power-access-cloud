@@ -60,7 +60,7 @@ const QuickLinks = () => {
         <div style={{ marginTop: "2rem" }}>
           <Link size="20" />{" "}
           <a href="https://community.ibm.com/community/user/powerdeveloper/home">
-            Join the Power Developer eXchange Community
+            Join the Power Access Cloud Community
           </a>
           <br />
           <br />
