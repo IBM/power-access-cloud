@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	pac "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
 
 func TestGetQuota(t *testing.T) {

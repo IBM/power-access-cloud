@@ -89,7 +89,7 @@ const HeaderNav = () => {
                 </HeaderMenuItem>
                 <HeaderMenuItem
                   as={Link}
-                  to="https://github.ibm.com/pac/power-access-cloud/blob/main/support/docs/FAQ.md"
+                  to="https://github.com/IBM/power-access-cloud/blob/main/support/docs/FAQ.md"
                 >
                   FAQ
                 </HeaderMenuItem>

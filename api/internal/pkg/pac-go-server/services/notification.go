@@ -9,9 +9,9 @@ import (
 
 	"go.uber.org/zap"
 
-	pac "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	serviceExpiryMsg  = "Service %s is expiring on %s. It will be deleted post-expiry, if not extended. Kindly ensure that all necessary data is downloaded prior to expiry, as all associated data will be permanently deleted upon service-deletion. Please refer this link for service extension: https://github.ibm.com/pac/power-access-cloud/blob/main/support/docs/FAQ.md"
+	serviceExpiryMsg  = "Service %s is expiring on %s. It will be deleted post-expiry, if not extended. Kindly ensure that all necessary data is downloaded prior to expiry, as all associated data will be permanently deleted upon service-deletion. Please refer this link for service extension: https://github.com/IBM/power-access-cloud/blob/main/support/docs/FAQ.md"
 	requestExpiryMsg  = "Service is expired, hence request is no longer needed"
 	serviceExpiredMsg = "Service %s is expired. It is going to be deleted."
 )

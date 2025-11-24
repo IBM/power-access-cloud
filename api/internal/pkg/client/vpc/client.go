@@ -6,7 +6,7 @@ import (
 
 	"github.com/IBM/go-sdk-core/v5/core"
 	"github.com/IBM/vpc-go-sdk/vpcv1"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/client/iam"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/client/iam"
 )
 
 var _ VPC = &Client{}

@@ -28,7 +28,7 @@ import (
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 	"github.com/pkg/errors"
 	"github.com/ppc64le-cloud/manageiq-client-go"
-	appv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
+	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,7 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	manageiqv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/manageiq/v1alpha1"
+	manageiqv1alpha1 "github.com/IBM/power-access-cloud/api/apis/manageiq/v1alpha1"
 )
 
 var (

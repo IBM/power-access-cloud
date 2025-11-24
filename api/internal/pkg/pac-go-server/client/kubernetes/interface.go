@@ -3,7 +3,7 @@ package kubernetes
 import (
 	"time"
 
-	pac "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
+	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 )
 
 //go:generate mockgen -destination=mock_kubernetes_client.go -package=kubernetes . Client

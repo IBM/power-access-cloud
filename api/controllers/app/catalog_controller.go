@@ -31,9 +31,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	appv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	appscope "github.ibm.com/pac/power-access-cloud/api/controllers/app/scope"
-	"github.ibm.com/pac/power-access-cloud/api/controllers/util"
+	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	appscope "github.com/IBM/power-access-cloud/api/controllers/app/scope"
+	"github.com/IBM/power-access-cloud/api/controllers/util"
 )
 
 // CatalogReconciler reconciles a Catalog object

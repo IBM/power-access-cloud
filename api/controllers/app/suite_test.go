@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	appv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
+	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 

@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
 
 //go:generate mockgen -destination=mock_db_client.go -package=db . DB

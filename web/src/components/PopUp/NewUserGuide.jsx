@@ -33,7 +33,7 @@ const NewUserGuide = ({ setActionProps }) => {
           Enter details for your service (Power instance) and submit. Within few secs, instance will be available to access under "My Services" section.
           <br />
           <br />
-          For more information, please read our <a href="https://github.ibm.com/pac/power-access-cloud/blob/main/support/docs/FAQ.md" target="_blank" rel="noopener noreferrer">FAQ</a> page.
+          For more information, please read our <a href="https://github.com/IBM/power-access-cloud/blob/main/support/docs/FAQ.md" target="_blank" rel="noopener noreferrer">FAQ</a> page.
       </div>
       </div>
     </Modal>

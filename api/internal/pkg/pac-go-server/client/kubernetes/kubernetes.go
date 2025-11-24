@@ -6,8 +6,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	pac "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
 )
 
 const DefaultNamespace = "default"

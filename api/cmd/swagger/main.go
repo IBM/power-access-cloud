@@ -1,6 +1,6 @@
 package main
 
-import _ "github.ibm.com/pac/power-access-cloud/api/docs"
+import _ "github.com/IBM/power-access-cloud/api/docs"
 
 // @title Pac-go-server APIs
 // @description Go-server for PAC backend apis in gin

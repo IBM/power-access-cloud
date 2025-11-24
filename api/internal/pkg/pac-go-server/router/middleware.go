@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	pacClient "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/client"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/utils"
+	pacClient "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 )
 
 func AllowAdminOnly(c *gin.Context) {

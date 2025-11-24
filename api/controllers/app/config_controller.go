@@ -22,7 +22,7 @@ import (
 	"net/url"
 
 	"github.com/pkg/errors"
-	manageiqv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/manageiq/v1alpha1"
+	manageiqv1alpha1 "github.com/IBM/power-access-cloud/api/apis/manageiq/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/ppc64le-cloud/manageiq-client-go"
@@ -34,7 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	appv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
+	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 )
 
 // ConfigReconciler reconciles a Config object

@@ -10,8 +10,8 @@ import (
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
 	"github.com/pkg/errors"
-	appv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	"github.ibm.com/pac/power-access-cloud/api/controllers/app/scope"
+	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	"github.com/IBM/power-access-cloud/api/controllers/app/scope"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 )
 

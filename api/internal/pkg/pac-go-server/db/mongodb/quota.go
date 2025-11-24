@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
 
 func (db *MongoDB) GetQuotaForGroupID(id string) (*models.Quota, error) {

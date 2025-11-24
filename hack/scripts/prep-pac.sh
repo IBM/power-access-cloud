@@ -104,7 +104,7 @@ echo -e "INFO: Installed patch-warning script into $UPGRADE_WARN_SCRIPT\n"
 # Terms & Conditions MOTD
 # ------------------------------------------------------------------------------
 
-TNC_LINK="https://github.ibm.com/pac/power-access-cloud/blob/main/support/Terms%20and%20Conditions.md"
+TNC_LINK="https://github.com/IBM/power-access-cloud/blob/main/support/Terms%20and%20Conditions.md"
 
 cat > /etc/motd <<EOF
 ********************************************************************************

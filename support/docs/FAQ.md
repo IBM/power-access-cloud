@@ -105,20 +105,20 @@ ssh -i ~/.ssh/id_rsa root@<ip> # Replace <ip> with actual IP available in 'Acces
 ## 8. How do I contact support?
 
 **Answer:**  
-If you're having issues, you can reach out to us at **PowerACL@ibm.com**, or open an issue on our [GitHub Issues Page](https://github.ibm.com/pac/power-access-cloud). Our team will get back to you as soon as possible.
+If you're having issues, you can reach out to us at **PowerACL@ibm.com**, or open an issue on our [GitHub Issues Page](https://github.com/IBM/power-access-cloud). Our team will get back to you as soon as possible.
 
 ---
 
 ## 9. Where can I find the source code?
 
 **Answer:**  
-The source code for IBM&reg; Power&reg; Access Cloud is hosted on GitHub. You can access it here: [IBM&reg; Power&reg; Access Cloud](https://github.ibm.com/pac/power-access-cloud)
+The source code for IBM&reg; Power&reg; Access Cloud is hosted on GitHub. You can access it here: [IBM&reg; Power&reg; Access Cloud](https://github.com/IBM/power-access-cloud)
 ---
 
 ## 10. How can I report a bug or suggest a feature?
 
 **Answer:**  
-To report bugs or request new features, please visit [GitHub Issues Page](https://github.ibm.com/pac/power-access-cloud) on our GitHub repository.
+To report bugs or request new features, please visit [GitHub Issues Page](https://github.com/IBM/power-access-cloud) on our GitHub repository.
 
 ---
 

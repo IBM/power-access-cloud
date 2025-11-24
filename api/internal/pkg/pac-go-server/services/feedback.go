@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/utils"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"go.uber.org/zap"
 )
 

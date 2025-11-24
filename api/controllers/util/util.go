@@ -22,7 +22,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	appv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
+	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 )
 
 var (

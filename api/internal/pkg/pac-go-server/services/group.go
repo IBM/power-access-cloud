@@ -8,9 +8,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/client"
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
 
 // GetAllGroups			godoc

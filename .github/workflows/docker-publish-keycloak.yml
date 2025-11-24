@@ -1,4 +1,4 @@
-name: Docker
+name: Docker Keycloak
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -85,8 +85,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
-          context: ./keycloak
-          dockerfile: ./keycloak/Dockerfile
+          context: ../keycloak-infra/keycloak
+          dockerfile: ../keycloak-infra/keycloak/Dockerfile
           build-args: KEYCLOAK_BASE_IMAGE=quay.io/keycloak/keycloak:${{ env.KEYCLOAK_VERSION }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}

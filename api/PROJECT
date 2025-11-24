@@ -3,7 +3,7 @@ layout:
 - go.kubebuilder.io/v3
 multigroup: true
 projectName: pac
-repo: github.ibm.com/pac/power-access-cloud/api
+repo: github.com/IBM/power-access-cloud/api
 resources:
 - api:
     crdVersion: v1
@@ -12,7 +12,7 @@ resources:
   domain: pac.io
   group: app
   kind: Config
-  path: github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1
+  path: github.com/IBM/power-access-cloud/api/apis/app/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
@@ -21,7 +21,7 @@ resources:
   domain: pac.io
   group: manageiq
   kind: Service
-  path: github.ibm.com/pac/power-access-cloud/api/apis/manageiq/v1alpha1
+  path: github.com/IBM/power-access-cloud/api/apis/manageiq/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
@@ -30,7 +30,7 @@ resources:
   domain: pac.io
   group: app
   kind: Catalog
-  path: github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1
+  path: github.com/IBM/power-access-cloud/api/apis/app/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
@@ -39,6 +39,6 @@ resources:
   domain: pac.io
   group: app
   kind: Service
-  path: github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1
+  path: github.com/IBM/power-access-cloud/api/apis/app/v1alpha1
   version: v1alpha1
 version: "3"

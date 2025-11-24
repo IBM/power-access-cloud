@@ -6,7 +6,7 @@ import (
 
 	"github.com/IBM/go-sdk-core/v5/core"
 	"github.com/IBM/platform-services-go-sdk/iamidentityv1"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/client/platform"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/client/platform"
 )
 
 // GetAccountID returns IBM cloud account ID of API key used.

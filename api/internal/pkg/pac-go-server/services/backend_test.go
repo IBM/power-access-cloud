@@ -9,12 +9,12 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/golang/mock/gomock"
-	pac "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/client"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/client/kubernetes"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/db"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/utils"
+	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client/kubernetes"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/db"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

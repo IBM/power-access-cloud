@@ -8,7 +8,7 @@ import (
 	"github.com/IBM/platform-services-go-sdk/iamidentityv1"
 	"github.com/IBM/platform-services-go-sdk/resourcecontrollerv2"
 
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/client/iam"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/client/iam"
 )
 
 type Client struct {

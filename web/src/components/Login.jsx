@@ -36,7 +36,7 @@ const Welcome = () => {
    <br/>
         <p>IBM&reg; Power&reg; Access Cloud offers a comprehensive catalog of free Power hardware resources for developers who want to explore, develop, and optimize their open source software on the Power architecture. 
 </p>
-        <p>Our self-service dashboard allows you to select the resources you need and deploy them according to your specific requirements. After you register, you'll have access to your resources for 5 days with an option to extend if needed. Read our <a href="https://github.ibm.com/pac/power-access-cloud/blob/main/support/docs/FAQ.md" target="_blank" rel="noopener noreferrer">FAQ</a> to learn more.
+        <p>Our self-service dashboard allows you to select the resources you need and deploy them according to your specific requirements. After you register, you'll have access to your resources for 5 days with an option to extend if needed. Read our <a href="https://github.com/IBM/power-access-cloud/blob/main/support/docs/FAQ.md" target="_blank" rel="noopener noreferrer">FAQ</a> to learn more.
 </p>
         <p>Click <strong>Register</strong> to get started. You'll need a valid <a href="https://www.ibm.com/account/us-en/signup/register.html" target="_blank" rel="noopener noreferrer">IBMid</a> or <a href="https://github.com/join" target="_blank" rel="noopener noreferrer">GitHub</a> account to complete the registration. If you've already registered, click <strong>Log in</strong> to go directly to the IBM&reg; Power&reg; Access Cloud dashboard. 
 </p>

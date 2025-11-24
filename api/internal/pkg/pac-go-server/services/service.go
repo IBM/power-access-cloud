@@ -13,13 +13,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 
-	pac "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/client"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/client/kubernetes"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/db"
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/utils"
+	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client/kubernetes"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/db"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 )
 
 const maxServiceNameLength = 50

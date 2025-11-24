@@ -55,7 +55,7 @@ do
 done
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
-curl https://raw.github.ibm.com/pac/power-access-cloud/refs/heads/main/hack/scripts/prep-pac.sh -o /usr/local/bin/prep-pac.sh
+curl https://raw.github.com/IBM/power-access-cloud/refs/heads/main/hack/scripts/prep-pac.sh -o /usr/local/bin/prep-pac.sh
 chmod +x /usr/local/bin/prep-pac.sh
 
 cat <<EOT >> /usr/lib/systemd/system/prep-pac.service

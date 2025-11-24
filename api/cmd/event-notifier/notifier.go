@@ -7,11 +7,11 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/Nerzal/gocloak/v13"
-	mailclient "github.ibm.com/pac/power-access-cloud/api/internal/pkg/notifier/client"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/client"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/db"
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	mailclient "github.com/IBM/power-access-cloud/api/internal/pkg/notifier/client"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/db"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
 
 func notifier(db db.DB, mailClient mailclient.Notifier) {

@@ -11,8 +11,8 @@ import (
 
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/client/keycloak"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/services"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/client/keycloak"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/services"
 
 	_ "github.com/joho/godotenv/autoload"
 )

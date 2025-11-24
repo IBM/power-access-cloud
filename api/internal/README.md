@@ -29,7 +29,7 @@ This guide provides step-by-step instructions for setting up and running the IBM
 1. Clone Repository
 
     ```
-    git clone https://github.ibm.com/pac/power-access-cloud/api.git
+    git clone https://github.com/IBM/power-access-cloud/api.git
     cd power-access-cloud
     ```
 
@@ -67,7 +67,7 @@ This guide provides step-by-step instructions for setting up and running the IBM
 1. Clone Repository
 
     ```
-    git clone https://github.ibm.com/pac/power-access-cloud.git
+    git clone https://github.com/IBM/power-access-cloud.git
     cd power-access-cloud
     ```
 

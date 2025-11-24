@@ -33,9 +33,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	appv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/app/v1alpha1"
-	manageiqv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/manageiq/v1alpha1"
-	appcontrollers "github.ibm.com/pac/power-access-cloud/api/controllers/app"
+	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
+	manageiqv1alpha1 "github.com/IBM/power-access-cloud/api/apis/manageiq/v1alpha1"
+	appcontrollers "github.com/IBM/power-access-cloud/api/controllers/app"
 	//+kubebuilder:scaffold:imports
 )
 

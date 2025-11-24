@@ -9,9 +9,9 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"go.uber.org/zap"
 
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/notifier/client"
-	log "github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/logger"
-	"github.ibm.com/pac/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/notifier/client"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
 
 var _ client.Notifier = &Mail{}

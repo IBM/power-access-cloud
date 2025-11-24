@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	manageiqv1alpha1 "github.ibm.com/pac/power-access-cloud/api/apis/manageiq/v1alpha1"
+	manageiqv1alpha1 "github.com/IBM/power-access-cloud/api/apis/manageiq/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
