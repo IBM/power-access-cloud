@@ -23,3 +23,18 @@ In the implementation of IBM&reg; Power&reg; Access Cloud, several key component
 ![image](https://github.com/user-attachments/assets/897cde19-037e-4e18-9b60-dbdbda9a2b60)
 
 Please refer to: [devguide](api/internal/README.md) for creating setup locally.
+
+## Secrets detection.
+
+To prevent accidental exposure of secrets in the repository, we use the detect-secrets tool:
+
+`detect-secrets` is installed **locally inside a project-managed Python virtual
+environment**,
+
+1. Python 3 installation is required to run the detect-secrets tooling.
+
+2. To scan the repository for secrets run:
+    make scan-secrets
+
+3. To audit the scanned secrets.baseline file run:
+    make secrets-audit
