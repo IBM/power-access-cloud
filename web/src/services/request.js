@@ -26,7 +26,7 @@ export const tncStatus = () => {
 
 export const getTnCText = () => {
   const url =
-    "https://github.com/IBM/power-access-cloud/blob/main/support/Terms%20and%20Conditions.md";
+    "https://raw.githubusercontent.com/IBM/power-access-cloud/refs/heads/main/support/Terms%20and%20Conditions.md";
   return axios
     .get(url)
     .then((response) => ({
