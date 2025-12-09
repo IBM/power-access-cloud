@@ -1,0 +1,13 @@
+This project is licensed under the Apache-2.0 license
+
+The following components are separately licensed under the SIL Open Font License (OFL) 1.1 -  http://scripts.sil.org/OFL
+
+plex-serif
+plex
+plex-sans-thai
+plex-mono
+plex-sans-thai-looped
+plex-sans
+plex-sans-devanagari
+plex-sans-hebrew
+plex-sans-arabic
