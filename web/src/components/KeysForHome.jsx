@@ -161,7 +161,7 @@ const renderNoDataEmptyState=()=>{
         
       >
         <p><strong>Key name</strong>: {keyname}</p>
-        <p><strong>Key Value</strong>: <span className={`${iscoppied ? "" : "highlight"}`}>{keyvalue}</span></p>
+        <p><strong>Key Value</strong>:</p> <span  className={`${iscoppied ? "" : "highlight"}`}><code style={{ color: "#000" }}>{keyvalue}</code></span>
       </Modal>
       <Notify title={errorTitle} message={errorMsg} nkind={notifyKind} setTitle={setErrorTitle} />
       {loading ? (renderSkeleton()) : (
