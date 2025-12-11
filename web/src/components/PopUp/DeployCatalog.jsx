@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { deployCatalog } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal,InlineNotification } from "@carbon/react";
+
+const MAX_NAME_LENGTH = 125;
+
 const DeployCatalog = ({ selectRows, setActionProps, response }) => {
   const [catalogName, setCatalogName] = useState("");
   const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
@@ -68,12 +71,16 @@ const DeployCatalog = ({ selectRows, setActionProps, response }) => {
       onRequestSubmit={() => {
         if(catalogName===""){
           setEmptyServiceName(false)
-        }else{
+          return;
+        }
+        if (catalogName.length > MAX_NAME_LENGTH){
+          return;
+        }
           setEmptyServiceName(true);
           setPrimaryButtonDisabled(true);
         setPrimaryButtonText("Submitting...")
         onSubmit();
-        }
+        
         
       }}
       open={true}
@@ -92,6 +99,7 @@ const DeployCatalog = ({ selectRows, setActionProps, response }) => {
             placeholder="Enter the display name for the service"
             name="name"
             value={catalogName}
+            maxLength={MAX_NAME_LENGTH}
             onChange={(e) => {
               if(e.target.value===""){
                 setEmptyServiceName(false)
@@ -102,6 +110,7 @@ const DeployCatalog = ({ selectRows, setActionProps, response }) => {
               setCatalogName(e.target.value)
             }}
           />
+          {catalogName.length}/{MAX_NAME_LENGTH} characters
           {!emptyServiceName&&inlineNotificationComponent('Service name',': field can not be empty')}
 
         </div>
