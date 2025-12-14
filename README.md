@@ -4,6 +4,10 @@ IBM&reg; Power&reg; Access Cloud is a self-service portal that offers Open Sourc
 
 IBM&reg; Power&reg; Access Cloud aims to foster collaboration, innovation, and adoption of Power Architecture, simplifying the exploration and development of Power-based applications from a comprehensive catalog of available resources.
 
+## 🚀 Getting Started
+
+Read the [FAQ](https://github.com/IBM/power-access-cloud/blob/main/support/docs/FAQ.md) to start using IBM&reg; Power&reg; Access Cloud
+
 ## Implementation Details
 
 In the implementation of IBM&reg; Power&reg; Access Cloud, several key components have been utilized to provide a comprehensive and user-friendly experience for Open Source developers, ISVs, and customers. These include:
