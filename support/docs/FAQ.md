@@ -3,6 +3,9 @@
 Welcome to the FAQ page for IBM&reg; Power&reg; Access Cloud. Below are some common questions and their answers.
 
 ---
+A guided video instruction:
+
+[Watch the guided video instruction](https://github.com/user-attachments/assets/a7525360-2028-4388-aaca-8cfe4ab66d89)
 
 ## 1. What is IBM&reg; Power&reg; Access Cloud?
 
