@@ -43,7 +43,7 @@ const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
         message = payload.response.data.error;
         errored = true;
       } else {
-        title = "Service extention request submitted successfully, please wait for the approval. For more details please check the Requests tab.";
+        title = "Service extension request submitted successfully, please wait for the approval. For more details please check status section under My Services Tab";
       }
     } catch (error) {
       console.log(error);
