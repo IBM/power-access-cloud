@@ -53,7 +53,7 @@ func raiseNotification() {
 			generateEvent(service, models.EventServiceExpiredNotification, fmt.Sprintf(serviceExpiredMsg, service.Name))
 			continue
 		}
-		generateEvent(service, models.EventServiceExpiryNotification, fmt.Sprintf(serviceExpiryMsg, service.Name, service.Expiry.String()))
+		generateEvent(service, models.EventServiceExpiryNotification, fmt.Sprintf(serviceExpiryMsg, service.Name, service.Expiry.Format(time.RFC3339)))
 	}
 }
 
