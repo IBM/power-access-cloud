@@ -376,7 +376,34 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 			},
 			ServiceExpiry: &models.ServiceExpiry{
 				Name:   "test-service",
-				Expiry: time.Now().Add(3 * time.Hour),
+				Expiry: time.Now().Add(4 * time.Hour),
+			},
+		}
+		// Update request with custom values if provided
+		for key, value := range customValues {
+			if fieldValue := reflect.ValueOf(&request).Elem().FieldByName(key); fieldValue.IsValid() {
+				if value != nil {
+					fieldValue.Set(reflect.ValueOf(value))
+				}
+			}
+		}
+		return &request
+	case "get-request-by-id-before-expiry":
+		request := models.Request{
+			ID:            [12]byte{1},
+			UserID:        "12345",
+			Justification: "justification",
+			Comment:       "comment",
+			CreatedAt:     time.Time{},
+			RequestType:   "SERVICE_EXPIRY",
+			GroupAdmission: &models.GroupAdmission{
+				GroupID:   "test-group",
+				Group:     "manager",
+				Requester: "test-user",
+			},
+			ServiceExpiry: &models.ServiceExpiry{
+				Name:   "test-service",
+				Expiry: time.Now().Add(2 * time.Hour),
 			},
 		}
 		// Update request with custom values if provided

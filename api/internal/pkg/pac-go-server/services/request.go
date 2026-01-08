@@ -98,16 +98,16 @@ func GetRequest(c *gin.Context) {
 func UpdateServiceExpiryRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
-	var request = models.GetRequest()
+	var expiryRequest = models.GetRequest()
 	userID := c.Request.Context().Value("userid").(string)
 
-	if err := utils.BindAndValidate(c, &request); err != nil {
+	if err := utils.BindAndValidate(c, &expiryRequest); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
 		return
 	}
-	logger.Debug("request body", zap.Any("request", request))
+	logger.Debug("request body", zap.Any("request", expiryRequest))
 
-	if err := validateCreateRequestParams(request); len(err) > 0 {
+	if err := validateCreateRequestParams(expiryRequest); len(err) > 0 {
 		logger.Error("error in create request validation", zap.Errors("errors", err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
@@ -132,6 +132,14 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	if now.After(service.Spec.Expiry.Time) {
 		logger.Error("service expired", zap.String("service name", serviceName), zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Service %s is expired, can't extend the expiry", serviceName)})
+		return
+	}
+	// requested expiry should be after current expiry
+	currentExpiry := service.Spec.Expiry.Time
+	requestedExpiry := expiryRequest.ServiceExpiry.Expiry
+	if requestedExpiry.Before(currentExpiry) {
+		logger.Error("Requested expiry date should be after the current expiry date")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Requested expiry date should be after the current expiry date"})
 		return
 	}
 
@@ -175,11 +183,11 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		UserID:        userID,
 		CreatedAt:     time.Now(),
 		State:         models.RequestStateNew,
-		Justification: request.Justification,
+		Justification: expiryRequest.Justification,
 		RequestType:   models.RequestExtendServiceExpiry,
 		ServiceExpiry: &models.ServiceExpiry{
 			Name:   serviceName,
-			Expiry: request.ServiceExpiry.Expiry,
+			Expiry: expiryRequest.ServiceExpiry.Expiry,
 		},
 	})
 	if err != nil {
