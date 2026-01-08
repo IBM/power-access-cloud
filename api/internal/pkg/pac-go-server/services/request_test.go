@@ -137,6 +137,17 @@ func TestUpdateServiceExpiryRequest(t *testing.T) {
 			}),
 			httpStatus: http.StatusBadRequest,
 		},
+		{
+			name: "service expiry request set before current expiry",
+			mockFunc: func() {
+				mockClient.EXPECT().GetService(gomock.Any()).Return(getResource("get-service", nil).(pac.Service), nil).Times(1)
+			},
+			requestContext: formContext(customValues{
+				"userid": "12345",
+			}),
+			httpStatus: http.StatusBadRequest,
+			request:    getResource("get-request-by-id-before-expiry", nil).(*models.Request),
+		},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
