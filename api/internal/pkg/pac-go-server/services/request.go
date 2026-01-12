@@ -98,16 +98,16 @@ func GetRequest(c *gin.Context) {
 func UpdateServiceExpiryRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
-	var request = models.GetRequest()
+	var expiryRequest = models.GetRequest()
 	userID := c.Request.Context().Value("userid").(string)
 
-	if err := utils.BindAndValidate(c, &request); err != nil {
+	if err := utils.BindAndValidate(c, &expiryRequest); err != nil {
 		logger.Error("failed to bind request", zap.Error(err))
 		return
 	}
-	logger.Debug("request body", zap.Any("request", request))
+	logger.Debug("request body", zap.Any("request", expiryRequest))
 
-	if err := validateCreateRequestParams(request); len(err) > 0 {
+	if err := validateCreateRequestParams(expiryRequest); len(err) > 0 {
 		logger.Error("error in create request validation", zap.Errors("errors", err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
@@ -168,6 +168,12 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "You have already requested to extend service expiry"})
 			return
 		}
+		requestedDate := expiryRequest.ServiceExpiry.Expiry
+		if requestedDate.After(request.ServiceExpiry.Expiry.AddDate(0, 0, 5)) {
+			logger.Error("Maximum extension allowed is 5 days from the current expiry date")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Maximum extension allowed is 5 days from the current expiry date"})
+			return
+		}
 	}
 
 	// insert the request into the database
@@ -175,11 +181,11 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		UserID:        userID,
 		CreatedAt:     time.Now(),
 		State:         models.RequestStateNew,
-		Justification: request.Justification,
+		Justification: expiryRequest.Justification,
 		RequestType:   models.RequestExtendServiceExpiry,
 		ServiceExpiry: &models.ServiceExpiry{
 			Name:   serviceName,
-			Expiry: request.ServiceExpiry.Expiry,
+			Expiry: expiryRequest.ServiceExpiry.Expiry,
 		},
 	})
 	if err != nil {
