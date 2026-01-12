@@ -10,7 +10,19 @@ const DeployCatalog = ({ selectRows, setActionProps, response }) => {
   const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
   const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
   const [emptyServiceName, setEmptyServiceName] = useState(true)
-  let name = selectRows.name;
+  const getCellValue = (data, key) => {
+    if (!data) return '';
+    
+    // Admin Persona (Carbon Table format)
+    if (data.cells) {
+      const cell = data.cells.find(c => c.id.endsWith(`:${key}`));
+      return cell ? cell.value : '';
+    }
+
+    // User Persona (Standard Object format)
+    return data[key] || '';
+  };
+  const name = getCellValue(selectRows, 'name');
   let navigate = useNavigate();
   const onSubmit = async () => {
     let title = "";
