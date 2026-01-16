@@ -1,0 +1,98 @@
+name: license-scan
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: false
+        type: string
+      tag:
+        required: true
+        type: string
+      skip-image-build:
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      ICR_NAMESPACE:
+        required: false
+
+env:
+  TRIVY_SBOM_FILE: trivy.json
+  PARLAY_SBOM_FILE: parlay.json
+  PARLAY_VERSION: v0.9.0
+   # Use docker.io for Docker Hub if empty
+  REGISTRY: icr.io
+
+jobs:
+  license:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      
+      - name: Download image tar
+        if: github.event_name == 'pull_request'
+        uses: actions/download-artifact@v4
+        with:
+          name: image-tar
+      
+      - name: Decide Trivy scan inputs
+        id: trivy
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "scan_type=image" >> $GITHUB_OUTPUT
+            echo "input=image.tar" >> $GITHUB_OUTPUT
+            echo "image_ref=" >> $GITHUB_OUTPUT
+          else
+            IMAGE_REF="${REGISTRY}/${IMAGE_NAME}/web:${{ inputs.tag }}"
+            echo "scan_type=image" >> $GITHUB_OUTPUT
+            echo "input=" >> $GITHUB_OUTPUT
+            echo "image_ref=${IMAGE_REF}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Log into ICR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ICR_USERNAME }}
+          password: ${{ secrets.ICR_APIKEY }}
+        
+      # Trivy SBOM (NO manual install needed)
+      - name: Generate Trivy SBOM
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: ${{ steps.trivy.outputs.scan_type }}
+          input: ${{ steps.trivy.outputs.input }}
+          image-ref: ${{ steps.trivy.outputs.image_ref }}
+          format: cyclonedx
+          output: trivy.json
+
+      # Parlay enrichment
+      - name: Enrich SBOM with Parlay
+        run: |
+          curl -sSfL \
+            https://github.com/snyk/parlay/releases/download/${{ env.PARLAY_VERSION }}/parlay_Linux_x86_64.tar.gz \
+            | tar -xz
+          chmod +x parlay
+          sudo mv parlay /usr/local/bin
+          parlay ecosystems enrich \
+            ${{ env.TRIVY_SBOM_FILE }} \
+            > ${{ env.PARLAY_SBOM_FILE }}
+
+      # Upload SBOM artifacts
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.image || 'power-access-cloud' }}-sbom-json-artifact
+          path: |
+            ${{ env.TRIVY_SBOM_FILE }}
+            ${{ env.PARLAY_SBOM_FILE }}
+
+      # License gate
+      - name: License scan
+        run: |
+          python .github/scripts/license_scan.py \
+            ${{ env.TRIVY_SBOM_FILE }} \
+            ${{ env.PARLAY_SBOM_FILE }}
