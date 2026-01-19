@@ -106,6 +106,9 @@ jobs:
     uses: ./.github/workflows/license-scan.yml
     with:
       image: 'api'
-      tag: ${{ needs.build.outputs.image-tag }}
-      skip-image-build: true
+      tag: main
+    secrets:
+      ICR_USERNAME: ${{ secrets.ICR_USERNAME }}
+      ICR_APIKEY: ${{ secrets.ICR_APIKEY }}
+      ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
 

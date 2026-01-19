@@ -32,6 +32,9 @@ jobs:
       # This is used to complete the identity challenge
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
+    
+    outputs:
+      image-tag: ${{ steps.image_tag.outputs.tag }}
       
     steps:
       - name: Checkout repository
@@ -93,4 +96,33 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 #            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:{{ env.RELEASE_VERSION }}-${{ env.KEYCLOAK_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Extract primary image tag
+        id: image_tag
+        run: |
+          TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Save image to tar
+        if: github.event_name == 'pull_request'
+        run: |
+          docker save "${{ steps.image_tag.outputs.tag }}" -o image.tar
+
+      - name: Upload image tar
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-tar
+          path: image.tar
+
+  image-scan:
+    needs: build
+    uses: ./.github/workflows/license-scan.yml
+    with:
+      image: 'keycloak'
+      tag: main
+    secrets:
+      ICR_USERNAME: ${{ secrets.ICR_USERNAME }}
+      ICR_APIKEY: ${{ secrets.ICR_APIKEY }}
+      ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
 
