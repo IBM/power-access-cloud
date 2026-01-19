@@ -9,13 +9,13 @@ on:
       tag:
         required: true
         type: string
-      skip-image-build:
-        required: false
-        default: false
-        type: boolean
     secrets:
       ICR_NAMESPACE:
         required: false
+      ICR_USERNAME:
+        required: true
+      ICR_APIKEY:
+        required: true
 
 env:
   TRIVY_SBOM_FILE: trivy.json
@@ -46,7 +46,7 @@ jobs:
             echo "input=image.tar" >> $GITHUB_OUTPUT
             echo "image_ref=" >> $GITHUB_OUTPUT
           else
-            IMAGE_REF="${REGISTRY}/${IMAGE_NAME}/web:${{ inputs.tag }}"
+            IMAGE_REF="${REGISTRY}/${{ secrets.ICR_NAMESPACE }}/web:${{ inputs.tag }}"
             echo "scan_type=image" >> $GITHUB_OUTPUT
             echo "input=" >> $GITHUB_OUTPUT
             echo "image_ref=${IMAGE_REF}" >> "$GITHUB_OUTPUT"
