@@ -35,6 +35,9 @@ jobs:
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
 
+    outputs:
+      image-tag: ${{ steps.image_tag.outputs.tag }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -71,7 +74,34 @@ jobs:
           file: ./web/Dockerfile.ubi
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Extract primary image tag
+        id: image_tag
+        run: |
+          TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Save image to tar (PR only)
+        if: github.event_name == 'pull_request'
+        run: |
+          docker save "${{ steps.image_tag.outputs.tag }}" -o image.tar
+
+      - name: Upload image tar (PR only)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-tar
+          path: image.tar
+
+  image-scan:
+    needs: build
+    uses: ./.github/workflows/license-scan.yml
+    with:
+      image: 'web'
+      tag: ${{ needs.build.outputs.image-tag }}
+      skip-image-build: true
