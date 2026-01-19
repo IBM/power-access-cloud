@@ -156,7 +156,7 @@ const CatalogsAdmin = () => {
         )}
         {actionProps?.key === BUTTON_REQUEST && (
           <DeployCatalog
-            selectRows={selectRows}
+            selectRows={selectRows[0]}
             setActionProps={setActionProps}
             response={handleResponse}
           />
