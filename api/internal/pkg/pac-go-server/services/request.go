@@ -142,6 +142,12 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Requested expiry date should be after the current expiry date"})
 		return
 	}
+	// maximum extension allowed is 5 days from current expiry
+	if requestedExpiry.After(currentExpiry.AddDate(0, 0, 5)) {
+		logger.Error("Maximum extension allowed is 5 days from the current expiry date")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Maximum extension allowed is 5 days from the current expiry date"})
+		return
+	}
 
 	// service shouldn't be extended if catalog already retired
 	catalog, err := kubeClient.GetCatalog(service.Spec.Catalog.Name)
@@ -174,12 +180,6 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		if request.State == models.RequestStateNew {
 			logger.Error("user have already requested to extend service expiry")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "You have already requested to extend service expiry"})
-			return
-		}
-		requestedDate := expiryRequest.ServiceExpiry.Expiry
-		if requestedDate.After(request.ServiceExpiry.Expiry.AddDate(0, 0, 5)) {
-			logger.Error("Maximum extension allowed is 5 days from the current expiry date")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Maximum extension allowed is 5 days from the current expiry date"})
 			return
 		}
 	}
