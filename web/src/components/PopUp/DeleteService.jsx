@@ -7,8 +7,19 @@ import { Modal } from "@carbon/react";
 const DeleteService = ({pagename, selectRows, setActionProps, response }) => {
   const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
   const [primaryButtonText, setPrimaryButtonText] = useState("Delete");
-  // const name = selectRows[0]?.id;
-  const name = selectRows[0]?.name;
+  const getCellValue = (data, key) => {
+    if (!data) return '';
+    
+    // Admin Persona (Carbon Table format)
+    if (data.cells) {
+      const cell = data.cells.find(c => c.id.endsWith(`:${key}`));
+      return cell ? cell.value : '';
+    }
+
+    // User Persona (Standard Object format)
+    return data[key] || '';
+  };
+  const name = getCellValue(selectRows[0], 'name');
   let navigate = useNavigate();
 
   const onSubmit = async () => {
