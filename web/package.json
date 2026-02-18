@@ -11,7 +11,6 @@
     "axios": "^1.13.5",
     "bootstrap": "^5.3.0",
     "env-cmd": "^10.1.0",
-    "http-proxy-middleware": "^2.0.9",
     "keycloak-js": "^26.2.0",
     "marked": "^9.1.0",
     "react": "^18.2.0",
@@ -24,17 +23,15 @@
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.4.2",
     "sass": "^1.63.4",
-    "web-vitals": "^2.1.4"
+    "vite": "^7.3.1"
   },
   "devDependencies": {
-    "react-scripts": "5.0.1"
+    "@vitejs/plugin-react": "^5.1.4"
   },
   "scripts": {
-    "dev": "chmod +x ./env.sh && ./env.sh && cp env-config.js ./public/ && react-scripts start",
-    "start": "env-cmd react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "chmod +x ./env.sh && ./env.sh && cp env-config.js ./public/ && vite",
+    "start": "env-cmd vite",
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": [
@@ -53,15 +50,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "resolutions": {
-    "nth-check": "^2.0.1",
-    "rollup": "^2.79.2",
-    "ws": "^7.5.10",
-    "path-to-regexp": "^0.1.12",
-    "body-parser": "^1.20.3",
-    "braces": "^3.0.3",
-    "postcss": "^8.4.31",
-    "form-data": "^3.0.4"
   }
 }
