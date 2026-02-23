@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#63d297"/>
+      <stop offset="100%" stop-color="#2aa198"/>
+    </linearGradient>
+  </defs>
+
+  <!-- circle background -->
+  <circle cx="64" cy="64" r="56" fill="url(#g)"/>
+
+  <!-- aix text -->
+  <text
+    x="64"
+    y="74"
+    text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="42"
+    font-weight="700"
+    fill="white"
+  >
+    AIX
+  </text>
+
+</svg>
