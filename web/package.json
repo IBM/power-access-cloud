@@ -22,11 +22,11 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.4.2",
-    "sass": "^1.63.4",
-    "vite": "^7.3.1"
+    "sass": "^1.63.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.1.4"
+    "@vitejs/plugin-react": "^5.1.4",
+    "vite": "^7.3.1"
   },
   "scripts": {
     "dev": "chmod +x ./env.sh && ./env.sh && cp env-config.js ./public/ && vite",
