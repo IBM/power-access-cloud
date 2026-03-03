@@ -48,6 +48,7 @@ spec:
               description:
                 type: string
               expiry:
+                default: 5
                 type: integer
               image_thumbnail_reference:
                 description: Thumbnail reference for image in Catalog which consists
@@ -80,6 +81,13 @@ spec:
                   image:
                     type: string
                   network:
+                    type: string
+                  os:
+                    default: linux
+                    enum:
+                    - linux
+                    - ibmi
+                    - aix
                     type: string
                   processor_type:
                     type: string
