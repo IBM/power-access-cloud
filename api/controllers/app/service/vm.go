@@ -1,11 +1,14 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	_ "embed"
 	"encoding/base64"
 	"fmt"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
@@ -19,9 +22,14 @@ const (
 	publicNetworkPrefix = "pac-public-network"
 )
 
+//go:embed templates/userdata.yaml
+var userDataTemplate string
+
 var (
 	ErroNoPublicNetwork = errors.New("no public network available to use for vm creation")
 	dnsServers          = []string{"9.9.9.9", "1.1.1.1"}
+	IbmiUsername        = "PAC"
+	IbmiOS              = "ibmi"
 )
 
 func getAvailablePubNetwork(scope *scope.ServiceScope) (string, error) {
@@ -176,6 +184,7 @@ func createVM(scope *scope.ServiceScope) error {
 
 	memory := float64(vmSpec.Capacity.Memory)
 	processors, _ := strconv.ParseFloat(vmSpec.Capacity.CPU, 64)
+	userData := getUserData(vmSpec.OS, scope)
 	createOpts := &models.PVMInstanceCreate{
 		ServerName: &scope.Service.Name,
 		ImageID:    imageRef.ImageID,
@@ -184,7 +193,7 @@ func createVM(scope *scope.ServiceScope) error {
 		Processors: &processors,
 		SysType:    vmSpec.SystemType,
 		ProcType:   &vmSpec.ProcessorType,
-		UserData:   base64.StdEncoding.EncodeToString([]byte(strings.Join(scope.Service.Spec.SSHKeys, "\n"))),
+		UserData:   userData,
 	}
 
 	pvmInstanceList, err := scope.PowerVSClient.CreateVM(createOpts)
@@ -198,4 +207,39 @@ func createVM(scope *scope.ServiceScope) error {
 	}
 	scope.Service.Status.VM.InstanceID = *(*pvmInstanceList)[0].PvmInstanceID
 	return nil
+}
+
+func getUserData(OS string, scope *scope.ServiceScope) string {
+	var userData string
+	switch OS {
+	case IbmiOS:
+		userData = getIBMiUserData(scope.Service.Spec.SSHKeys, IbmiUsername, scope)
+	default:
+		userData = base64.StdEncoding.EncodeToString(
+			[]byte(strings.Join(scope.Service.Spec.SSHKeys, "\n")),
+		)
+	}
+	return userData
+}
+
+func getIBMiUserData(sshKeys []string, username string, scope *scope.ServiceScope) string {
+	allKeys := strings.Join(sshKeys, "\\n")
+	cloudInitTemplate, err := template.New("userdata").Parse(userDataTemplate)
+	if err != nil {
+		scope.Logger.Error(err, "error parsing cloud-init template")
+		return ""
+	}
+	var buf bytes.Buffer
+	err = cloudInitTemplate.Execute(&buf, struct {
+		Username string
+		Keys     string
+	}{
+		Username: username,
+		Keys:     allKeys,
+	})
+	if err != nil {
+		scope.Logger.Error(err, "error executing cloud-init template")
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString(buf.Bytes())
 }

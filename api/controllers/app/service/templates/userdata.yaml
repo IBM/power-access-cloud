@@ -1,0 +1,51 @@
+#cloud-config
+runcmd:
+  - |
+    {
+      set -x
+      echo "--- STARTING CLOUD-INIT DEPLOYMENT ---"
+
+      # 1. Create User Profile
+      /QOpenSys/usr/bin/system "CRTUSRPRF USRPRF({{.Username}}) PASSWORD(*NONE) USRCLS(*SECOFR) SPCAUT(*ALLOBJ *SECADM *JOBCTL) STATUS(*ENABLED) HOMEDIR('/home/{{.Username}}') GID(*GEN) UID(*GEN)"
+
+      sleep 5
+
+      # 2. Disable Global Sign-on Lock
+      /QOpenSys/usr/bin/system "CHGSYSVAL SYSVAL(QRMTSIGN) VALUE('*VERIFY')"
+
+      # 3. Create SSH Directory
+      mkdir -p /home/{{.Username}}/.ssh
+
+      # 4. Inject SSH Key(s) and FORCE CCSID 1208 (Critical for IBM i)
+      printf "{{.Keys}}\n" > /home/{{.Username}}/.ssh/authorized_keys
+      /QOpenSys/usr/bin/system "CHGATR OBJ('/home/{{.Username}}/.ssh/authorized_keys') ATR(*CCSID) VALUE(1208)"
+
+      # 5. Change Ownership
+      /QOpenSys/usr/bin/system "CHGOWN OBJ('/home/{{.Username}}') NEWOWN({{.Username}}) SUBTREE(*ALL)"
+
+      # 6. Secure Permissions
+      chmod 700 /home/{{.Username}}
+      chmod 700 /home/{{.Username}}/.ssh
+      chmod 600 /home/{{.Username}}/.ssh/authorized_keys
+
+    # 7. SSHD Config Update
+      CONF="/QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config"
+      if [ -f "$CONF" ]; then
+        # Use a more aggressive regex to handle '# PasswordAuthentication', '#PasswordAuthentication', etc.
+        sed -e 's|^#*[[:space:]]*PubkeyAuthentication.*|PubkeyAuthentication yes|' \
+            -e 's|^#*[[:space:]]*PasswordAuthentication.*|PasswordAuthentication no|' \
+            -e 's|^#*[[:space:]]*AuthorizedKeysFile.*|AuthorizedKeysFile .ssh/authorized_keys|' \
+            "$CONF" > /tmp/sshd.tmp && mv /tmp/sshd.tmp "$CONF"
+
+        # Force CCSID to 1208 so the daemon doesn't see "garbage"
+        /QOpenSys/usr/bin/system "CHGATR OBJ('$CONF') ATR(*CCSID) VALUE(1208)"
+        chmod 644 "$CONF"
+      fi
+
+      # 8. Restart SSH
+      /QOpenSys/usr/bin/system "ENDTCPSVR *SSHD"
+      sleep 5
+      /QOpenSys/usr/bin/system "STRTCPSVR *SSHD"
+
+      echo "--- DEPLOYMENT FINISHED ---"
+    } > /tmp/cloud-init-trace.log 2>&1

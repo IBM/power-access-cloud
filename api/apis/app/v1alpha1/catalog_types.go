@@ -74,6 +74,10 @@ type VMCatalog struct {
 	Network string `json:"network"`
 	// +optional
 	Capacity Capacity `json:"capacity"`
+	// +optional
+	// +kubebuilder:default=linux
+	// +kubebuilder:validation:Enum=linux;ibmi;aix
+	OS string `json:"os"`
 }
 
 //+kubebuilder:object:root=true
