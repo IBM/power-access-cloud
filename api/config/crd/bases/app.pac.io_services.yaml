@@ -94,6 +94,9 @@ spec:
               vm:
                 description: VM has the detail of provisioned vm service
                 properties:
+                  created_at:
+                    format: date-time
+                    type: string
                   external_ip_address:
                     type: string
                   instance_id:

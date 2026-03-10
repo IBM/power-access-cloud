@@ -9,12 +9,14 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
 	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	"github.com/IBM/power-access-cloud/api/controllers/app/scope"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 )
 
@@ -110,10 +112,7 @@ func updateStatus(scope *scope.ServiceScope, pvmInstance *models.PVMInstance) {
 
 	switch *pvmInstance.Status {
 	case "ACTIVE":
-		scope.Service.Status.SetSuccessful()
-		scope.Service.Status.State = appv1alpha1.ServiceStateCreated
-		scope.Service.Status.AccessInfo = appv1alpha1.VMAccessInfoTemplate(scope.Service.Status.VM.ExternalIPAddress, scope.Service.Status.VM.IPAddress)
-		scope.Service.Status.Message = ""
+		handleActiveStatus(scope)
 	case "ERROR":
 		scope.Service.Status.State = appv1alpha1.ServiceStateFailed
 		if pvmInstance.Fault != nil {
@@ -124,6 +123,65 @@ func updateStatus(scope *scope.ServiceScope, pvmInstance *models.PVMInstance) {
 		scope.Service.Status.State = appv1alpha1.ServiceStateInProgress
 		scope.Service.Status.Message = "vm creation started, will update the access info once vm is ready"
 	}
+}
+
+// handleActiveStatus processes VM in ACTIVE state with IBMi initialization delay logic
+func handleActiveStatus(scope *scope.ServiceScope) {
+	// If service was already successfully created, keep it that way (don't revert to IN_PROGRESS)
+	if scope.Service.Status.Successful {
+		scope.Service.Status.State = appv1alpha1.ServiceStateCreated
+		scope.Service.Status.AccessInfo = appv1alpha1.VMAccessInfoTemplate(
+			scope.Service.Status.VM.ExternalIPAddress,
+			scope.Service.Status.VM.IPAddress)
+		scope.Service.Status.Message = ""
+		return
+	}
+
+	// Track when VM first became ACTIVE (set once, never overwrite)
+	if scope.Service.Status.VM.CreatedAt == nil {
+		now := metav1.Now()
+		scope.Service.Status.VM.CreatedAt = &now
+		scope.Logger.Info("VM became ACTIVE, tracking creation time",
+			"instanceID", scope.Service.Status.VM.InstanceID,
+			"createdAt", now)
+	} else {
+		scope.Logger.Info("VM CreatedAt already set, preserving timestamp",
+			"instanceID", scope.Service.Status.VM.InstanceID,
+			"createdAt", scope.Service.Status.VM.CreatedAt)
+	}
+
+	// Check if this is IBMi and if we need to wait 40 minutes (only for new deployments)
+	if isIBMiOS(scope) {
+		elapsed := time.Since(scope.Service.Status.VM.CreatedAt.Time)
+		waitTime := 40 * time.Minute
+
+		if elapsed < waitTime {
+			// Keep in IN_PROGRESS state - controller will requeue every 2 minutes
+			scope.Service.Status.State = appv1alpha1.ServiceStateInProgress
+			remaining := waitTime - elapsed
+			scope.Service.Status.Message = fmt.Sprintf(
+				"IBMi instance is initializing. Time remaining: %d minutes (elapsed: %d minutes)",
+				int(remaining.Minutes()), int(elapsed.Minutes()))
+			scope.Logger.Info("IBMi still initializing",
+				"elapsed", elapsed, "remaining", remaining)
+			return // Don't mark as CREATED yet
+		}
+
+		scope.Logger.Info("IBMi initialization complete", "elapsed", elapsed)
+	}
+
+	// Mark as created after wait period (or immediately for non-IBMi)
+	scope.Service.Status.SetSuccessful()
+	scope.Service.Status.State = appv1alpha1.ServiceStateCreated
+	scope.Service.Status.AccessInfo = appv1alpha1.VMAccessInfoTemplate(
+		scope.Service.Status.VM.ExternalIPAddress,
+		scope.Service.Status.VM.IPAddress)
+	scope.Service.Status.Message = ""
+	scope.Logger.Info("Service marked as CREATED")
+}
+
+func isIBMiOS(scope *scope.ServiceScope) bool {
+	return strings.ToLower(scope.Catalog.Spec.VM.OS) == IbmiOS
 }
 
 func extractPVMInstance(scope *scope.ServiceScope, pvmInstance *models.PVMInstance) {
@@ -184,6 +242,7 @@ func createVM(scope *scope.ServiceScope) error {
 
 	memory := float64(vmSpec.Capacity.Memory)
 	processors, _ := strconv.ParseFloat(vmSpec.Capacity.CPU, 64)
+
 	userData := getUserData(vmSpec.OS, scope)
 	createOpts := &models.PVMInstanceCreate{
 		ServerName: &scope.Service.Name,
