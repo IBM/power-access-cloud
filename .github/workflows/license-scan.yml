@@ -61,7 +61,7 @@ jobs:
         
       # Trivy SBOM (NO manual install needed)
       - name: Generate Trivy SBOM
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           scan-type: ${{ steps.trivy.outputs.scan_type }}
           input: ${{ steps.trivy.outputs.input }}
