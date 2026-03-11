@@ -40,10 +40,11 @@ const (
 
 // VM has the detail of provisioned vm service
 type VM struct {
-	InstanceID        string `json:"instance_id,omitempty"`
-	IPAddress         string `json:"ip_address,omitempty"`
-	ExternalIPAddress string `json:"external_ip_address,omitempty"`
-	State             string `json:"state,omitempty"`
+	InstanceID        string       `json:"instance_id,omitempty"`
+	IPAddress         string       `json:"ip_address,omitempty"`
+	ExternalIPAddress string       `json:"external_ip_address,omitempty"`
+	State             string       `json:"state,omitempty"`
+	CreatedAt         *metav1.Time `json:"created_at,omitempty"`
 }
 
 var VMAccessInfoTemplate = func(externalIP, internalIP string) string {
