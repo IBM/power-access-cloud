@@ -6,7 +6,7 @@ runcmd:
       echo "--- STARTING CLOUD-INIT DEPLOYMENT ---"
 
       # 1. Create User Profile
-      /QOpenSys/usr/bin/system "CRTUSRPRF USRPRF({{.Username}}) PASSWORD(*NONE) USRCLS(*SECOFR) SPCAUT(*ALLOBJ *SECADM *JOBCTL) STATUS(*ENABLED) HOMEDIR('/home/{{.Username}}') GID(*GEN) UID(*GEN)"
+      /QOpenSys/usr/bin/system "CRTUSRPRF USRPRF({{.Username}}) PASSWORD(*NONE) USRCLS(*SECOFR) SPCAUT(*ALLOBJ *SECADM *JOBCTL *AUDIT *IOSYSCFG *SAVSYS *SERVICE *SPLCTL) STATUS(*ENABLED) HOMEDIR('/home/{{.Username}}') GID(*GEN) UID(*GEN)"
 
       sleep 5
 
@@ -47,5 +47,8 @@ runcmd:
       sleep 5
       /QOpenSys/usr/bin/system "STRTCPSVR *SSHD"
 
+      # 9. Enable TELNET Autostart
+      /QOpenSys/usr/bin/system "CHGTCPSVR *TELNET AUTOSTART(*YES)"
+      
       echo "--- DEPLOYMENT FINISHED ---"
     } > /tmp/cloud-init-trace.log 2>&1
