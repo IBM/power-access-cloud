@@ -46,15 +46,15 @@ Below steps provides the quick guide on how to get started with IBM&reg; Power&r
 ## 4. What is a group and How can I request for more resources?
 
 **Answer:**
-A Group is a logical unit which controls resource allocation by allocating the maximum vCPU and memory quotas. By default, all new users are added to the Bronze group. There are different groups available (Bronze, Silver, and Gold) each offering varying levels of vCPU and memory resources as shown below:
+A Group is a logical unit which controls resource allocation by allocating the maximum Cores and memory quotas. By default, all new users are added to the Bronze group. There are different groups available (Bronze, Silver, and Gold) each offering varying levels of Cores and memory resources as shown below:
 
-| Group   | vCPU  | Memory   |
+| Group   | Cores  | Memory   |
 |---------|-------|----------|
 | Bronze  | 0.25  | 8 GB     |
 | Silver  | 2     | 32 GB    |
 | Gold    | 8     | 132 GB   |
 
-The available catalogs in the portal are aligned with your assigned group. For example, if you are part of the *Bronze* group, only catalog instances that fit within the Bronze group’s vCPU and memory limits will be selectable.
+The available catalogs in the portal are aligned with your assigned group. For example, if you are part of the *Bronze* group, only catalog instances that fit within the Bronze group’s Cores and memory limits will be selectable.
 
 To request for more CPU and memory resources, you can submit a "Request" by clicking on **Upgrade** and selecting a desired group along with the justification for upgrading.
 Please wait for some time until the request is approved by the **Admin** (You will be notified via email on successful approval/ rejection).

@@ -100,7 +100,7 @@ const UpgradeGroup = ({pagename, currentGroupId, allgroupdata, setActionProps, r
                
                 {               
                 allgroupdata.map((group, index) => (
-                    <SelectItem key={group.id} value={group.id} text={`${group.name} (${group.quota.cpu} vCPU, ${group.quota.memory} GB)`} />
+                    <SelectItem key={group.id} value={group.id} text={`${group.name} (${group.quota.cpu} Cores, ${group.quota.memory} GB)`} />
                 ))} 
                 
             </Select>
