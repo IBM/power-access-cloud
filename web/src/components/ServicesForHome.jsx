@@ -18,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { flattenArrayOfObject } from "./commonUtils";
 import UserService from "../services/UserService";
-import { CheckmarkFilled,Pending,InProgress, Information, Renew,ErrorFilled } from "@carbon/icons-react";
+import { CheckmarkFilled,Pending,InProgress, Information, Renew,ErrorFilled, InformationFilled } from "@carbon/icons-react";
 import DeleteService from "./PopUp/DeleteService";
 import ServiceExtend from "./PopUp/ServiceExtend";
 import ServiceDetails from './PopUp/ServiceDetails';
@@ -69,6 +69,22 @@ const headers = [
     header: "Action",
   }
 ];
+// Helper function to get OS-specific access guide
+const getAccessGuideLink = (osType) => {
+  if (osType && osType.toLowerCase().includes('ibmi')) {
+    return {
+      text: 'IBMi Access Guide',
+      url: 'https://github.com/IBM/power-access-cloud/blob/main/support/docs/IBMi_userguide.md'
+    };
+  } else if (osType && (osType.toLowerCase().includes('centos') || osType.toLowerCase().includes('aix'))) {
+    return {
+      text: 'CentOS/AIX Access Guide',
+      url: 'https://github.com/IBM/power-access-cloud/blob/main/support/docs/CentOS_AIX_userguide.md'
+    };
+  }
+  return null;
+};
+
 const ServicesForHome=({groups})=> {
   let navigate = useNavigate();
   const [servicesrows, setServicesRows] = useState([]);
@@ -223,7 +239,6 @@ const ServicesForHome=({groups})=> {
                             <Information />
                           </Button>
                     </Tooltip></h4>
-                   
                 <TableContainer
                   {...getTableContainerProps()}
                 >
@@ -238,11 +253,38 @@ const ServicesForHome=({groups})=> {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => (
+                      {rows.map((row) => {
+                        const serviceData = servicesrows.find(s => s.id === row.id);
+                        const osType = serviceData?.catalog_name || serviceData?.display_name || '';
+                        const accessGuide = getAccessGuideLink(osType);
+                        
+                        return (
                         <TableRow key={row.id}>
-                          {row.cells.map((cell,i) => (cell.value &&
-                            // <TableCell key={cell.id}>{cell.value}</TableCell>
-                            ((i!==2)?<TableCell key={cell.id}>{cell.value}</TableCell>:<TableCell key={cell.id}>{row.cells[i].value==="PENDING EXTENSION"&&<><svg  x="0px" y="0px"
+                          {row.cells.map((cell,i) => {
+                            // Access information column (index 3) - only show tooltip if there's an actual IP (not "...")
+                            if (i === 3 && cell.value && cell.value !== "..." && accessGuide) {
+                              return (
+                                <TableCell key={cell.id}>
+                                  <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                    <span>{cell.value}</span>
+                                    <Tooltip align="right" label={accessGuide.text}>
+                                      <a
+                                        href={accessGuide.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{display: 'flex', alignItems: 'center', textDecoration: 'none'}}
+                                      >
+                                        <Information size={16} style={{cursor: 'pointer', color: '#0F62FE', verticalAlign: 'middle'}} />
+                                      </a>
+                                    </Tooltip>
+                                  </div>
+                                </TableCell>
+                              );
+                            }
+                            // Status column (index 2)
+                            if (i === 2 && cell.value) {
+                              return (
+                                <TableCell key={cell.id}>{row.cells[i].value==="PENDING EXTENSION"&&<><svg  x="0px" y="0px"
                             viewBox="0 0 32 32"  width="18px" height="18px" fill="#FA4D56">
                          <path d="M28,6c0-1.1-0.9-2-2-2h-4V2h-2v2h-8V2h-2v2H6C4.9,4,4,4.9,4,6v20c0,1.1,0.9,2,2,2h19v-2H6V6h4v2h2V6h8v2h2V6h4v16h2V6z"/>
                          <g>
@@ -254,8 +296,15 @@ const ServicesForHome=({groups})=> {
                            <circle cx="22.3" cy="17" r="2"/>
                            <circle cx="16.3" cy="17" r="2"/>
                          </g>
-                         </svg> Pending Extension</>} {(row.cells[i].value==="CREATED"&&<> <CheckmarkFilled  style={{fill:"#24A148"}}/> Active</>)}{(row.cells[i].value==="NEW"&&<> <Pending style={{fill: "#FA4D56"}}/> Pending</>)}{(row.cells[i].value==="IN_PROGRESS"&&<> <InProgress style={{fill: "#F1C21B"}} /> Deploying</>)}{(row.cells[i].value==="EXPIRED"&&<> <ErrorFilled style={{fill: "#FA4D56"}} /> Expired</>)}</TableCell>)
-                          ))}
+                         </svg> Pending Extension</>} {(row.cells[i].value==="CREATED"&&<> <CheckmarkFilled  style={{fill:"#24A148"}}/> Active</>)}{(row.cells[i].value==="NEW"&&<> <Pending style={{fill: "#FA4D56"}}/> Pending</>)}{(row.cells[i].value==="IN_PROGRESS"&&<> <InProgress style={{fill: "#F1C21B"}} /> Deploying</>)}{(row.cells[i].value==="EXPIRED"&&<> <ErrorFilled style={{fill: "#FA4D56"}} /> Expired</>)}</TableCell>
+                              );
+                            }
+                            // Default cell rendering
+                            if (cell.value) {
+                              return <TableCell key={cell.id}>{cell.value}</TableCell>;
+                            }
+                            return null;
+                          })}
                           <TableCell >
                             <OverflowMenu size="sm" flipped>
                               <OverflowMenuItem 
@@ -295,7 +344,8 @@ const ServicesForHome=({groups})=> {
                             </OverflowMenu>
                           </TableCell>
                         </TableRow>
-                      ))}
+                        );
+                      })}
                        {
                   }
                     </TableBody>
