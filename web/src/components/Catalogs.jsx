@@ -144,9 +144,10 @@ const Catalogs = () => {
 </Tooltip>}
         <img src={row.image_thumbnail_reference} width="15%" height="auto" alt="centos" /><br/>
       <strong><em>{row.name}</em></strong><br/><br/>
-      
+        
 Cores: {row.capacity.cpu}<br/>
-Memory: {row.capacity.memory} GB<br/><br/>
+Memory: {row.capacity.memory} GB<br/>
+SystemType: {row.vm.system_type}<br/><br/>
 {/* {row.description}
 <br /><br /> */}
 <span style={{float:"right"}} >
