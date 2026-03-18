@@ -18,5 +18,6 @@ type Client interface {
 	GetService(string) (pac.Service, error)
 	CreateService(pac.Service) error
 	UpdateServiceExpiry(string, time.Time) error
+	UpdateServicePendingExtensionRequestAnnotation(string, bool) error
 	DeleteService(string, string) error
 }

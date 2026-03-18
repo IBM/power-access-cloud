@@ -110,6 +110,7 @@ func TestUpdateServiceExpiryRequest(t *testing.T) {
 				mockClient.EXPECT().GetService(gomock.Any()).Return(getResource("get-service", nil).(pac.Service), nil).Times(1)
 				mockClient.EXPECT().GetCatalog(gomock.Any()).Return(getResource("get-catalog", nil).(pac.Catalog), nil).Times(1)
 				mockDBClient.EXPECT().GetRequestByServiceName(gomock.Any()).Return(getResource("get-request-by-service-name", nil).([]models.Request), nil).Times(1)
+				mockClient.EXPECT().UpdateServicePendingExtensionRequestAnnotation(gomock.Any(), true).Return(nil).Times(1)
 				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
 				mockDBClient.EXPECT().NewRequest(gomock.Any()).Return("123", nil).Times(1)
 			},
@@ -374,6 +375,7 @@ func TestApproveRequest(t *testing.T) {
 				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(true).Times(1)
 				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(getResource("get-request-by-id", nil).(*models.Request), nil).Times(1)
 				mockClient.EXPECT().UpdateServiceExpiry(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+				mockClient.EXPECT().UpdateServicePendingExtensionRequestAnnotation(gomock.Any(), false).Return(nil).Times(1)
 				mockDBClient.EXPECT().UpdateRequestState(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
 			},
@@ -412,7 +414,7 @@ func TestApproveRequest(t *testing.T) {
 
 func TestRejectRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	_, mockDBClient, mockKCClient, tearDown := setUp(t)
+	mockClient, mockDBClient, mockKCClient, tearDown := setUp(t)
 	defer tearDown()
 
 	testcases := []struct {
@@ -427,6 +429,7 @@ func TestRejectRequest(t *testing.T) {
 			mockFunc: func() {
 				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(true).Times(2)
 				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(getResource("get-request-by-id", nil).(*models.Request), nil).Times(1)
+				mockClient.EXPECT().UpdateServicePendingExtensionRequestAnnotation(gomock.Any(), false).Return(nil).Times(1)
 				mockDBClient.EXPECT().UpdateRequestStateWithComment(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
 			},
@@ -470,6 +473,7 @@ func TestRejectRequest(t *testing.T) {
 			ctx := getContext(tc.requestContext)
 			c.Request = req.WithContext(ctx)
 			dbCon = mockDBClient
+			kubeClient = mockClient
 			RejectRequest(c)
 			assert.Equal(t, tc.httpStatus, c.Writer.Status())
 		})
