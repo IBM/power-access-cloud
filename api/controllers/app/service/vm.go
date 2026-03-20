@@ -15,9 +15,11 @@ import (
 	"github.com/IBM/go-sdk-core/v5/core"
 	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	"github.com/IBM/power-access-cloud/api/controllers/app/scope"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 const (
@@ -72,21 +74,29 @@ func NewVM(scope *scope.ServiceScope) Interface {
 	}
 }
 
-func (s *VM) Reconcile(ctx context.Context) error {
+func (s *VM) Reconcile(ctx context.Context) (ctrl.Result, error) {
 	if s.scope.Service.Status.VM.InstanceID == "" {
 		if err := createVM(s.scope); err != nil {
-			return errors.Wrap(err, "error creating vm")
+			return ctrl.Result{}, errors.Wrap(err, "error creating vm")
 		}
 	}
 
 	pvmInstance, err := s.scope.PowerVSClient.GetVM(s.scope.Service.Status.VM.InstanceID)
 	if err != nil {
-		return errors.Wrap(err, "error get vm")
+		// Check if this is a transient provisioning error (e.g., volume attachment in progress)
+		if utils.IsVolumeAttachementInProcessError(err) {
+			s.scope.Logger.Info("Error during volume attachment, will retry in 10s", "instanceID", s.scope.Service.Status.VM.InstanceID)
+			// Set state to IN_PROGRESS and return custom requeue interval
+			s.scope.Service.Status.State = appv1alpha1.ServiceStateInProgress
+			s.scope.Service.Status.Message = "VM provisioning in progress with volume attachment"
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		}
+		return ctrl.Result{}, errors.Wrap(err, "error getting vm")
 	}
 
 	updateStatus(s.scope, pvmInstance)
 
-	return nil
+	return ctrl.Result{}, nil
 }
 
 func (s *VM) Delete(ctx context.Context) (bool, error) {
@@ -101,10 +111,6 @@ func (s *VM) Delete(ctx context.Context) (bool, error) {
 	s.scope.Service.Status.ClearVMStatus()
 
 	return true, nil
-}
-
-func cleanupVM(scope *scope.ServiceScope) error {
-	return scope.PowerVSClient.DeleteVM(scope.Service.Status.VM.InstanceID)
 }
 
 func updateStatus(scope *scope.ServiceScope, pvmInstance *models.PVMInstance) {
@@ -244,6 +250,13 @@ func createVM(scope *scope.ServiceScope) error {
 	processors, _ := strconv.ParseFloat(vmSpec.Capacity.CPU, 64)
 
 	userData := getUserData(vmSpec.OS, scope)
+
+	// Create volumes from catalog spec if specified
+	volumeIDs, err := createVolumesFromCatalog(scope, vmSpec, imageRef)
+	if err != nil {
+		return errors.Wrap(err, "failed to create volumes")
+	}
+
 	createOpts := &models.PVMInstanceCreate{
 		ServerName: &scope.Service.Name,
 		ImageID:    imageRef.ImageID,
@@ -253,6 +266,7 @@ func createVM(scope *scope.ServiceScope) error {
 		SysType:    vmSpec.SystemType,
 		ProcType:   &vmSpec.ProcessorType,
 		UserData:   userData,
+		VolumeIDs:  volumeIDs,
 	}
 
 	pvmInstanceList, err := scope.PowerVSClient.CreateVM(createOpts)
@@ -266,6 +280,117 @@ func createVM(scope *scope.ServiceScope) error {
 	}
 	scope.Service.Status.VM.InstanceID = *(*pvmInstanceList)[0].PvmInstanceID
 	return nil
+}
+
+// createVolumes creates volumes based on the provided volume specifications
+// Returns a list of created volume IDs
+// imageStoragePool is the storage pool where the image (and boot volume) resides
+func createVolumes(scope *scope.ServiceScope, volumeSpecs []appv1alpha1.VolumeSpec, imageStoragePool string) ([]string, error) {
+	if len(volumeSpecs) == 0 {
+		return nil, nil
+	}
+
+	var createdVolumeIDs []string
+
+	// Setup cleanup on error
+	defer func() {
+		if r := recover(); r != nil {
+			cleanupVolumes(scope, createdVolumeIDs)
+			panic(r)
+		}
+	}()
+
+	for _, volSpec := range volumeSpecs {
+		volumeName := fmt.Sprintf("%s-%s", scope.Service.Name, volSpec.VolumeNameSuffix)
+
+		volumeID, err := createVolume(scope, volSpec, volumeName, imageStoragePool)
+		if err != nil {
+			cleanupVolumes(scope, createdVolumeIDs)
+			return nil, errors.Wrapf(err, "failed to create volume %s", volumeName)
+		}
+
+		createdVolumeIDs = append(createdVolumeIDs, volumeID)
+	}
+
+	scope.Logger.Info("all volumes created successfully", "count", len(createdVolumeIDs), "volumeIDs", createdVolumeIDs)
+	return createdVolumeIDs, nil
+}
+
+// createSingleVolume creates a single volume
+func createVolume(scope *scope.ServiceScope, volSpec appv1alpha1.VolumeSpec, volumeName, imageStoragePool string) (string, error) {
+	// Build volume parameters
+	sizeFloat := float64(volSpec.Size)
+	diskType := volSpec.DiskType
+	createParams := &models.CreateDataVolume{
+		Name:     &volumeName,
+		Size:     &sizeFloat,
+		DiskType: diskType,
+	}
+
+	// Use image storage pool for volume affinity
+	if imageStoragePool != "" {
+		createParams.VolumePool = imageStoragePool
+		scope.Logger.Info("creating volume in image storage pool", "name", volumeName, "size", volSpec.Size, "diskType", diskType, "storagePool", imageStoragePool)
+	} else {
+		scope.Logger.Info("creating volume without storage pool", "name", volumeName, "size", volSpec.Size, "diskType", diskType)
+	}
+
+	// Create volume - fail if it already exists
+	volume, err := scope.PowerVSClient.CreateVolume(createParams)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to create volume %s", volumeName)
+	}
+
+	scope.Logger.Info("volume created successfully", "volumeID", *volume.VolumeID, "name", volumeName)
+	return *volume.VolumeID, nil
+}
+
+func cleanupVM(scope *scope.ServiceScope) error {
+	scope.Logger.Info("deleting VM with all attached volumes", "instanceID", scope.Service.Status.VM.InstanceID)
+
+	// Delete VM and all its attached data volumes in one API call
+	err := scope.PowerVSClient.DeleteVMWithVolumes(scope.Service.Status.VM.InstanceID)
+
+	if err != nil && !utils.IsNotFoundError(err) {
+		return errors.Wrap(err, "error deleting VM with volumes")
+	}
+
+	if err == nil {
+		scope.Logger.Info("VM and all attached volumes deleted successfully", "instanceID", scope.Service.Status.VM.InstanceID)
+	} else {
+		scope.Logger.Info("VM already deleted or not found", "instanceID", scope.Service.Status.VM.InstanceID)
+	}
+
+	return nil
+}
+
+// cleanupVolumes deletes the specified volumes
+func cleanupVolumes(scope *scope.ServiceScope, volumeIDs []string) {
+	if len(volumeIDs) == 0 {
+		return
+	}
+	scope.Logger.Info("cleaning up volumes due to error", "count", len(volumeIDs))
+	for _, volID := range volumeIDs {
+		if err := scope.PowerVSClient.DeleteVolume(volID); err != nil {
+			scope.Logger.Error(err, "failed to cleanup volume", "volumeID", volID)
+		}
+	}
+}
+
+// createVolumesFromCatalog creates volumes from catalog spec using image's storage pool
+func createVolumesFromCatalog(scope *scope.ServiceScope, vmCatalog appv1alpha1.VMCatalog, imageRef *models.ImageReference) ([]string, error) {
+	if len(vmCatalog.Volumes) == 0 {
+		return nil, nil
+	}
+
+	// Get image storage pool for volume affinity
+	imageStoragePool := ""
+	if imageRef.StoragePool != nil {
+		imageStoragePool = *imageRef.StoragePool
+	}
+
+	scope.Logger.Info("creating volumes from catalog", "count", len(vmCatalog.Volumes), "storagePool", imageStoragePool)
+	return createVolumes(scope, vmCatalog.Volumes, imageStoragePool)
 }
 
 func getUserData(OS string, scope *scope.ServiceScope) string {

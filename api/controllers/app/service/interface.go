@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type Interface interface {
-	// Create creates a service
-	Reconcile(ctx context.Context) error
+	// Reconcile reconciles a service
+	Reconcile(ctx context.Context) (ctrl.Result, error)
 	// Delete deletes a service
 	Delete(ctx context.Context) (bool, error)
 }
