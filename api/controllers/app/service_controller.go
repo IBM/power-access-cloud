@@ -183,12 +183,18 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 	}
 
-	if err := svc.Reconcile(ctx); err != nil {
+	result, err := svc.Reconcile(ctx)
+	if err != nil {
 		err = errors.Wrap(err, "error reconciling service")
 		scope.Service.Status.State = appv1alpha1.ServiceStateError
 		scope.Service.Status.Message = err.Error()
 
 		return ctrl.Result{}, err
+	}
+
+	// If Reconcile returned a custom requeue result, use it
+	if result.RequeueAfter > 0 || result.Requeue {
+		return result, nil
 	}
 
 	if scope.Service.Status.State == appv1alpha1.ServiceStateInProgress {

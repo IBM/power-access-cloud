@@ -6,7 +6,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/IBM-Cloud/power-go-client/clients/instance"
+	"github.com/IBM-Cloud/power-go-client/helpers"
 	"github.com/IBM-Cloud/power-go-client/ibmpisession"
+	"github.com/IBM-Cloud/power-go-client/power/client/p_cloud_p_vm_instances"
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/client/iam"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/client/utils"
@@ -15,10 +17,14 @@ import (
 var _ PowerVS = &Client{}
 
 type Client struct {
-	instanceClient *instance.IBMPIInstanceClient
-	networkClient  *instance.IBMPINetworkClient
-	dhcpClient     *instance.IBMPIDhcpClient
-	imageClient    *instance.IBMPIImageClient
+	instanceClient  *instance.IBMPIInstanceClient
+	networkClient   *instance.IBMPINetworkClient
+	dhcpClient      *instance.IBMPIDhcpClient
+	imageClient     *instance.IBMPIImageClient
+	volumeClient    *instance.IBMPIVolumeClient
+	session         *ibmpisession.IBMPISession
+	ctx             context.Context
+	cloudInstanceID string
 }
 
 // GetAllInstance returns all the virtual machine in the Power VS service instance.
@@ -96,6 +102,26 @@ func (s *Client) DeleteVM(id string) error {
 	return s.instanceClient.Delete(id)
 }
 
+// DeleteVMWithVolumes deletes a VM and all its attached data volumes
+func (s *Client) DeleteVMWithVolumes(id string) error {
+	deleteDataVolumes := true
+	params := p_cloud_p_vm_instances.NewPcloudPvminstancesDeleteParams().
+		WithContext(s.ctx).
+		WithTimeout(helpers.PIDeleteTimeOut).
+		WithCloudInstanceID(s.cloudInstanceID).
+		WithPvmInstanceID(id).
+		WithDeleteDataVolumes(&deleteDataVolumes)
+
+	_, err := s.session.Power.PCloudpVMInstances.PcloudPvminstancesDelete(
+		params,
+		s.session.AuthInfo(s.cloudInstanceID),
+	)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete PVM Instance %s", id)
+	}
+	return nil
+}
+
 type Options struct {
 	AccountID       string
 	CloudInstanceID string
@@ -131,9 +157,23 @@ func NewClient(ctx context.Context, options Options) (*Client, error) {
 	}
 
 	return &Client{
-		instanceClient: instance.NewIBMPIInstanceClient(ctx, session, options.CloudInstanceID),
-		networkClient:  instance.NewIBMPINetworkClient(ctx, session, options.CloudInstanceID),
-		dhcpClient:     instance.NewIBMPIDhcpClient(ctx, session, options.CloudInstanceID),
-		imageClient:    instance.NewIBMPIImageClient(ctx, session, options.CloudInstanceID),
+		instanceClient:  instance.NewIBMPIInstanceClient(ctx, session, options.CloudInstanceID),
+		networkClient:   instance.NewIBMPINetworkClient(ctx, session, options.CloudInstanceID),
+		dhcpClient:      instance.NewIBMPIDhcpClient(ctx, session, options.CloudInstanceID),
+		imageClient:     instance.NewIBMPIImageClient(ctx, session, options.CloudInstanceID),
+		volumeClient:    instance.NewIBMPIVolumeClient(ctx, session, options.CloudInstanceID),
+		session:         session,
+		ctx:             ctx,
+		cloudInstanceID: options.CloudInstanceID,
 	}, nil
+}
+
+// CreateVolume creates a new volume
+func (s *Client) CreateVolume(body *models.CreateDataVolume) (*models.Volume, error) {
+	return s.volumeClient.CreateVolume(body)
+}
+
+// DeleteVolume deletes a volume by ID
+func (s *Client) DeleteVolume(id string) error {
+	return s.volumeClient.DeleteVolume(id)
 }

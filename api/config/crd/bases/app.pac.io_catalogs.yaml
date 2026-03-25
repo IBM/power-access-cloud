@@ -93,6 +93,29 @@ spec:
                     type: string
                   system_type:
                     type: string
+                  volumes:
+                    description: Volumes is a list of volume specifications to create
+                      and attach during deployment
+                    items:
+                      description: VolumeSpec defines the specification for creating
+                        a new volume
+                      properties:
+                        diskType:
+                          default: tier3
+                          description: Type of disk (tier1, tier3, fixed IOPS, etc.)
+                          type: string
+                        volumeNameSuffix:
+                          description: Name of the volume to create
+                          type: string
+                        size:
+                          description: Size of the volume in GB
+                          minimum: 1
+                          type: integer
+                      required:
+                      - name
+                      - size
+                      type: object
+                    type: array
                 required:
                 - crn
                 - image

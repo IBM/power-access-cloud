@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -15,6 +16,25 @@ var (
 	ErrResourceAlreadyExists = errors.New("requested resource already exists")
 	ErrNotAuthorized         = errors.New("user does not have permission to delete this key")
 )
+
+// IsNotFoundError checks if the error indicates a resource was not found
+func IsNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "not found") || strings.Contains(errMsg, "does not exist")
+}
+
+// IsVolumeAttachementInProcessError checks if the error indicates a resource is still being provisioned
+func IsVolumeAttachementInProcessError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "in process of bdm attachment") ||
+		strings.Contains(errMsg, "in process of volume attachment")
+}
 
 func translateValidationError(fe validator.FieldError) string {
 	switch fe.Tag() {

@@ -35,6 +35,21 @@ type Capacity struct {
 	Memory int    `json:"memory"`
 }
 
+// VolumeSpec defines the specification for creating a new volume
+type VolumeSpec struct {
+	// Name of the volume to create
+	// +kubebuilder:validation:Required
+	VolumeNameSuffix string `json:"volumeNameSuffix"`
+	// Size of the volume in GB
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Minimum=1
+	Size int `json:"size"`
+	// Type of disk (tier1, tier3, fixed IOPS, etc.)
+	// +optional
+	// +kubebuilder:default=tier3
+	DiskType string `json:"diskType,omitempty"`
+}
+
 // CatalogSpec defines the desired state of Catalog
 type CatalogSpec struct {
 	// +kubebuilder:validation:Required
@@ -78,6 +93,9 @@ type VMCatalog struct {
 	// +kubebuilder:default=linux
 	// +kubebuilder:validation:Enum=linux;ibmi;aix
 	OS string `json:"os"`
+	// +optional
+	// Volumes is a list of volume specifications to create and attach during deployment
+	Volumes []VolumeSpec `json:"volumes,omitempty"`
 }
 
 //+kubebuilder:object:root=true
