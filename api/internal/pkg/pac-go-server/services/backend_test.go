@@ -415,7 +415,7 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 			}
 		}
 		return &request
-	case "get-request-more-than-5days":
+	case "get-request-more-than-6months":
 		request := models.Request{
 			ID:            [12]byte{1},
 			UserID:        "12345",
@@ -430,7 +430,7 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 			},
 			ServiceExpiry: &models.ServiceExpiry{
 				Name:   "test-service",
-				Expiry: time.Now().AddDate(0, 0, 6),
+				Expiry: time.Now().AddDate(0, 7, 0),
 			},
 		}
 		// Update request with custom values if provided

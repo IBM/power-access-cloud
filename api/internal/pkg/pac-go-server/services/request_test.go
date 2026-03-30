@@ -157,7 +157,7 @@ func TestUpdateServiceExpiryRequest(t *testing.T) {
 				"userid": "12345",
 			}),
 			httpStatus: http.StatusBadRequest,
-			request:    getResource("get-request-more-than-5days", nil).(*models.Request),
+			request:    getResource("get-request-more-than-6months", nil).(*models.Request),
 		},
 	}
 	for _, tc := range testcases {

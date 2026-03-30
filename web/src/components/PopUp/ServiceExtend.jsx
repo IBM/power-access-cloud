@@ -86,6 +86,9 @@ const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
         <label htmlFor="Name" className="form-label">
             Select date<span className="text-danger">*</span>
           </label>
+        <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+          Maximum extension allowed is 6 months from the current expiry date.
+        </p>
         <DatePicker
           allowInput={true}
           locale="en"

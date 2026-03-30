@@ -142,10 +142,10 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Requested expiry date should be after the current expiry date"})
 		return
 	}
-	// maximum extension allowed is 5 days from current expiry
-	if requestedExpiry.After(currentExpiry.AddDate(0, 0, 5)) {
-		logger.Error("Maximum extension allowed is 5 days from the current expiry date")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Maximum extension allowed is 5 days from the current expiry date"})
+	// maximum extension allowed is 6 months from current expiry
+	if requestedExpiry.After(currentExpiry.AddDate(0, 6, 0)) {
+		logger.Error("Maximum extension allowed is 6 months from the current expiry date")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Maximum extension allowed is 6 months from the current expiry date"})
 		return
 	}
 
