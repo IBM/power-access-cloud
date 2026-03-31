@@ -176,3 +176,79 @@ The classic IBM i "Sign On" display will appear.
 
 1. Enter your **User ID** (PAC).
 2. Enter the **Password** you created in Step 1.
+
+---
+
+## Accessing Service Tools Menu from PAC User
+
+This section describes how to access the IBM i System Service Tools (SST) menu using the PAC user account.
+
+### Overview
+
+The System Service Tools (SST) menu provides access to advanced system configuration and diagnostic tools. By default, the QSECOFR user profile is required to access SST. This guide walks you through enabling QSECOFR and configuring it to access the Service Tools menu.
+
+### Prerequisites
+
+- Active SSH connection to your IBM i system as the PAC user
+- Access to the 5250 console via IBM ACS tool
+- Console keypad functionality (F-keys) available in your 5250 session
+
+**Note:** To show the keypad in the 5250 console, go to **View > Keypad** in the IBM ACS tool 5250 session window.
+
+### Step 1: Modify QSECOFR User Profile
+
+1. **Login as PAC user** via 5250 console
+2. Run the following command to work with the QSECOFR user profile:
+   ```
+   WRKUSRPRF QSECOFR
+   ```
+3. **Press F21** on the console keypad to change the assistance level of the QSECOFR user from **Basic** to **Intermediate**
+4. **Select option 2** to modify the QSECOFR user profile
+5. **Enable the user** and **set a password** for QSECOFR
+
+### Step 2: Configure DST Password
+
+1. **Logout** of the PAC account
+2. **Login as QSECOFR** using the password you just set
+3. Run the following command to set the DST (Dedicated Service Tools) password to default:
+   ```
+   CHGDSTPWD PASSWORD(*DEFAULT)
+   ```
+
+### Step 3: Access Service Tools Menu
+
+1. Run the following command to start System Service Tools:
+   ```
+   STRSST
+   ```
+2. At the SST sign-on screen, enter:
+   - **User ID:** `QSECOFR`
+   - **Password:** `QSECOFR` (default password) <!-- pragma: allowlist secret -->
+3. You will receive a prompt indicating that the password has expired 
+4. **Press F9** on the console keypad to change or set a new password
+5. Follow the prompts to set a new secure password
+6. Once the password is changed, you will be able to access the Service Tools menu
+
+### Step 4: Future Access
+
+After completing the initial setup, you can access the Service Tools menu directly from the PAC user account:
+
+1. **Login as PAC user** (no need to switch to QSECOFR)
+2. Run the command:
+   ```
+   STRSST
+   ```
+3. At the SST sign-on screen, enter:
+   - **User ID:** `QSECOFR`
+   - **Password:** The new password you set in Step 3 <!-- pragma: allowlist secret -->
+
+You will now have access to the Service Tools menu without needing to logout and login as QSECOFR.
+
+### Important Notes
+
+- **Security:** Keep the QSECOFR password secure and change it regularly
+- **Password Expiration:** If the password expires, you will need to repeat Step 3 to reset it
+- **Assistance Level:** The assistance level change (Basic to Intermediate) provides access to additional system configuration options
+- **Console Keypad:** To access the keypad in your 5250 console session, navigate to **View > Keypad** in the 5250 session window menu bar.
+
+---
