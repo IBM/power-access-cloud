@@ -2,3 +2,8 @@
 .cds--header__nav {
     display: block;
 }
+
+// Remove default ul padding from dropdown menus
+.cds--list-box__menu {
+    padding-left: 0 !important;
+}

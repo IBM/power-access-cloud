@@ -21,11 +21,7 @@ import Keys from "./Keys";
 import { Theme } from "@carbon/react";
 import Feedbacks from "./Feedbacks";
 
-const App = () => {
-  const auth = UserService.isLoggedIn();
-  const isAdmin = UserService.isAdminUser();
-
-  const RouterClass = () => {
+const RouterClass = React.memo(({ isAdmin }) => {
     return (
       <Routes>
         {!isAdmin && (
@@ -90,7 +86,17 @@ const App = () => {
         )}
       </Routes>
     );
-  };
+});
+
+const App = () => {
+  const auth = UserService.isLoggedIn();
+  const isAdmin = UserService.isAdminUser();
+  const [isSideNavExpanded, setIsSideNavExpanded] = React.useState(false);
+
+  const handleSideNavToggle = React.useCallback((expanded) => {
+    setIsSideNavExpanded(expanded);
+  }, []);
+
   if (auth === true && window.location.pathname === "/login") {
     window.location.href = window.location.href.replace("/login", "");
     return;
@@ -112,9 +118,9 @@ const App = () => {
   }
   return (
     <React.Fragment>
-      <Theme theme="g90">{auth === true && <HeaderNav />} </Theme>
-      <section className={auth ? "contentSection" : ""}>
-        <RouterClass />
+      <Theme theme="g90">{auth === true && <HeaderNav onSideNavToggle={handleSideNavToggle} />} </Theme>
+      <section className={auth ? `contentSection ${isAdmin && isSideNavExpanded ? 'sideNavExpanded' : ''}` : ""}>
+        <RouterClass isAdmin={isAdmin} />
       </section>
     </React.Fragment>
   );

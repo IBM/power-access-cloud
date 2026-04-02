@@ -40,6 +40,11 @@
   margin-left: 10px;
   margin-right: 10px;
   margin-top: 35px;
+  transition: margin-left 0.3s ease;
+}
+
+.contentSection.sideNavExpanded {
+  margin-left: 270px;
 }
 
 .SideNavLink {
