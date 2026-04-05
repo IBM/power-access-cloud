@@ -252,3 +252,38 @@ You will now have access to the Service Tools menu without needing to logout and
 - **Console Keypad:** To access the keypad in your 5250 console session, navigate to **View > Keypad** in the 5250 session window menu bar.
 
 ---
+
+## Adding the Extra 100GB LUN
+
+By default, a second 100GB LUN (Logical Unit Number) is provided for your use if needed. This additional storage can be added to your IBM i system's Auxiliary Storage Pool (ASP).
+
+### Prerequisites
+
+- Active 5250 console session
+- Access to System Service Tools (SST) - see the previous section for setup instructions
+- QSECOFR credentials configured
+
+### Steps to Add the Extra LUN
+
+1. **Login to Service Tools** by running the command:
+   ```
+   STRSST
+   ```
+
+2. **Select Option 3:** Work with disk units
+
+3. **Select Option 2:** Work with disk configuration
+
+4. **Select Option 2:** Add units to ASPs
+
+5. **Select Option 3:** Add units to existing ASPs
+
+6. **Add unit to ASP 1**
+
+7. **Press F10:** Ignore and continue
+
+8. **Press F10:** Add and balance
+
+The system will now add the 100GB LUN to your Auxiliary Storage Pool and balance the data across the available disk units.
+
+---
