@@ -140,11 +140,18 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 	}
 
+	// Check if service is expired and should transition to EXPIRED state
 	if scope.IsExpired() && service.Status.State != appv1alpha1.ServiceStateExpired {
-		service.Status.State = appv1alpha1.ServiceStateExpired
-		service.Status.Expired = true
-		service.Status.Message = "service expired"
-		return ctrl.Result{}, nil
+		// Don't mark as expired if there's a pending extension request
+		hasPendingRequest := scope.Service.Annotations != nil &&
+			scope.Service.Annotations[appv1alpha1.ServiceAnnotationPendingExtensionRequest] == "true"
+
+		if !hasPendingRequest {
+			service.Status.State = appv1alpha1.ServiceStateExpired
+			service.Status.Expired = true
+			service.Status.Message = "service expired"
+			return ctrl.Result{}, nil
+		}
 	}
 
 	{
@@ -154,7 +161,19 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, nil
 		case appv1alpha1.ServiceStateExpired:
 			scope.Logger.Info("service expired", "name", scope.Service.ObjectMeta.Name)
-			// Expired service will be deleted after 1 day by reconciler
+
+			// Check if there's a pending extension request (via annotation)
+			hasPendingRequest := scope.Service.Annotations != nil &&
+				scope.Service.Annotations[appv1alpha1.ServiceAnnotationPendingExtensionRequest] == "true"
+
+			if hasPendingRequest {
+				// Keep VM running while extension request is pending - no time limit
+				scope.Logger.Info("pending extension request exists, keeping service active", "name", scope.Service.ObjectMeta.Name)
+				// VM stays active until admin approves or rejects the request
+				return ctrl.Result{}, nil
+			}
+
+			// No pending extension request - proceed with deletion after 24 hours
 			if time.Now().After(scope.Service.Spec.Expiry.Time.Add(24 * time.Hour)) {
 				if err := scope.ControllerScope.Client.Delete(ctx, scope.Service); err != nil {
 					return ctrl.Result{}, errors.Wrap(err, "failed to delete service")

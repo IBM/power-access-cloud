@@ -91,3 +91,29 @@ func (client KubeClient) UpdateServiceExpiry(name string, expiry time.Time) erro
 	}
 	return nil
 }
+
+func (client KubeClient) UpdateServicePendingExtensionRequestAnnotation(name string, pending bool) error {
+	service := pac.Service{}
+	if err := client.kubeClient.Get(context.Background(), kClient.ObjectKey{Namespace: DefaultNamespace, Name: name}, &service); err != nil {
+		if apierrors.IsNotFound(err) {
+			return utils.ErrResourceNotFound
+		}
+		return fmt.Errorf("failed to get service with name %s Error: %v", name, err)
+	}
+
+	// Use annotation to avoid RBAC permission issues
+	if service.Annotations == nil {
+		service.Annotations = make(map[string]string)
+	}
+
+	if pending {
+		service.Annotations[pac.ServiceAnnotationPendingExtensionRequest] = "true"
+	} else {
+		delete(service.Annotations, pac.ServiceAnnotationPendingExtensionRequest)
+	}
+
+	if err := client.kubeClient.Update(context.Background(), &service); err != nil {
+		return fmt.Errorf("failed to update service annotations with name %s Error: %v", name, err)
+	}
+	return nil
+}

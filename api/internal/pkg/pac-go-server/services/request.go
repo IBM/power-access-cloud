@@ -202,6 +202,12 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		return
 	}
 
+	// Set PendingExtensionRequest annotation on the service
+	if err := kubeClient.UpdateServicePendingExtensionRequestAnnotation(serviceName, true); err != nil {
+		logger.Error("failed to update service pending extension request annotation", zap.String("service name", serviceName), zap.Error(err))
+		// Don't fail the request creation, just log the error
+	}
+
 	event, err := models.NewEvent(userID, originator, models.EventServiceExpiryRequest)
 	if err != nil {
 		logger.Error("failed to create event", zap.Error(err))
@@ -615,15 +621,19 @@ func ApproveRequest(c *gin.Context) {
 			return
 		}
 	case models.RequestExtendServiceExpiry:
+		// Update service expiry
 		if err := kubeClient.UpdateServiceExpiry(request.ServiceExpiry.Name, request.ServiceExpiry.Expiry); err != nil {
-			if errors.Is(err, utils.ErrResourceNotFound) {
-				logger.Error("service does not exists", zap.String("service name", request.ServiceExpiry.Name))
-				c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("service with name %s does not exists", request.ServiceExpiry.Name)})
-				return
-			}
-			logger.Error("failed to update service", zap.String("service name", request.ServiceExpiry.Name), zap.Error(err))
+			logger.Error("failed to update service expiry", zap.String("service name", request.ServiceExpiry.Name), zap.Error(err))
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 			return
+		}
+
+		// Clear PendingExtensionRequest annotation when request is approved
+		if err := kubeClient.UpdateServicePendingExtensionRequestAnnotation(request.ServiceExpiry.Name, false); err != nil {
+			logger.Error("failed to clear service pending extension request annotation", zap.String("service name", request.ServiceExpiry.Name), zap.Error(err))
+			// Don't fail the approval, just log the error
+		} else {
+			logger.Info("cleared pending extension request annotation, controller will restart VM if suspended", zap.String("service name", request.ServiceExpiry.Name))
 		}
 	}
 	if err := dbCon.UpdateRequestState(id, models.RequestStateApproved); err != nil {
@@ -705,6 +715,14 @@ func RejectRequest(c *gin.Context) {
 		logger.Error("failed to update request status in database", zap.String("id", id), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to update the state field in the db, err: %s", err.Error())})
 		return
+	}
+
+	// Clear PendingExtensionRequest annotation when request is rejected (for service expiry extension requests)
+	if req.RequestType == models.RequestExtendServiceExpiry && req.ServiceExpiry != nil {
+		if err := kubeClient.UpdateServicePendingExtensionRequestAnnotation(req.ServiceExpiry.Name, false); err != nil {
+			logger.Error("failed to clear service pending extension request annotation", zap.String("service name", req.ServiceExpiry.Name), zap.Error(err))
+			// Don't fail the rejection, just log the error
+		}
 	}
 	event, err := models.NewEvent(req.UserID, originator, models.EventTypeRequestRejected)
 	if err != nil {

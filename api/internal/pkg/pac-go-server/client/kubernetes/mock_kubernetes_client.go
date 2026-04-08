@@ -178,3 +178,17 @@ func (mr *MockClientMockRecorder) UpdateServiceExpiry(arg0, arg1 interface{}) *g
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateServiceExpiry", reflect.TypeOf((*MockClient)(nil).UpdateServiceExpiry), arg0, arg1)
 }
+
+// UpdateServicePendingExtensionRequestAnnotation mocks base method.
+func (m *MockClient) UpdateServicePendingExtensionRequestAnnotation(arg0 string, arg1 bool) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateServicePendingExtensionRequestAnnotation", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateServicePendingExtensionRequestAnnotation indicates an expected call of UpdateServicePendingExtensionRequestAnnotation.
+func (mr *MockClientMockRecorder) UpdateServicePendingExtensionRequestAnnotation(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateServicePendingExtensionRequestAnnotation", reflect.TypeOf((*MockClient)(nil).UpdateServicePendingExtensionRequestAnnotation), arg0, arg1)
+}

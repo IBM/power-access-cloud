@@ -29,6 +29,9 @@ type ServiceState string
 
 const ServiceFinalizer = "services.pac.io/finalizer"
 
+// Annotation key for pending extension request
+const ServiceAnnotationPendingExtensionRequest = "app.pac.io/pending-extension-request"
+
 const (
 	ServiceStateNew        ServiceState = "NEW"
 	ServiceStateInProgress ServiceState = "IN_PROGRESS"
