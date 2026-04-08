@@ -6,9 +6,9 @@
     "@carbon/icons-react": "^11.21.0",
     "@carbon/react": "^1.31.3",
     "@reduxjs/toolkit": "^1.9.5",
-    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^13.4.0",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "bootstrap": "^5.3.0",
     "env-cmd": "^10.1.0",
     "keycloak-js": "^26.2.0",
@@ -22,11 +22,16 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.4.2",
-    "sass": "^1.63.4"
+    "sass": "^1.99.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.4",
     "vite": "^7.3.2"
+  },
+  "resolutions": {
+    "picomatch": "^4.0.4",
+    "immutable": "^5.1.5",
+    "lodash": "^4.18.0"
   },
   "scripts": {
     "dev": "chmod +x ./env.sh && ./env.sh && cp env-config.js ./public/ && vite",
