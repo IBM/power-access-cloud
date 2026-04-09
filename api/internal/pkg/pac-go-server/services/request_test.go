@@ -31,6 +31,12 @@ func TestGetAllRequest(t *testing.T) {
 			mockFunc: func() {
 				mockDBClient.EXPECT().GetRequestsByUserID(gomock.Any(), gomock.Any()).Return(getResource("get-requests-by-user-id", nil).([]models.Request), nil).Times(1)
 				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(true).AnyTimes()
+				username := "testuser"
+				email := "testuser@example.com"
+				mockKCClient.EXPECT().GetUser(gomock.Any()).Return(&gocloak.User{
+					Username: &username,
+					Email:    &email,
+				}, nil).AnyTimes()
 			},
 			requestContext: formContext(customValues{
 				"userid": "12345",

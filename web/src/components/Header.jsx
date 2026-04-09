@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { UserAvatar } from "@carbon/icons-react";
 import Feedback from "./PopUp/Feedback";
@@ -31,15 +31,41 @@ const MenuLink = (props) => {
   );
 };
 
-const HeaderNav = () => {
+const HeaderNav = ({ onSideNavToggle }) => {
   const isAdmin = UserService.isAdminUser();
   const [showProfile, setShowProfile] = useState(false);
   const [actionProps, setActionProps] = useState("");
+  const [isSideNavExpanded, setIsSideNavExpanded] = useState(false);
+  const sideNavRef = useRef(null);
 
   // notify
   const [notifyKind, setNotifyKind] = useState("");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+
+  // Handle click outside to close side nav
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isSideNavExpanded && sideNavRef.current && !sideNavRef.current.contains(event.target)) {
+        // Check if click is not on the hamburger button
+        const hamburgerButton = document.querySelector('.cds--header__menu-toggle');
+        if (hamburgerButton && !hamburgerButton.contains(event.target)) {
+          setIsSideNavExpanded(false);
+          if (onSideNavToggle) {
+            onSideNavToggle(false);
+          }
+        }
+      }
+    };
+
+    if (isSideNavExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSideNavExpanded, onSideNavToggle]);
 
   const action = {
     key: BUTTON_FEEDBACK,
@@ -64,9 +90,17 @@ const HeaderNav = () => {
       </React.Fragment>
     );
   };
+  const toggleSideNav = () => {
+    const newState = !isSideNavExpanded;
+    setIsSideNavExpanded(newState);
+    if (onSideNavToggle) {
+      onSideNavToggle(newState);
+    }
+  };
+
   return (
     <HeaderContainer
-      render={({ isSideNavExpanded, onClickSideNavExpand }) => (
+      render={() => (
         <>
           {renderActionModals()}
           <Header aria-label="">
@@ -74,7 +108,7 @@ const HeaderNav = () => {
               <HeaderMenuButton
                 aria-label={isSideNavExpanded ? "Close menu" : "Open menu"}
                 isCollapsible
-                onClick={onClickSideNavExpand}
+                onClick={toggleSideNav}
                 isActive={isSideNavExpanded}
                 aria-expanded={isSideNavExpanded}
               />
@@ -116,17 +150,17 @@ const HeaderNav = () => {
               {showProfile && <ProfileSection />}
             </HeaderGlobalBar>
             {isAdmin && (
-              <SideNav
-                aria-label="Side navigation"
-                expanded={isSideNavExpanded}
-                onOverlayClick={onClickSideNavExpand}
-                onSideNavBlur={onClickSideNavExpand}
-                isFixedNav={true}
-                isChildOfHeader={false}
-                style={{
-                  marginTop: "47px",
-                }}
-              >
+              <div ref={sideNavRef}>
+                <SideNav
+                  aria-label="Side navigation"
+                  expanded={isSideNavExpanded}
+                  onOverlayClick={toggleSideNav}
+                  isFixedNav={true}
+                  isChildOfHeader={false}
+                  style={{
+                    marginTop: "47px",
+                  }}
+                >
                 <SideNavItems>
                   <MenuLink
                     url="/"
@@ -146,6 +180,7 @@ const HeaderNav = () => {
                   {isAdmin && <MenuLink url="/events" label="Events" />}
                 </SideNavItems>
               </SideNav>
+              </div>
             )}
           </Header>
         </>

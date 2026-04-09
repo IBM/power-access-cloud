@@ -27,8 +27,9 @@ import {
   TableBatchAction,
   TableSelectRow,
   TableToolbarSearch,
-  TableSelectAll,
   DataTableSkeleton,
+  Dropdown,
+  TableToolbarContent,
 } from "@carbon/react";
 import ApproveRequest from "./PopUp/ApproveRequest";
 import RequestDetails from "./PopUp/RequestDetail";
@@ -48,8 +49,13 @@ const headers = [
     header: "Type",
   },
   {
-    key: "user_id",
-    header: "User ID",
+    key: "username",
+    header: "Username",
+    adminOnly: true,
+  },
+  {
+    key: "email",
+    header: "Email",
     adminOnly: true,
   },
   {
@@ -109,6 +115,25 @@ const TABLE_BUTTONS = [
   },
 ];
 let selectRows = [];
+
+// Helper function to format date to user's local format
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } catch (error) {
+    return dateString; // Return original if parsing fails
+  }
+};
+
 const RequestList = () => {
   const isAdmin = UserService.isAdminUser();
   const [rows, setRows] = useState([]);
@@ -118,6 +143,9 @@ const RequestList = () => {
   const [notifyKind, setNotifyKind] = useState("");
   const [actionProps, setActionProps] = useState("");
   const [loading, setLoading] = useState(true);
+  const [filterType, setFilterType] = useState("");
+  const [filterState, setFilterState] = useState("");
+  const [filterUsername, setFilterUsername] = useState("");
 
   const filteredHeaders = isAdmin
     ? headers // Display all buttons for admin users
@@ -125,7 +153,12 @@ const RequestList = () => {
 
   const fetchAllRequest = async () => {
     let data = await allRequests();
-    setRows(data?.payload);
+    // Format the created_at dates to user's local format
+    const formattedData = data?.payload?.map(row => ({
+      ...row,
+      created_at: formatDate(row.created_at)
+    }));
+    setRows(formattedData);
     setLoading(false);
   };
 
@@ -194,14 +227,50 @@ const RequestList = () => {
     );
   };
 
-  const displayData = clientSearchFilter(searchText, rows);
+  // Apply filters to the data
+  const applyFilters = (data) => {
+    let filtered = data;
+    
+    if (filterType) {
+      filtered = filtered.filter(row => row.type === filterType);
+    }
+    
+    if (filterState) {
+      filtered = filtered.filter(row => row.state === filterState);
+    }
+    
+    if (filterUsername) {
+      filtered = filtered.filter(row => row.username === filterUsername);
+    }
+    
+    return filtered;
+  };
+
+  // Get unique values for filter dropdowns
+  const getUniqueTypes = () => {
+    const types = [...new Set(rows.map(row => row.type).filter(Boolean))];
+    return types.map(type => ({ id: type, label: type }));
+  };
+
+  const getUniqueStates = () => {
+    const states = [...new Set(rows.map(row => row.state).filter(Boolean))];
+    return states.map(state => ({ id: state, label: state }));
+  };
+
+  const getUniqueUsernames = () => {
+    const usernames = [...new Set(rows.map(row => row.username).filter(Boolean))];
+    return usernames.map(username => ({ id: username, label: username }));
+  };
+
+  const filteredData = applyFilters(rows);
+  const displayData = clientSearchFilter(searchText, filteredData);
   return (
     <>
       <Notify title={title} message={message} nkind={notifyKind} setTitle={setTitle} />
       {loading ? (renderSkeleton()) : (
         <>
           {renderActionModals()}
-          <DataTable rows={displayData} headers={filteredHeaders} isSortable>
+          <DataTable rows={displayData} headers={filteredHeaders} radio isSortable>
             {({
               rows,
               headers,
@@ -232,6 +301,35 @@ const RequestList = () => {
                       }}
                       placeholder={"Search"}
                     />
+                    <TableToolbarContent>
+                      <Dropdown
+                        id="filter-type"
+                        titleText=""
+                        label="Filter by Type"
+                        items={[{ id: "", label: "All Types" }, ...getUniqueTypes()]}
+                        selectedItem={filterType ? { id: filterType, label: filterType } : { id: "", label: "All Types" }}
+                        onChange={({ selectedItem }) => setFilterType(selectedItem?.id || "")}
+                        size="md"
+                      />
+                      <Dropdown
+                        id="filter-state"
+                        titleText=""
+                        label="Filter by State"
+                        items={[{ id: "", label: "All States" }, ...getUniqueStates()]}
+                        selectedItem={filterState ? { id: filterState, label: filterState } : { id: "", label: "All States" }}
+                        onChange={({ selectedItem }) => setFilterState(selectedItem?.id || "")}
+                        size="md"
+                      />
+                      <Dropdown
+                          id="filter-username"
+                          titleText=""
+                          label="Filter by Username"
+                          items={[{ id: "", label: "All Users" }, ...getUniqueUsernames()]}
+                          selectedItem={filterUsername ? { id: filterUsername, label: filterUsername } : { id: "", label: "All Users" }}
+                          onChange={({ selectedItem }) => setFilterUsername(selectedItem?.id || "")}
+                          size="md"
+                      />
+                    </TableToolbarContent>
                     {batchActionProps.batchActions.map((action) => {
                       return filteredButtons.map((btn) => {
                         if (btn.key === action.key) {
@@ -253,7 +351,7 @@ const RequestList = () => {
                   <Table {...getTableProps()}>
                     <TableHead>
                       <TableRow>
-                        <TableSelectAll {...getSelectionProps()} />
+                        <th></th>
                         {headers.map((header) => (
                           <TableHeader {...getHeaderProps({ header })}>
                             {header.header}
@@ -262,14 +360,30 @@ const RequestList = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => (
-                        <TableRow key={row.id}>
-                          <TableSelectRow {...getSelectionProps({ row })} />
-                          {row.cells.map((cell) => (
-                            <TableCell key={cell.id}>{cell.value}</TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
+                      {rows.map((row) => {
+                        const selectionProps = getSelectionProps({ row });
+                        return (
+                          <TableRow 
+                            key={row.id}
+                            onClick={(e) => {
+                              // Don't trigger if clicking on the radio button itself
+                              if (e.target.type === 'radio') return;
+                              
+                              // Find and click the radio input in this row
+                              const radioInput = e.currentTarget.querySelector('input[type="radio"]');
+                              if (radioInput) {
+                                radioInput.click();
+                              }
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <TableSelectRow {...selectionProps} />
+                            {row.cells.map((cell) => (
+                              <TableCell key={cell.id}>{cell.value}</TableCell>
+                            ))}
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>

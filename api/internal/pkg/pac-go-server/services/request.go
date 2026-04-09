@@ -56,6 +56,23 @@ func GetAllRequests(c *gin.Context) {
 		c.JSON(http.StatusOK, []models.Request{})
 		return
 	}
+
+	// Populate username and email for each request
+	for i := range requests {
+		user, err := kc.GetUser(requests[i].UserID)
+		if err != nil {
+			logger.Warn("failed to get user details", zap.String("user id", requests[i].UserID), zap.Error(err))
+			// Continue with empty username and email if user fetch fails
+			continue
+		}
+		if user.Username != nil {
+			requests[i].Username = *user.Username
+		}
+		if user.Email != nil {
+			requests[i].Email = *user.Email
+		}
+	}
+
 	c.JSON(http.StatusOK, requests)
 }
 

@@ -23,6 +23,8 @@ const (
 type Request struct {
 	ID             primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	UserID         string             `json:"user_id" bson:"user_id,omitempty"`
+	Username       string             `json:"username" bson:"-"`
+	Email          string             `json:"email" bson:"-"`
 	Justification  string             `json:"justification" bson:"justification,omitempty"`
 	Comment        string             `json:"comment" bson:"comment,omitempty"`
 	CreatedAt      time.Time          `json:"created_at" bson:"created_at,omitempty"`
