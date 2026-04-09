@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-22:9.6 AS builder
+FROM registry.access.redhat.com/ubi9/nodejs-22:9.7 AS builder
 
 # Switch to root to install global tools
 USER 0
@@ -18,9 +18,10 @@ COPY . .
 RUN yarn build
 
 # Stage 2: Production image with NGINX on UBI
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7
 
-RUN microdnf install -y nginx gettext && \
+RUN microdnf update -y && \
+    microdnf install -y nginx gettext && \
     microdnf clean all && \
     rm -rf /var/cache/dnf && \
     mkdir -p /var/log/nginx && \
@@ -41,6 +42,8 @@ COPY ./entrypoint.sh .
 
 # Set correct permissions for nginx to serve content
 RUN chown -R nginx:root /usr/share/nginx/html
+
+USER nginx
 
 EXPOSE 8080
 CMD ["/bin/bash", "/usr/share/nginx/html/entrypoint.sh"]
