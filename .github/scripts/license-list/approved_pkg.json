@@ -270,6 +270,7 @@
     "util-linux-core": "GPL-2.0-only AND GPL-2.0-or-later AND LGPL-2.0-or-later AND BSD-3-Clause WITH advertising AND Public-Domain",
     "util-linux": "GPL-2.0-only AND GPL-2.0-or-later AND LGPL-2.0-or-later AND BSD-3-Clause WITH advertising AND Public-Domain",
     "xz-libs": "Public-Domain",
-    "zlib": "Zlib AND BSL-1.0"
+    "zlib": "Zlib AND BSL-1.0",
+    "vertx-codegen": "Apache-2.0"
   }
 }

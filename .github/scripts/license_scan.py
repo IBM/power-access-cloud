@@ -105,7 +105,7 @@ def load_approved_pkgs(file_name):
     try:
         with open(f".github/scripts/license-list/{file_name}", 'r') as approved_pkg_file:
             approved_pkg_data = json.load(approved_pkg_file)
-            return approved_pkg_data.get("approvesd_pkg_licenses", {})
+            return approved_pkg_data.get("approved_pkg_licenses", {})
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
