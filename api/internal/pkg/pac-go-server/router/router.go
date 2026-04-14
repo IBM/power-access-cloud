@@ -94,6 +94,10 @@ func CreateRouter() *gin.Engine {
 		authorizedAdmin.GET("/users/:id", services.GetUser)
 
 		authorizedAdmin.GET("/feedbacks", services.GetFeedback)
+
+		authorizedAdmin.POST("/maintenance", services.CreateMaintenanceWindow)
+		authorizedAdmin.PUT("/maintenance/:id", services.UpdateMaintenanceWindow)
+		authorizedAdmin.DELETE("/maintenance/:id", services.DeleteMaintenanceWindow)
 	}
 
 	// user related endpoints
@@ -123,6 +127,9 @@ func CreateRouter() *gin.Engine {
 
 	// feedback related endpoints
 	authorized.POST("/feedbacks", services.CreateFeedback)
+
+	// maintenance notification related endpoints
+	authorized.GET("/maintenance", services.GetMaintenanceWindows)
 
 	return router
 }
