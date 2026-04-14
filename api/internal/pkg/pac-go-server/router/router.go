@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,24 @@ var (
 func init() {
 	client = gocloak.NewClient(hostname)
 	internalClient = keycloak.NewGoCloakClient(hostname)
+	
+	// Set GIN mode based on LOG_LEVEL or GIN_MODE environment variable
+	setGinMode()
+}
+
+// setGinMode configures GIN's logging mode based on environment variables
+func setGinMode() {
+	ginMode := os.Getenv("GIN_MODE")
+	if ginMode == "" {
+		// If GIN_MODE not set, derive from LOG_LEVEL
+		logLevel := strings.ToLower(os.Getenv("LOG_LEVEL"))
+		if logLevel == "debug" {
+			ginMode = gin.DebugMode
+		} else {
+			ginMode = gin.ReleaseMode
+		}
+	}
+	gin.SetMode(ginMode)
 }
 
 func CreateRouter() *gin.Engine {

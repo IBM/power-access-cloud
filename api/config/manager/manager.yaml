@@ -52,7 +52,7 @@ spec:
         image: controller:latest
         imagePullPolicy: Always
         name: manager-config
-#        env:
+#       env:
 #        - name: IBMCLOUD_APIKEY
 #          valueFrom:
 #            secretKeyRef:
