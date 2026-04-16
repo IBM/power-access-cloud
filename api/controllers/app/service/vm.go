@@ -77,6 +77,8 @@ func NewVM(scope *scope.ServiceScope) Interface {
 func (s *VM) Reconcile(ctx context.Context) (ctrl.Result, error) {
 	if s.scope.Service.Status.VM.InstanceID == "" {
 		if err := createVM(s.scope); err != nil {
+			err := s.scope.NotifyServiceCreationFailure(err.Error())
+			s.scope.Logger.Error(err, "Error notifying VM creation failure")
 			return ctrl.Result{}, errors.Wrap(err, "error creating vm")
 		}
 	}
@@ -121,10 +123,31 @@ func updateStatus(scope *scope.ServiceScope, pvmInstance *models.PVMInstance) {
 		handleActiveStatus(scope)
 	case "ERROR":
 		scope.Service.Status.State = appv1alpha1.ServiceStateFailed
+		serverName := "unknown"
+		if pvmInstance.ServerName != nil {
+			serverName = *pvmInstance.ServerName
+		}
+		instanceID := "unknown"
+		if pvmInstance.PvmInstanceID != nil {
+			instanceID = *pvmInstance.PvmInstanceID
+		}
+
+		errorMsg := fmt.Sprintf(`VM Creation Failed
+
+Service Details:
+- Server Name: %s
+- Instance ID: %s`, serverName, instanceID)
 		if pvmInstance.Fault != nil {
-			scope.Service.Status.Message = fmt.Sprintf("vm creation failed with reason: %s", pvmInstance.Fault.Message)
+			errorMsg += fmt.Sprintf(`
+
+Error Details:
+%s`, pvmInstance.Fault.Message)
+			scope.Service.Status.Message = fmt.Sprintf("VM creation failed with reason: %s", pvmInstance.Fault.Message)
 		}
 		scope.Service.Status.AccessInfo = ""
+		if err := scope.NotifyServiceCreationFailure(errorMsg); err != nil {
+			scope.Logger.Error(err, "failed to create failure notification event")
+		}
 	default:
 		scope.Service.Status.State = appv1alpha1.ServiceStateInProgress
 		scope.Service.Status.Message = "vm creation started, will update the access info once vm is ready"
@@ -184,6 +207,7 @@ func handleActiveStatus(scope *scope.ServiceScope) {
 		scope.Service.Status.VM.IPAddress)
 	scope.Service.Status.Message = ""
 	scope.Logger.Info("Service marked as CREATED")
+	scope.ClearNotificationCache()
 }
 
 func isIBMiOS(scope *scope.ServiceScope) bool {

@@ -79,3 +79,20 @@ func (db *MongoDB) CollectionExists(name string) (bool, error) {
 	// collection exists
 	return true, nil
 }
+
+func (db *MongoDB) ConnectionExists(reconnect bool) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	//ping the database
+	err := db.client.Ping(ctx, nil)
+	if err == nil {
+		return nil
+	}
+
+	if !reconnect {
+		return fmt.Errorf("error pinging MongoDB: %w", err)
+	}
+
+	return db.Connect()
+}

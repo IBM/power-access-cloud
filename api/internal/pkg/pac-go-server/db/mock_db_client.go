@@ -78,6 +78,20 @@ func (mr *MockDBMockRecorder) Connect() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Connect", reflect.TypeOf((*MockDB)(nil).Connect))
 }
 
+// ConnectionExists mocks base method.
+func (m *MockDB) ConnectionExists(arg0 bool) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ConnectionExists", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ConnectionExists indicates an expected call of ConnectionExists.
+func (mr *MockDBMockRecorder) ConnectionExists(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConnectionExists", reflect.TypeOf((*MockDB)(nil).ConnectionExists), arg0)
+}
+
 // CreateKey mocks base method.
 func (m *MockDB) CreateKey(arg0 *models.Key) error {
 	m.ctrl.T.Helper()
