@@ -14,6 +14,7 @@ import {
   TableToolbar,
   TableToolbarSearch,
   DataTableSkeleton,
+  Tag,
 } from "@carbon/react";
 
 const headers = [
@@ -36,6 +37,10 @@ const headers = [
   {
     key: "email",
     header: "Email",
+  },
+  {
+    key: "groups",
+    header: "Groups",
   },
 ];
 
@@ -114,7 +119,25 @@ const Users = () => {
                       {rows.map((row) => (
                         <TableRow key={row.id}>
                           {row.cells.map((cell) => (
-                            <TableCell key={cell.id}>{cell.value}</TableCell>
+                            <TableCell key={cell.id}>
+                              {cell.info.header === "groups" ? (
+                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                  {Array.isArray(cell.value) ? (
+                                    cell.value.map((group, idx) => (
+                                      <Tag key={idx} type="blue" size="md">
+                                        {group}
+                                      </Tag>
+                                    ))
+                                  ) : cell.value ? (
+                                    <Tag type="blue" size="md">
+                                      {cell.value}
+                                    </Tag>
+                                  ) : null}
+                                </div>
+                              ) : (
+                                cell.value
+                              )}
+                            </TableCell>
                           ))}
                         </TableRow>
                       ))}

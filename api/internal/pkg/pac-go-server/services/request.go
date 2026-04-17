@@ -115,7 +115,7 @@ func GetRequest(c *gin.Context) {
 func UpdateServiceExpiryRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
-	var expiryRequest = models.GetRequest()
+	expiryRequest := models.GetRequest()
 	userID := c.Request.Context().Value("userid").(string)
 
 	if err := utils.BindAndValidate(c, &expiryRequest); err != nil {
@@ -202,7 +202,7 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	}
 
 	// insert the request into the database
-	id, err := dbCon.NewRequest(&models.Request{
+	_, err = dbCon.NewRequest(&models.Request{
 		UserID:        userID,
 		CreatedAt:     time.Now(),
 		State:         models.RequestStateNew,
@@ -239,7 +239,12 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	}()
 
 	event.SetNotifiyBoth()
-	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("New Request submitted to change the expiry of the service, id: %s", id))
+	username := c.Request.Context().Value("username").(string)
+	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(
+		`New service expiry change Request has been submitted 
+
+User: %s
+Justification: %s`, username, expiryRequest.Justification))
 
 	logger.Debug("successfully created request")
 	c.Status(http.StatusCreated)
@@ -259,7 +264,7 @@ func NewGroupRequest(c *gin.Context) {
 	originator := c.Request.Context().Value("userid").(string)
 	logger := log.GetLogger()
 
-	var request = models.GetRequest()
+	request := models.GetRequest()
 	// get the authenticated user's username and ID
 	username := c.Request.Context().Value("username").(string)
 	userID := c.Request.Context().Value("userid").(string)
@@ -313,7 +318,7 @@ func NewGroupRequest(c *gin.Context) {
 	}
 
 	// insert the request into the database
-	id, err := dbCon.NewRequest(&models.Request{
+	_, err = dbCon.NewRequest(&models.Request{
 		UserID:        userID,
 		CreatedAt:     time.Now(),
 		State:         models.RequestStateNew,
@@ -323,7 +328,8 @@ func NewGroupRequest(c *gin.Context) {
 			GroupID:   groupID,
 			Group:     *grp.Name,
 			Requester: username,
-		}})
+		},
+	})
 	if err != nil {
 		logger.Error("failed to create request", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to insert the request into the db, err: %s", err.Error())})
@@ -344,7 +350,13 @@ func NewGroupRequest(c *gin.Context) {
 	}()
 
 	event.SetNotifiyBoth()
-	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("New Request(%s) has been submitted to add to the group: %s", id, *grp.Name))
+
+	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(
+		`New Request has been submitted.
+
+User: %s
+Justification: %s
+For Group: %s`, username, request.Justification, *grp.Name))
 
 	logger.Debug("successfully created request")
 	c.Status(http.StatusCreated)
@@ -363,7 +375,7 @@ func NewGroupRequest(c *gin.Context) {
 func ExitGroup(c *gin.Context) {
 	logger := log.GetLogger()
 
-	var request = models.GetRequest()
+	request := models.GetRequest()
 	// get the authenticated user's username and ID
 	username := c.Request.Context().Value("username").(string)
 	userID := c.Request.Context().Value("userid").(string)
@@ -462,7 +474,7 @@ func ExitGroup(c *gin.Context) {
 func deleteUserRequest(c *gin.Context) error {
 	logger := log.GetLogger()
 
-	var request = models.GetRequest()
+	request := models.GetRequest()
 	userID := c.Request.Context().Value("userid").(string)
 
 	// TODO : Request details has to be send by UI
