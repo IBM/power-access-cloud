@@ -178,6 +178,7 @@ const HeaderNav = ({ onSideNavToggle }) => {
                   {isAdmin && <MenuLink url="/keys" label="Keys" />}
                   {isAdmin && <MenuLink url="/users" label="Users" />}
                   {isAdmin && <MenuLink url="/events" label="Events" />}
+                  {isAdmin && <MenuLink url="/maintenance" label="Maintenance" />}
                 </SideNavItems>
               </SideNav>
               </div>

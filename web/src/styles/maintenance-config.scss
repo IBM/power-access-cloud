@@ -1,0 +1,97 @@
+.maintenance-config-container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+
+  h2 {
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+
+  .maintenance-config-description {
+    margin-bottom: 2rem;
+    color: #525252;
+    line-height: 1.5;
+  }
+
+  .maintenance-config-form {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+
+    .date-picker-group {
+      margin-bottom: 1rem;
+
+      .datetime-input {
+        cursor: text;
+        
+        &:hover {
+          cursor: text;
+        }
+        
+        &:focus {
+          cursor: text;
+        }
+      }
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+  }
+
+  .maintenance-config-info {
+    background: #f4f4f4;
+    padding: 1.5rem;
+    border-radius: 4px;
+    border-left: 4px solid #0f62fe;
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.5rem;
+
+      li {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  .maintenance-config-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+  }
+}
+
+// Dark theme support
+[data-carbon-theme="g100"],
+[data-carbon-theme="g90"] {
+  .maintenance-config-container {
+    .maintenance-config-description {
+      color: #c6c6c6;
+    }
+
+    .maintenance-config-form {
+      background: #262626;
+    }
+
+    .maintenance-config-info {
+      background: #393939;
+      border-left-color: #78a9ff;
+    }
+  }
+}
