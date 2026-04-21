@@ -12,6 +12,7 @@ subscription-manager register --force --auto-attach --username={{ .RHNUser }} --
 
 yum update -y && yum install -y yum-utils
 yum install -y cloud-init firewalld
+yum install -y device-mapper-multipath parted kpartx
 rm -rf /etc/systemd/system/multi-user.target.wants/firewalld.service
 rpm -vih --nodeps https://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/ibm-power-repo-latest.noarch.rpm
 sed -i 's/^more \/opt\/ibm\/lop\/notice/#more \/opt\/ibm\/lop\/notice/g' /opt/ibm/lop/configure
@@ -56,13 +57,32 @@ done
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 curl https://raw.githubusercontent.com/IBM/power-access-cloud/refs/heads/main/hack/scripts/prep-pac.sh -o /usr/local/bin/prep-pac.sh
+curl https://raw.githubusercontent.com/IBM/power-access-cloud/refs/heads/main/hack/scripts/expand-root-volume.sh -o /usr/local/bin/expand-root-volume.sh
 chmod +x /usr/local/bin/prep-pac.sh
+chmod +x /usr/local/bin/expand-root-volume.sh
+
+cat <<EOT >> /usr/lib/systemd/system/expand-root-volume.service
+[Unit]
+Description=Expand multipath root volume on first boot
+DefaultDependencies=no
+After=local-fs.target systemd-udev-settle.service multipathd.service
+Before=prep-pac.service cloud-final.service
+ConditionPathExists=!/var/lib/pac-root-expanded
+
+[Service]
+ExecStart=/usr/local/bin/expand-root-volume.sh
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOT
 
 cat <<EOT >> /usr/lib/systemd/system/prep-pac.service
 [Unit]
 Description=Prepare the machine for the Power Access Cloud
-Requires=cloud-final.service
-After=cloud-final.service
+Requires=cloud-final.service expand-root-volume.service
+After=cloud-final.service expand-root-volume.service
 
 [Service]
 ExecStart=/usr/local/bin/prep-pac.sh
@@ -75,6 +95,7 @@ RemainAfterExit=yes
 WantedBy=cloud-init.target
 EOT
 
+systemctl enable expand-root-volume.service
 systemctl enable prep-pac.service
 #mkdir -p /etc/cloud/cloud.cfg.d
 #cat <<EOT >> /etc/cloud/cloud.cfg.d/99-custom-networking.cfg
