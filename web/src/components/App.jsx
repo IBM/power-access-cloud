@@ -20,6 +20,8 @@ import Events from "./Events";
 import Keys from "./Keys";
 import { Theme } from "@carbon/react";
 import Feedbacks from "./Feedbacks";
+import MaintenanceNotification from "./MaintenanceNotification";
+import MaintenanceManager from "./MaintenanceManager";
 
 const RouterClass = React.memo(({ isAdmin }) => {
     return (
@@ -84,6 +86,12 @@ const RouterClass = React.memo(({ isAdmin }) => {
             element={<TnCRoute Component={Feedbacks} />}
           />
         )}
+        {isAdmin && (
+          <Route
+            path="/maintenance"
+            element={<TnCRoute Component={MaintenanceManager} />}
+          />
+        )}
       </Routes>
     );
 });
@@ -111,6 +119,7 @@ const App = () => {
       "/events",
       "/keys",
       "/feedbacks",
+      "/maintenance",
     ].includes(window.location.pathname)
   ) {
     window.location.href = "/login";
@@ -118,7 +127,8 @@ const App = () => {
   }
   return (
     <React.Fragment>
-      <Theme theme="g90">{auth === true && <HeaderNav onSideNavToggle={handleSideNavToggle} />} </Theme>
+      <Theme theme="g90">{auth && <HeaderNav onSideNavToggle={handleSideNavToggle} />} </Theme>
+      {auth && <MaintenanceNotification />}
       <section className={auth ? `contentSection ${isAdmin && isSideNavExpanded ? 'sideNavExpanded' : ''}` : ""}>
         <RouterClass isAdmin={isAdmin} />
       </section>
