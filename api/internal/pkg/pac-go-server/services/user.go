@@ -20,13 +20,26 @@ import (
 // @Router			/api/v1/users [get]
 func GetUsers(c *gin.Context) {
 	config := client.GetConfigFromContext(c.Request.Context())
-	usrs, err := client.NewKeyCloakClient(config, c).GetUsers()
+	kclient := client.NewKeyCloakClient(config, c)
+	usrs, err := kclient.GetUsers()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	var users []models.User
 	for _, user := range usrs {
+		// Fetch user Groups
+		groups, err := kclient.GetUserGroups(*user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		currUserGroups := []string{}
+		for _, group := range groups {
+			if group.Name != nil {
+				currUserGroups = append(currUserGroups, *group.Name)
+			}
+		}
 		u := models.User{
 			Username: *user.Username,
 			ID:       *user.ID,
@@ -41,6 +54,7 @@ func GetUsers(c *gin.Context) {
 		if user.Email != nil {
 			u.Email = *user.Email
 		}
+		u.Groups = currUserGroups
 		users = append(users, u)
 	}
 	c.JSON(http.StatusOK, users)

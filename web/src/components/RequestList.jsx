@@ -24,12 +24,13 @@ import {
   TableCell,
   TableContainer,
   TableToolbar,
-  TableBatchAction,
-  TableSelectRow,
   TableToolbarSearch,
   DataTableSkeleton,
   Dropdown,
   TableToolbarContent,
+  OverflowMenu,
+  OverflowMenuItem,
+  Modal,
 } from "@carbon/react";
 import ApproveRequest from "./PopUp/ApproveRequest";
 import RequestDetails from "./PopUp/RequestDetail";
@@ -73,6 +74,10 @@ const headers = [
   {
     key: "comment",
     header: "Admin comments",
+  },
+  {
+    key: "actions",
+    header: "Actions",
   },
 ];
 
@@ -146,6 +151,7 @@ const RequestList = () => {
   const [filterType, setFilterType] = useState("");
   const [filterState, setFilterState] = useState("");
   const [filterUsername, setFilterUsername] = useState("");
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const filteredHeaders = isAdmin
     ? headers // Display all buttons for admin users
@@ -174,10 +180,49 @@ const RequestList = () => {
     setTitle(title);
     setMessage(message);
     errored ? setNotifyKind("error") : setNotifyKind("success");
+    // Refresh the table data after successful operations
+    if (!errored) {
+      fetchAllRequest();
+    }
   };
 
-  const selectionHandler = (rows = []) => {
-    selectRows = rows;
+  const handleActionClick = (action, row) => {
+    // Find the original data row by matching the id
+    const originalRow = rows.find(r => r.id === row.id);
+    selectRows = [originalRow || row];
+    
+    // Reject action goes directly to its modal (which has comment field and confirmation)
+    if (action.key === REJECT_REQUEST) {
+      setActionProps(action);
+    }
+    // Show confirmation modal for Delete and Approve actions
+    else if (action.key === DELETE_REQUEST || action.key === APPROVE_REQUEST) {
+      setConfirmAction({ action, row: originalRow });
+    } else {
+      setActionProps(action);
+    }
+  };
+
+  const handleConfirmAction = () => {
+    if (confirmAction) {
+      setActionProps(confirmAction.action);
+      setConfirmAction(null);
+    }
+  };
+
+  const getConfirmationMessage = () => {
+    if (!confirmAction) return '';
+    
+    switch (confirmAction.action.key) {
+      case DELETE_REQUEST:
+        return 'Are you sure you want to delete this request? This action cannot be undone.';
+      case REJECT_REQUEST:
+        return 'Are you sure you want to reject this request?';
+      case APPROVE_REQUEST:
+        return 'Are you sure you want to approve this request?';
+      default:
+        return '';
+    }
   };
 
   const renderActionModals = () => {
@@ -270,32 +315,24 @@ const RequestList = () => {
       {loading ? (renderSkeleton()) : (
         <>
           {renderActionModals()}
-          <DataTable rows={displayData} headers={filteredHeaders} radio isSortable>
+          <DataTable rows={displayData} headers={filteredHeaders} isSortable>
             {({
               rows,
               headers,
               getTableProps,
               getHeaderProps,
               getRowProps,
-              getBatchActionProps,
               getToolbarProps,
               getTableContainerProps,
-              getSelectionProps,
-              selectedRows,
             }) => {
-              const batchActionProps = getBatchActionProps({
-                batchActions: TABLE_BUTTONS,
-              });
               return (
                 <TableContainer
                   title={"Requests Detail"}
                   {...getTableContainerProps()}
                 >
-                  {selectionHandler && selectionHandler(selectedRows)}
                   <TableToolbar {...getToolbarProps()}>
                     <TableToolbarSearch
                       persistent={true}
-                      tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
                       onChange={(onInputChange) => {
                         setSearchText(onInputChange.target.value);
                       }}
@@ -330,28 +367,10 @@ const RequestList = () => {
                           size="md"
                       />
                     </TableToolbarContent>
-                    {batchActionProps.batchActions.map((action) => {
-                      return filteredButtons.map((btn) => {
-                        if (btn.key === action.key) {
-                          return (
-                            <TableBatchAction
-                              renderIcon={btn.icon}
-                              disabled={!(selectRows.length === 1)}
-                              onClick={() => setActionProps(btn)}
-                              key={btn.key} // Add a unique key for each rendered component
-                            >
-                              {btn.label}
-                            </TableBatchAction>
-                          );
-                        }
-                        return null;
-                      });
-                    })}
                   </TableToolbar>
                   <Table {...getTableProps()}>
                     <TableHead>
                       <TableRow>
-                        <th></th>
                         {headers.map((header) => (
                           <TableHeader {...getHeaderProps({ header })}>
                             {header.header}
@@ -360,30 +379,27 @@ const RequestList = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => {
-                        const selectionProps = getSelectionProps({ row });
-                        return (
-                          <TableRow 
-                            key={row.id}
-                            onClick={(e) => {
-                              // Don't trigger if clicking on the radio button itself
-                              if (e.target.type === 'radio') return;
-                              
-                              // Find and click the radio input in this row
-                              const radioInput = e.currentTarget.querySelector('input[type="radio"]');
-                              if (radioInput) {
-                                radioInput.click();
-                              }
-                            }}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            <TableSelectRow {...selectionProps} />
-                            {row.cells.map((cell) => (
-                              <TableCell key={cell.id}>{cell.value}</TableCell>
-                            ))}
-                          </TableRow>
-                        );
-                      })}
+                      {rows.map((row) => (
+                        <TableRow key={row.id}>
+                          {row.cells.map((cell) => (
+                            <TableCell key={cell.id}>
+                              {cell.info.header === "actions" ? (
+                                <OverflowMenu size="sm" flipped>
+                                  {filteredButtons.map((btn) => (
+                                    <OverflowMenuItem
+                                      key={btn.key}
+                                      itemText={btn.label}
+                                      onClick={() => handleActionClick(btn, row)}
+                                    />
+                                  ))}
+                                </OverflowMenu>
+                              ) : (
+                                cell.value
+                              )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -392,6 +408,21 @@ const RequestList = () => {
           </DataTable>
           {<FooterPagination displayData={rows} />}
         </>
+      )}
+      
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <Modal
+          open={true}
+          danger={confirmAction.action.key === DELETE_REQUEST}
+          modalHeading={`Confirm ${confirmAction.action.label}`}
+          primaryButtonText="Confirm"
+          secondaryButtonText="Cancel"
+          onRequestSubmit={handleConfirmAction}
+          onRequestClose={() => setConfirmAction(null)}
+        >
+          <p>{getConfirmationMessage()}</p>
+        </Modal>
       )}
     </>
   );

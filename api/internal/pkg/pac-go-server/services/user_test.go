@@ -5,7 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,6 +26,12 @@ func TestGetUsers(t *testing.T) {
 			name: "fetched all users",
 			mockFunc: func() {
 				mockKCClient.EXPECT().GetUsers().Return(getResource("get-all-users", nil), nil).Times(1)
+				groupName1 := "group1"
+				groupName2 := "group2"
+				mockKCClient.EXPECT().GetUserGroups(gomock.Any()).Return([]*gocloak.Group{
+					{Name: &groupName1},
+					{Name: &groupName2},
+				}, nil).AnyTimes()
 			},
 			httpStatus: http.StatusOK,
 		},
