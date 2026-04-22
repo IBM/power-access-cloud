@@ -15,6 +15,7 @@ import (
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/golang/mock/gomock"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -591,6 +592,75 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 			CreatedAt: time.Now(),
 		}
 		return []models.Feedback{feedback}
+	case "get-all-maintenance-windows":
+		now := time.Now()
+		objectID1, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439011")
+		objectID2, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439012")
+		window1 := models.MaintenanceWindow{
+			ID:        objectID1,
+			Enabled:   true,
+			StartTime: now.Add(24 * time.Hour),
+			EndTime:   now.Add(48 * time.Hour),
+			Message:   "Scheduled maintenance for PowerVS infrastructure upgrade",
+			CreatedBy: "admin-user-123",
+			CreatedAt: now,
+			UpdatedBy: "admin-user-123",
+			UpdatedAt: now,
+		}
+		window2 := models.MaintenanceWindow{
+			ID:        objectID2,
+			Enabled:   false,
+			StartTime: now.Add(72 * time.Hour),
+			EndTime:   now.Add(96 * time.Hour),
+			Message:   "Planned network maintenance",
+			CreatedBy: "admin-user-456",
+			CreatedAt: now,
+			UpdatedBy: "admin-user-456",
+			UpdatedAt: now,
+		}
+		return []models.MaintenanceWindow{window1, window2}
+	case "get-maintenance-window-by-id":
+		now := time.Now()
+		objectID, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439011")
+		window := models.MaintenanceWindow{
+			ID:        objectID,
+			Enabled:   true,
+			StartTime: now.Add(24 * time.Hour),
+			EndTime:   now.Add(48 * time.Hour),
+			Message:   "Scheduled maintenance for PowerVS infrastructure upgrade",
+			CreatedBy: "admin-user-123",
+			CreatedAt: now,
+			UpdatedBy: "admin-user-123",
+			UpdatedAt: now,
+		}
+		return &window
+	case "create-maintenance-window-request":
+		now := time.Now()
+		request := models.MaintenanceCreateRequest{
+			Enabled:   true,
+			StartTime: now.Add(24 * time.Hour),
+			EndTime:   now.Add(48 * time.Hour),
+			Message:   "Scheduled maintenance for PowerVS infrastructure upgrade",
+		}
+		return &request
+	case "create-maintenance-window-invalid-time":
+		now := time.Now()
+		request := models.MaintenanceCreateRequest{
+			Enabled:   true,
+			StartTime: now.Add(48 * time.Hour),
+			EndTime:   now.Add(24 * time.Hour), // End time before start time
+			Message:   "Invalid time range",
+		}
+		return &request
+	case "update-maintenance-window-request":
+		now := time.Now()
+		request := models.MaintenanceUpdateRequest{
+			Enabled:   false,
+			StartTime: now.Add(36 * time.Hour),
+			EndTime:   now.Add(60 * time.Hour),
+			Message:   "Updated maintenance message",
+		}
+		return &request
 	default:
 		return nil
 	}
