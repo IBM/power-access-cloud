@@ -121,3 +121,21 @@
     padding-right: 20px;
   }
 }
+
+.modify-user-groups-modal {
+  .cds--modal-container {
+    overflow: visible;
+  }
+
+  .cds--modal-content {
+    overflow: visible;
+  }
+
+  .cds--list-box__menu {
+    max-height: 50vh;
+  }
+}
+
+.modify-user-groups-modal__content {
+  padding-bottom: 10rem;
+}

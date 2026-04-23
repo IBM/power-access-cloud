@@ -343,12 +343,26 @@ export const allUsers = () => {
     }));
 };
 
-export const deleteUser = (name) => {
-  const url = `/pac-go-server/users`;
+export const deleteUser = (userId) => {
+  const url = `/pac-go-server/users/${userId}`;
   return _axios
     .delete(url)
     .then((response) => ({
-      type: "LIST_REQUESTS",
+      type: "DELETE_USER",
+      payload: response.data,
+    }))
+    .catch((error) => ({
+      type: "API_ERROR",
+      payload: error,
+    }));
+};
+
+export const updateUserGroup = (userId, groupName) => {
+  const url = `/pac-go-server/users/${userId}/group/${groupName}`;
+  return _axios
+    .put(url)
+    .then((response) => ({
+      type: "UPDATE_USER_GROUP",
       payload: response.data,
     }))
     .catch((error) => ({

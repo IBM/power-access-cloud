@@ -98,6 +98,8 @@ func CreateRouter() *gin.Engine {
 		authorizedAdmin.POST("/maintenance", services.CreateMaintenanceWindow)
 		authorizedAdmin.PUT("/maintenance/:id", services.UpdateMaintenanceWindow)
 		authorizedAdmin.DELETE("/maintenance/:id", services.DeleteMaintenanceWindow)
+		authorizedAdmin.DELETE("/users/:id", services.AdminDeleteUser)
+		authorizedAdmin.PUT("/users/:id/group/:group", services.AdminChangeGroup)
 	}
 
 	// user related endpoints

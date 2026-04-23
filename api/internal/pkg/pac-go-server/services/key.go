@@ -46,6 +46,16 @@ func getAllKeys(c *gin.Context) ([]models.Key, error) {
 	return keys, nil
 }
 
+// getAllKeysForUser retrieves all SSH keys for a specific user without role-based filtering.
+// Used internally for admin operations like user deletion.
+func getAllKeysForUser(c *gin.Context, userID string) ([]models.Key, error) {
+	keys, err := dbCon.GetKeyByUserID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all keys, err : %w", err)
+	}
+	return keys, nil
+}
+
 // GetKey				godoc
 // @Summary				Get key
 // @Description			Get key
