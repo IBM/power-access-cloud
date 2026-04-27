@@ -11,6 +11,7 @@ type DB interface {
 	Connect() error
 	Disconnect() error
 	CollectionExists(name string) (bool, error)
+	ConnectionExists(reconnect bool) error
 
 	GetRequestsByUserID(id, requestType string) ([]models.Request, error)
 	NewRequest(request *models.Request) (string, error)

@@ -36,6 +36,8 @@ import (
 	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	manageiqv1alpha1 "github.com/IBM/power-access-cloud/api/apis/manageiq/v1alpha1"
 	appcontrollers "github.com/IBM/power-access-cloud/api/controllers/app"
+	servicesscope "github.com/IBM/power-access-cloud/api/controllers/app/scope"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/db/mongodb"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -82,6 +84,21 @@ func main() {
 	if managerType != "both" && managerType != "config" && managerType != "service" {
 		setupLog.Error(fmt.Errorf("invalid manager type"), "", "manager-type", managerType)
 		os.Exit(1)
+	}
+
+	if servicesscope.ShouldNotify() {
+		setupLog.Info("Attempting to connect to MongoDB...")
+		db := mongodb.New()
+		if err := db.Connect(); err != nil {
+			panic(err)
+		}
+
+		defer func() {
+			if err := db.Disconnect(); err != nil {
+				panic(err)
+			}
+		}()
+		servicesscope.SetDB(db)
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
