@@ -1,9 +1,11 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -250,6 +252,53 @@ Justification: %s`, username, expiryRequest.Justification))
 	c.Status(http.StatusCreated)
 }
 
+// enrichJustificationWithGitHub adds GitHub profile to justification for users who logged in via GitHub
+func enrichJustificationWithGitHub(ctx context.Context, userID string, justification string) string {
+	logger := log.GetLogger()
+
+	// Get federated identities from Keycloak
+	kc := client.NewKeyCloakClient(client.GetConfigFromContext(ctx), ctx)
+	federatedIdentities, err := kc.GetUserFederatedIdentities(userID)
+	if err != nil {
+		logger.Debug("Failed to get federated identities", zap.String("userID", userID), zap.Error(err))
+		return justification
+	}
+
+	logger.Debug("Retrieved federated identities", zap.String("userID", userID), zap.Int("count", len(federatedIdentities)))
+
+	// Look for GitHub identity provider
+	githubProfile := ""
+	for _, identity := range federatedIdentities {
+		if identity.IdentityProvider != nil {
+			logger.Debug("Found identity provider", zap.String("provider", *identity.IdentityProvider))
+			if *identity.IdentityProvider == "github" {
+				if identity.UserName != nil {
+					githubProfile = fmt.Sprintf("https://github.com/%s", *identity.UserName)
+					logger.Info("Found GitHub profile for user", zap.String("profile", githubProfile), zap.String("userID", userID))
+					break
+				}
+			}
+		}
+	}
+
+	if githubProfile == "" {
+		logger.Debug("No GitHub identity found for user", zap.String("userID", userID))
+		return justification
+	}
+
+	// Add GitHub profile after the first line (User Type line)
+	parts := strings.SplitN(justification, "\n", 2)
+	if len(parts) >= 2 {
+		// Multiple lines: insert after first line
+		return parts[0] + "\nGitHub Profile: " + githubProfile + "\n" + parts[1]
+	} else if len(parts) == 1 {
+		// Single line: append at the end
+		return parts[0] + "\nGitHub Profile: " + githubProfile
+	}
+
+	return justification
+}
+
 // NewGroupRequest			godoc
 // @Summary				New group request
 // @Description			Request to switch to new group
@@ -351,12 +400,18 @@ func NewGroupRequest(c *gin.Context) {
 
 	event.SetNotifiyBoth()
 
+	// Enrich justification with GitHub profile if user logged in via GitHub
+	enrichedJustification := enrichJustificationWithGitHub(c.Request.Context(), userID, request.Justification)
+
 	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(
 		`New Request has been submitted.
 
 User: %s
-Justification: %s
-For Group: %s`, username, request.Justification, *grp.Name))
+
+Justification:
+%s
+
+For Group: %s`, username, enrichedJustification, *grp.Name))
 
 	logger.Debug("successfully created request")
 	c.Status(http.StatusCreated)
