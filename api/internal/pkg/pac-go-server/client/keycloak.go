@@ -91,6 +91,11 @@ func (k *KeyCloakClient) GetUserID() string {
 	return k.config.UserID
 }
 
+// GetUserFederatedIdentities gets federated identities for a user
+func (k *KeyCloakClient) GetUserFederatedIdentities(userID string) ([]*gocloak.FederatedIdentityRepresentation, error) {
+	return k.client.GetUserFederatedIdentities(k.ctx, k.config.AccessToken, k.config.Realm, userID)
+}
+
 // GetConfigFromContext gets config from context
 func GetConfigFromContext(ctx context.Context) KeyCloakConfig {
 
