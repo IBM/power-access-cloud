@@ -4,10 +4,11 @@ import { extendServices } from "../../services/request";
 import { useNavigate } from "react-router-dom";
 import { Modal, DatePicker, DatePickerInput } from "@carbon/react";
 
+const MIN_JUSTIFICATION_LENGTH = 100;
+
 const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
   console.log(selectRows.display_name)
-  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
-  const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
+  const [loading, setLoading] = useState(false);
   const name = selectRows[0]?.name;
   const [justification, setJustification] = useState("");
   let expiry = "";
@@ -25,6 +26,7 @@ const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
   let navigate = useNavigate();
 
   const onSubmit = async () => {
+    setLoading(true);
     let title = "";
     let message = "";
     let errored = false;
@@ -60,14 +62,12 @@ const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
         setActionProps("");
       }}
       onRequestSubmit={() => {
-        setPrimaryButtonDisabled(true);
-        setPrimaryButtonText("Submitting...")
         onSubmit();
       }}
       open={true}
-      primaryButtonText={primaryButtonText}
+      primaryButtonText={loading ? "Submitting..." : "Submit"}
       secondaryButtonText={"Cancel"}
-      primaryButtonDisabled={primaryButtonDisabled}
+      primaryButtonDisabled={loading || justification.length < MIN_JUSTIFICATION_LENGTH}
     >
       <div>
         <div className="mb-3">
@@ -80,8 +80,13 @@ const ServiceExtend = ({ pagename, selectRows, setActionProps, response }) => {
             placeholder="Enter your justification for extending the service."
             name="justification"
             value={justification}
-            onChange={(e) => setJustification(e.target.value)}
+            onChange={(e) => {
+              setJustification(e.target.value);
+            }}
           />
+          <small className="text-muted">
+            {justification.length}/{MIN_JUSTIFICATION_LENGTH} characters (minimum required)
+          </small>
         </div>
         <label htmlFor="Name" className="form-label">
             Select date<span className="text-danger">*</span>

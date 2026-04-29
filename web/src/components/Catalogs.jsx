@@ -9,7 +9,7 @@ import {
   InlineNotification,
   Tooltip
 } from "@carbon/react";
-import { MobileAdd, Information, CheckmarkFilled, WarningFilled} from "@carbon/icons-react";
+import { MobileAdd, Information } from "@carbon/icons-react";
 import { getAllCatalogs } from "../services/request";
 import DeployCatalog from "./PopUp/DeployCatalog";
 
@@ -40,8 +40,10 @@ const Catalogs = () => {
   const fetchData = async () => {
     let data = await getAllCatalogs();
     
+    // Filter out catalogs that are not ready
+    const readyCatalogs = data?.payload.filter(catalog => catalog.status.ready) || [];
     
-    data?.payload.sort((a, b) => {
+    readyCatalogs.sort((a, b) => {
       let fa = a.capacity.cpu,
         fb = b.capacity.cpu;
       if (fa < fb) {
@@ -52,7 +54,7 @@ const Catalogs = () => {
       }
       return 0;
     });
-    setRows(data?.payload);
+    setRows(readyCatalogs);
     let data2 = await allGroups();
     const result= data2.payload.filter((d)=>d.membership)
     //alert(result[0].quota.cpu+ " "+ result[0].quota.memory);
@@ -132,16 +134,6 @@ const Catalogs = () => {
         md={4}
         sm={2}
       ><Tile style={{paddingBottom:"50px", marginBottom:"50px", height:"85%", border:"1px grey solid"}} >
-        {(row.status.ready)&&<Tooltip align="top" style={{float:"right"}} label="Ready">
-<Button className="sb-tooltip-trigger" kind="ghost" size="sm">
-<CheckmarkFilled  style={{fill:"#24A148"}} />
-      </Button>
-</Tooltip>}
-{!(row.status.ready)&&<Tooltip align="top" style={{float:"right"}} label="Not ready">
-<Button className="sb-tooltip-trigger" kind="ghost" size="sm">
-<WarningFilled style={{fill:"#FA4D56"}} />
-      </Button>
-</Tooltip>}
         <img src={row.image_thumbnail_reference} width="15%" height="auto" alt="centos" /><br/>
       <strong><em>{row.name}</em></strong><br/><br/>
       

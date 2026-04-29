@@ -75,7 +75,7 @@ const DeployCatalog = ({ selectRows, setActionProps, response }) => {
   };
   return (
     <Modal
-      modalHeading="Deploy Catalog"
+      modalHeading="Deploy Service"
       
       onRequestClose={() => {
         setActionProps("");
@@ -108,7 +108,7 @@ const DeployCatalog = ({ selectRows, setActionProps, response }) => {
           <input
             type={"text"}
             className="form-control"
-            placeholder="Enter the display name for the service"
+            placeholder="Enter the display name for this service"
             name="name"
             value={catalogName}
             maxLength={MAX_NAME_LENGTH}

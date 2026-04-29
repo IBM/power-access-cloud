@@ -4,11 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { newRequest, getGroup } from "../../services/request";
 import { Modal,Select,SelectItem } from "@carbon/react";
 
+const MIN_JUSTIFICATION_LENGTH = 100;
+
 const UpgradeGroup = ({pagename, currentGroupId, allgroupdata, setActionProps, response }) => {
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const id = currentGroupId;
-  const [primaryButtonDisabled, setPrimaryButtonDisabled] = useState(false);
-  const [primaryButtonText, setPrimaryButtonText] = useState("Submit");
 
   useEffect(() => {
     loadUser();
@@ -37,6 +38,7 @@ const UpgradeGroup = ({pagename, currentGroupId, allgroupdata, setActionProps, r
   };
 
   const onSubmit = async () => {
+    setSubmitting(true);
     let title = "";
     let message = "";
     let errored = false;
@@ -65,15 +67,12 @@ const UpgradeGroup = ({pagename, currentGroupId, allgroupdata, setActionProps, r
         setActionProps("");
       }}
       onRequestSubmit={() => {
-        setPrimaryButtonDisabled(true);
-        setPrimaryButtonText("Submitting...")
-        
         onSubmit();
       }}
       open={true}
-      primaryButtonText={primaryButtonText}
+      primaryButtonText={submitting ? "Submitting..." : "Submit"}
       secondaryButtonText={"Cancel"}
-      primaryButtonDisabled={primaryButtonDisabled}
+      primaryButtonDisabled={submitting || (g?.justification?.length || 0) < MIN_JUSTIFICATION_LENGTH}
     >
       {loading && <>Loading....</>}
       {!loading && (
@@ -118,6 +117,9 @@ const UpgradeGroup = ({pagename, currentGroupId, allgroupdata, setActionProps, r
               onChange={(e) => onInputChange(e)}
               required
             />
+            <small className="text-muted">
+              {g?.justification?.length || 0}/{MIN_JUSTIFICATION_LENGTH} characters (minimum required)
+            </small>
           </div>
         </div>
       )}

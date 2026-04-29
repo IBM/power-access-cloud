@@ -204,7 +204,7 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	}
 
 	// insert the request into the database
-	_, err = dbCon.NewRequest(&models.Request{
+	id, err := dbCon.NewRequest(&models.Request{
 		UserID:        userID,
 		CreatedAt:     time.Now(),
 		State:         models.RequestStateNew,
@@ -243,10 +243,11 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 	event.SetNotifiyBoth()
 	username := c.Request.Context().Value("username").(string)
 	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(
-		`New service expiry change Request has been submitted 
+		`New service expiry change Request has been submitted
 
 User: %s
-Justification: %s`, username, expiryRequest.Justification))
+Justification: %s
+RequestID: %s`, username, expiryRequest.Justification, id))
 
 	logger.Debug("successfully created request")
 	c.Status(http.StatusCreated)
@@ -367,7 +368,7 @@ func NewGroupRequest(c *gin.Context) {
 	}
 
 	// insert the request into the database
-	_, err = dbCon.NewRequest(&models.Request{
+	requestID, err := dbCon.NewRequest(&models.Request{
 		UserID:        userID,
 		CreatedAt:     time.Now(),
 		State:         models.RequestStateNew,
@@ -411,7 +412,9 @@ User: %s
 Justification:
 %s
 
-For Group: %s`, username, enrichedJustification, *grp.Name))
+For Group: %s
+
+RequestID: %s`, username, enrichedJustification, *grp.Name, requestID))
 
 	logger.Debug("successfully created request")
 	c.Status(http.StatusCreated)
@@ -520,7 +523,9 @@ func ExitGroup(c *gin.Context) {
 	}()
 
 	event.SetNotifyAdmin()
-	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("Request has been submitted for exiting the group, id: %s", id))
+	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(`Request has been submitted for exiting the group.
+
+RequestID: %s`, id))
 
 	logger.Debug("successfully created request")
 	c.Status(http.StatusCreated)
@@ -575,7 +580,9 @@ func deleteUserRequest(c *gin.Context) error {
 	}()
 
 	event.SetNotifyAdmin()
-	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("Request has been submitted for deleting the user with request-id: %s", id))
+	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(`Request has been submitted for deleting the user.
+
+RequestID: %s`, id))
 
 	logger.Debug("successfully created request")
 	return nil
@@ -739,7 +746,9 @@ func ApproveRequest(c *gin.Context) {
 	}()
 
 	event.SetNotify()
-	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("Request has been successfully approved, id: %s", request.ID.Hex()))
+	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(`We are pleased to inform you that your request has been approved.
+
+RequestID: %s`, request.ID.Hex()))
 	logger.Debug("successfully approved request", zap.String("id", id))
 	c.Status(http.StatusNoContent)
 }
@@ -822,7 +831,12 @@ func RejectRequest(c *gin.Context) {
 	}()
 
 	event.SetNotify()
-	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf("Request has been rejected, id: %s", request.ID.Hex()))
+	event.SetLog(models.EventLogLevelINFO, fmt.Sprintf(`We regret to inform you that your request has not been approved at this time.
+
+Reason: %s
+If you have any questions or would like to discuss this further, please feel free to reach out to our team at PowerACL@ibm.com.
+
+RequestID: %s`, request.Comment, id))
 	logger.Debug("successfully rejected request", zap.String("id", id))
 	c.Status(http.StatusNoContent)
 }
