@@ -179,6 +179,21 @@ func (mr *MockKeycloakMockRecorder) GetUsers() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockKeycloak)(nil).GetUsers))
 }
 
+// GetUserFederatedIdentities mocks base method.
+func (m *MockKeycloak) GetUserFederatedIdentities(arg0 string) ([]*gocloak.FederatedIdentityRepresentation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserFederatedIdentities", arg0)
+	ret0, _ := ret[0].([]*gocloak.FederatedIdentityRepresentation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserFederatedIdentities indicates an expected call of GetUserFederatedIdentities.
+func (mr *MockKeycloakMockRecorder) GetUserFederatedIdentities(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserFederatedIdentities", reflect.TypeOf((*MockKeycloak)(nil).GetUserFederatedIdentities), arg0)
+}
+
 // IsRole mocks base method.
 func (m *MockKeycloak) IsRole(arg0 string) bool {
 	m.ctrl.T.Helper()

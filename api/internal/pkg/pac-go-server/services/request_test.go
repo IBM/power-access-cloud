@@ -3,6 +3,7 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -206,6 +207,7 @@ func TestNewGroupRequest(t *testing.T) {
 			mockFunc: func() {
 				mockKCClient.EXPECT().GetGroups().Return(getResource("get-group-info", nil).([]*gocloak.Group), nil).AnyTimes()
 				mockDBClient.EXPECT().GetRequestByGroupIDAndUserID(gomock.Any(), gomock.Any()).Return(getResource("get-requests-by-user-id", nil).([]models.Request), nil).AnyTimes()
+				mockKCClient.EXPECT().GetUserFederatedIdentities(gomock.Any()).Return([]*gocloak.FederatedIdentityRepresentation{}, nil).Times(1)
 				mockDBClient.EXPECT().NewRequest(gomock.Any()).Return("123", nil).Times(1)
 				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
 			},
@@ -533,6 +535,141 @@ func TestDeleteRequest(t *testing.T) {
 			dbCon = mockDBClient
 			DeleteRequest(c)
 			assert.Equal(t, tc.httpStatus, c.Writer.Status())
+		})
+	}
+}
+
+func TestEnrichJustificationWithGitHub(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	_, _, mockKCClient, tearDown := setUp(t)
+	defer tearDown()
+
+	testcases := []struct {
+		name                string
+		justification       string
+		mockFunc            func()
+		expectedContains    string
+		expectedNotContains string
+	}{
+		{
+			name: "enrich opensource justification with github profile",
+			justification: `User Type: OPENSOURCE
+Open Source Project/Community: MyProject
+Purpose of using Power VMs: Testing and CI/CD`,
+			mockFunc: func() {
+				githubUsername := "testuser"
+				identityProvider := "github"
+				mockKCClient.EXPECT().GetUserFederatedIdentities(gomock.Any()).Return([]*gocloak.FederatedIdentityRepresentation{
+					{
+						IdentityProvider: &identityProvider,
+						UserName:         &githubUsername,
+					},
+				}, nil).Times(1)
+			},
+			expectedContains:    "GitHub Profile: https://github.com/testuser",
+			expectedNotContains: "",
+		},
+		{
+			name: "enrich ISV user with github profile if logged in via GitHub",
+			justification: `User Type: ISV
+Company Name: Acme Corp
+Purpose of using Power VMs: Testing`,
+			mockFunc: func() {
+				githubUsername := "isvuser"
+				identityProvider := "github"
+				mockKCClient.EXPECT().GetUserFederatedIdentities(gomock.Any()).Return([]*gocloak.FederatedIdentityRepresentation{
+					{
+						IdentityProvider: &identityProvider,
+						UserName:         &githubUsername,
+					},
+				}, nil).Times(1)
+			},
+			expectedContains:    "GitHub Profile: https://github.com/isvuser",
+			expectedNotContains: "",
+		},
+		{
+			name: "no enrichment when github identity not found",
+			justification: `User Type: OPENSOURCE
+Open Source Project/Community: MyProject
+Purpose of using Power VMs: Testing`,
+			mockFunc: func() {
+				mockKCClient.EXPECT().GetUserFederatedIdentities(gomock.Any()).Return([]*gocloak.FederatedIdentityRepresentation{}, nil).Times(1)
+			},
+			expectedContains:    "User Type: OPENSOURCE",
+			expectedNotContains: "GitHub Profile",
+		},
+		{
+			name: "handle error from keycloak gracefully",
+			justification: `User Type: OPENSOURCE
+Open Source Project/Community: MyProject
+Purpose of using Power VMs: Testing`,
+			mockFunc: func() {
+				mockKCClient.EXPECT().GetUserFederatedIdentities(gomock.Any()).Return(nil, fmt.Errorf("keycloak error")).Times(1)
+			},
+			expectedContains:    "User Type: OPENSOURCE",
+			expectedNotContains: "GitHub Profile",
+		},
+		{
+			name: "enrich with multiple identities, pick github",
+			justification: `User Type: OPENSOURCE
+Open Source Project/Community: MyProject
+Purpose of using Power VMs: Testing`,
+			mockFunc: func() {
+				githubUsername := "githubuser"
+				githubProvider := "github"
+				googleProvider := "google"
+				googleUsername := "googleuser"
+				mockKCClient.EXPECT().GetUserFederatedIdentities(gomock.Any()).Return([]*gocloak.FederatedIdentityRepresentation{
+					{
+						IdentityProvider: &googleProvider,
+						UserName:         &googleUsername,
+					},
+					{
+						IdentityProvider: &githubProvider,
+						UserName:         &githubUsername,
+					},
+				}, nil).Times(1)
+			},
+			expectedContains:    "GitHub Profile: https://github.com/githubuser",
+			expectedNotContains: "google",
+		},
+		{
+			name:          "enrich single line justification without panic",
+			justification: `User Type: OPENSOURCE`,
+			mockFunc: func() {
+				githubUsername := "testuser"
+				identityProvider := "github"
+				mockKCClient.EXPECT().GetUserFederatedIdentities(gomock.Any()).Return([]*gocloak.FederatedIdentityRepresentation{
+					{
+						IdentityProvider: &identityProvider,
+						UserName:         &githubUsername,
+					},
+				}, nil).Times(1)
+			},
+			expectedContains:    "GitHub Profile: https://github.com/testuser",
+			expectedNotContains: "",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mockFunc()
+
+			ctx := getContext(formContext(customValues{
+				"keycloak_hostname":     "http://localhost:8080",
+				"keycloak_access_token": "test-token",
+				"keycloak_realm":        "test-realm",
+			}))
+
+			result := enrichJustificationWithGitHub(ctx, "test-user-id", tc.justification)
+
+			if tc.expectedContains != "" {
+				assert.Contains(t, result, tc.expectedContains, "Expected result to contain: %s", tc.expectedContains)
+			}
+
+			if tc.expectedNotContains != "" {
+				assert.NotContains(t, result, tc.expectedNotContains, "Expected result to NOT contain: %s", tc.expectedNotContains)
+			}
 		})
 	}
 }

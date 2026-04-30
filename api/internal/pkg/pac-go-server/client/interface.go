@@ -17,4 +17,5 @@ type Keycloak interface {
 	DeleteUser(userID string) error
 	IsRole(name string) bool
 	GetUserID() string
+	GetUserFederatedIdentities(userID string) ([]*gocloak.FederatedIdentityRepresentation, error)
 }
