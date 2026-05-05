@@ -12,7 +12,6 @@ import {
   TableBatchAction,
   TableSelectRow,
   TableToolbarSearch,
-  TableSelectAll,
   DataTableSkeleton,
 } from "@carbon/react";
 import { CalendarAddAlt, TrashCan } from "@carbon/icons-react";
@@ -21,7 +20,7 @@ import FooterPagination from "../utils/Pagination";
 import { flattenArrayOfObject } from "./commonUtils";
 import { getServices } from "../services/request";
 import DeleteService from "./PopUp/DeleteService";
-import ServiceExtend from "./PopUp/ServiceExtend";
+import AdminServiceExtend from "./PopUp/AdminServiceExtend";
 import UserService from "../services/UserService";
 import Notify from "./utils/Notify";
 
@@ -32,6 +31,11 @@ const headers = [
   {
     key: "user_id",
     header: "User ID",
+    adminOnly: true,
+  },
+  {
+    key: "username",
+    header: "Username",
     adminOnly: true,
   },
   {
@@ -84,7 +88,6 @@ const TABLE_BUTTONS = [
   },
 ];
 
-let selectRows = [];
 const ServicesAdmin = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -104,10 +107,6 @@ const ServicesAdmin = () => {
     // override the id field to be the name of the service to make it easier for the actions like expiry or delete
     setRows(data?.payload.map((row) => ({ ...row, id: row.name })));
     setLoading(false);
-  };
-
-  const selectionHandler = (rows = []) => {
-    selectRows = rows;
   };
 
   useEffect(() => {
@@ -141,14 +140,14 @@ const ServicesAdmin = () => {
       <React.Fragment>
         {actionProps?.key === BUTTON_REQUEST && (
           <DeleteService
-            selectRows={selectRows}
+            selectRows={actionProps.selectRows || []}
             setActionProps={setActionProps}
             response={handleResponse}
           />
         )}
         {actionProps?.key === BUTTON_EXTEND && (
-          <ServiceExtend
-            selectRows={selectRows}
+          <AdminServiceExtend
+            selectRows={actionProps.selectRows || []}
             setActionProps={setActionProps}
             response={handleResponse}
           />
@@ -163,9 +162,9 @@ const ServicesAdmin = () => {
       {loading ? (renderSkeleton()) : (
         <>
           {renderActionModals()}
-          <DataTable rows={displayData} headers={filteredHeaders} isSortable>
+          <DataTable rows={displayData} headers={filteredHeaders} isSortable radio>
             {({
-              rows,
+              rows: tableRows,
               headers,
               getTableProps,
               getHeaderProps,
@@ -184,7 +183,6 @@ const ServicesAdmin = () => {
                   title={"Service Details"}
                   {...getTableContainerProps()}
                 >
-                  {selectionHandler && selectionHandler(selectedRows)}
                   <TableToolbar {...getToolbarProps()}>
                     <TableToolbarSearch
                       persistent={true}
@@ -199,8 +197,20 @@ const ServicesAdmin = () => {
                         <TableBatchAction
                           key={action.key}
                           renderIcon={action.icon}
-                          disabled={!(selectRows.length === 1)}
-                          onClick={() => setActionProps(action)}
+                          disabled={!(selectedRows.length === 1)}
+                          onClick={() => {
+                            const selectedServiceRows = tableRows
+                              .filter((tableRow) =>
+                                selectedRows.some((selectedRow) => selectedRow.id === tableRow.id)
+                              )
+                              .map((tableRow) => rows.find((service) => service.id === tableRow.id))
+                              .filter(Boolean);
+
+                            setActionProps({
+                              ...action,
+                              selectRows: selectedServiceRows,
+                            });
+                          }}
                         >
                           {action.label}
                         </TableBatchAction>
@@ -210,7 +220,7 @@ const ServicesAdmin = () => {
                   <Table {...getTableProps()}>
                     <TableHead>
                       <TableRow>
-                        <TableSelectAll {...getSelectionProps()} />
+                        <TableHeader />
                         {headers.map((header) => (
                           <TableHeader {...getHeaderProps({ header })}>
                             {header.header}
@@ -219,7 +229,7 @@ const ServicesAdmin = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => (
+                      {tableRows.map((row) => (
                         <TableRow key={row.id}>
                           <TableSelectRow {...getSelectionProps({ row })} />
                           {row.cells.map((cell) => (

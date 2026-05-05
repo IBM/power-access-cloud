@@ -91,15 +91,7 @@ const TABLE_BUTTONS = [
     hasIconOnly: true,
     adminOnly: false,
   },
-  {
-    key: DELETE_REQUEST,
-    label: "Delete",
-    kind: "ghost",
-    icon: TrashCan,
-    standalone: true,
-    hasIconOnly: true,
-    adminOnly: false,
-  },
+
   {
     key: REJECT_REQUEST,
     label: "Reject",

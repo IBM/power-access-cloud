@@ -10,6 +10,7 @@ import (
 
 	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -31,6 +32,9 @@ func TestGetAllServices(t *testing.T) {
 			mockFunc: func() {
 				mockClient.EXPECT().GetServices(gomock.Any()).Return(getResource("get-all-services", nil).(pac.ServiceList), nil).Times(1)
 				mockKCClient.EXPECT().GetUserID().Return("12345").Times(1)
+				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(true).Times(1)
+				username := "test-user"
+				mockKCClient.EXPECT().GetUser(gomock.Any()).Return(&gocloak.User{Username: &username}, nil).AnyTimes()
 			},
 			requestContext: formContext(customValues{
 				"keycloak_hostname":     "127.0.0.1",

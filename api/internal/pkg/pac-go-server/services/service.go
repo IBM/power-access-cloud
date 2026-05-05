@@ -50,6 +50,21 @@ func GetAllServicesHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
+
+	// Populate usernames for admin view
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c.Request.Context())
+	if kc.IsRole(utils.ManagerRole) {
+		for i := range serviceItems {
+			if serviceItems[i].UserID != "" {
+				user, err := kc.GetUser(serviceItems[i].UserID)
+				if err == nil && user.Username != nil {
+					serviceItems[i].Username = *user.Username
+				}
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, serviceItems)
 }
 

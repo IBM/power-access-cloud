@@ -6,6 +6,7 @@ import "time"
 type Service struct {
 	ID          string        `json:"id"`
 	UserID      string        `json:"user_id"`
+	Username    string        `json:"username"`
 	Name        string        `json:"name"`
 	DisplayName string        `json:"display_name"`
 	CatalogName string        `json:"catalog_name"`
