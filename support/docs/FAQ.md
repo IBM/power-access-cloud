@@ -52,7 +52,7 @@ A Group is a logical unit which controls resource allocation by allocating the m
 |---------|-------|----------|
 | Bronze  | 0.25  | 8 GB     |
 | Silver  | 2     | 32 GB    |
-| Gold    | 8     | 132 GB   |
+| Gold    | 8     | 128 GB   |
 
 The available catalogs in the portal are aligned with your assigned group. For example, if you are part of the *Bronze* group, only catalog instances that fit within the Bronze group’s Cores and memory limits will be selectable.
 
