@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	serviceExpiryMsg  = "Service %s is expiring on %s. It will be deleted post-expiry, if not extended. Kindly ensure that all necessary data is downloaded prior to expiry, as all associated data will be permanently deleted upon service-deletion. Please refer this link for service extension: https://github.com/IBM/power-access-cloud/blob/main/support/docs/FAQ.md"
+	serviceExpiryMsg  = "Service %s is expiring on %s. It will be deleted post-expiry, if not extended. Kindly ensure that all necessary data is downloaded prior to expiry, as all associated data will be permanently deleted upon service-deletion. Please refer this link for service extension: https://github.com/IBM/power-access-cloud/blob/main/support/docs/FAQ.md#12-how-can-i-extend-my-active-service"
 	requestExpiryMsg  = "Service is expired, hence request is no longer needed"
 	serviceExpiredMsg = "Service %s is expired. It is going to be deleted."
 )
