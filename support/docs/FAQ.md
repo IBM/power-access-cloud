@@ -50,7 +50,7 @@ A Group is a logical unit which controls resource allocation by allocating the m
 
 | Group   | Cores  | Memory   |
 |---------|-------|----------|
-| Bronze  | 0.25  | 8 GB     |
+| Bronze  | 0.5  | 8 GB     |
 | Silver  | 2     | 32 GB    |
 | Gold    | 8     | 128 GB   |
 
