@@ -1,0 +1,68 @@
+.maintenance-manager {
+  padding: 2rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+
+  &__header {
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #525252;
+      font-size: 0.875rem;
+    }
+  }
+
+  .cds--inline-notification {
+    margin-bottom: 1rem;
+  }
+
+  .cds--data-table-container {
+    margin-top: 1rem;
+  }
+
+  .maintenance-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem 0;
+
+    .cds--toggle {
+      margin-bottom: 0.5rem;
+    }
+
+    .datetime-input {
+      cursor: text;
+
+      &:hover {
+        cursor: text;
+      }
+
+      &:focus {
+        cursor: text;
+      }
+    }
+
+    .cds--text-input__field-wrapper {
+      input[type="datetime-local"] {
+        cursor: text;
+      }
+    }
+
+    .cds--text-area {
+      min-height: 100px;
+    }
+  }
+
+  .cds--overflow-menu {
+    .cds--overflow-menu__icon {
+      fill: #161616;
+    }
+  }
+}

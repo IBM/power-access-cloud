@@ -421,3 +421,79 @@ export const getFeedbacks = async (page, per_page) => {
   }
   return result;
 };
+
+// Maintenance Windows API
+
+export const getAllMaintenanceWindows = async (includeAll = false, page = 1, perPage = 10) => {
+  let url = includeAll
+    ? `/pac-go-server/maintenance?all=true&page=${page}&per_page=${perPage}`
+    : "/pac-go-server/maintenance";
+  let result = {};
+  try {
+    const response = await _axios.get(url);
+    result = {
+      type: "GET_ALL_MAINTENANCE_WINDOWS",
+      payload: response.data,
+    };
+  } catch (error) {
+    result = {
+      type: "API_ERROR",
+      payload: error,
+    };
+  }
+  return result;
+};
+
+export const createMaintenanceWindow = async (payload) => {
+  const url = "/pac-go-server/maintenance";
+  let result = {};
+  try {
+    const response = await _axios.post(url, payload);
+    result = {
+      type: "CREATE_MAINTENANCE_WINDOW",
+      payload: response.data,
+    };
+  } catch (error) {
+    result = {
+      type: "API_ERROR",
+      payload: error,
+    };
+  }
+  return result;
+};
+
+export const updateMaintenanceWindow = async (id, payload) => {
+  const url = `/pac-go-server/maintenance/${id}`;
+  let result = {};
+  try {
+    const response = await _axios.put(url, payload);
+    result = {
+      type: "UPDATE_MAINTENANCE_WINDOW",
+      payload: response.data,
+    };
+  } catch (error) {
+    result = {
+      type: "API_ERROR",
+      payload: error,
+    };
+  }
+  return result;
+};
+
+export const deleteMaintenanceWindow = async (id) => {
+  const url = `/pac-go-server/maintenance/${id}`;
+  let result = {};
+  try {
+    const response = await _axios.delete(url);
+    result = {
+      type: "DELETE_MAINTENANCE_WINDOW",
+      payload: response.data,
+    };
+  } catch (error) {
+    result = {
+      type: "API_ERROR",
+      payload: error,
+    };
+  }
+  return result;
+};
