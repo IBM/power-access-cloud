@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
@@ -47,4 +48,11 @@ type DB interface {
 	InsertFeedback(*models.Feedback) error
 	GetFeedbacks(models.FeedbacksFilter, int64, int64) ([]models.Feedback, int64, error)
 	FeedbackAllowed(context.Context, string) (bool, error)
+
+	// Maintenance window operations
+	GetAllMaintenanceWindows() ([]models.MaintenanceWindow, error)
+	GetMaintenanceWindowByID(id string) (*models.MaintenanceWindow, error)
+	CreateMaintenanceWindow(window *models.MaintenanceWindow) error
+	UpdateMaintenanceWindow(window *models.MaintenanceWindow) error
+	DeleteMaintenanceWindow(id string, deletedBy string, deletedAt *time.Time) error
 }

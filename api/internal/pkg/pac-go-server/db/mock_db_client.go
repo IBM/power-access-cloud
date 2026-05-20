@@ -7,6 +7,7 @@ package db
 import (
 	"context"
 	reflect "reflect"
+	"time"
 
 	models "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 	gomock "github.com/golang/mock/gomock"
@@ -372,6 +373,78 @@ func (m *MockDB) FeedbackAllowed(arg0 context.Context, arg1 string) (bool, error
 func (mr *MockDBMockRecorder) FeedbackAllowed(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeedbackAllowed", reflect.TypeOf((*MockDB)(nil).FeedbackAllowed), arg0, arg1)
+}
+
+// GetAllMaintenanceWindows mocks base method.
+func (m *MockDB) GetAllMaintenanceWindows() ([]models.MaintenanceWindow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllMaintenanceWindows")
+	ret0, _ := ret[0].([]models.MaintenanceWindow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllMaintenanceWindows indicates an expected call of GetAllMaintenanceWindows.
+func (mr *MockDBMockRecorder) GetAllMaintenanceWindows() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllMaintenanceWindows", reflect.TypeOf((*MockDB)(nil).GetAllMaintenanceWindows))
+}
+
+// GetMaintenanceWindowByID mocks base method.
+func (m *MockDB) GetMaintenanceWindowByID(arg0 string) (*models.MaintenanceWindow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMaintenanceWindowByID", arg0)
+	ret0, _ := ret[0].(*models.MaintenanceWindow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMaintenanceWindowByID indicates an expected call of GetMaintenanceWindowByID.
+func (mr *MockDBMockRecorder) GetMaintenanceWindowByID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMaintenanceWindowByID", reflect.TypeOf((*MockDB)(nil).GetMaintenanceWindowByID), arg0)
+}
+
+// CreateMaintenanceWindow mocks base method.
+func (m *MockDB) CreateMaintenanceWindow(arg0 *models.MaintenanceWindow) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMaintenanceWindow", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateMaintenanceWindow indicates an expected call of CreateMaintenanceWindow.
+func (mr *MockDBMockRecorder) CreateMaintenanceWindow(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).CreateMaintenanceWindow), arg0)
+}
+
+// UpdateMaintenanceWindow mocks base method.
+func (m *MockDB) UpdateMaintenanceWindow(arg0 *models.MaintenanceWindow) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMaintenanceWindow", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMaintenanceWindow indicates an expected call of UpdateMaintenanceWindow.
+func (mr *MockDBMockRecorder) UpdateMaintenanceWindow(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).UpdateMaintenanceWindow), arg0)
+}
+
+// DeleteMaintenanceWindow mocks base method.
+func (m *MockDB) DeleteMaintenanceWindow(arg0 string, arg1 string, arg2 *time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteMaintenanceWindow", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteMaintenanceWindow indicates an expected call of DeleteMaintenanceWindow.
+func (mr *MockDBMockRecorder) DeleteMaintenanceWindow(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).DeleteMaintenanceWindow), arg0, arg1, arg2)
 }
 
 // MarkEventAsNotified mocks base method.
