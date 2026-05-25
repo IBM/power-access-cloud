@@ -1,14 +1,25 @@
 # IBM® Power® Access Cloud Dev Setup Guide
+
 This guide provides step-by-step instructions for setting up and running the IBM® Power® Access Cloud locally.
 
 ## Prerequisites
 
-* Git
-* Go
-* Node.js and npm
-* Yarn package manager
+* **Git** - Version control
+* **Go 1.24**
+* **Node.js v18+** - Frontend runtime
+* **Yarn** - Package manager (not npm)
+* **Kubernetes cluster** - minikube, kind, or cloud-based
+* **Podman or Docker** - For running Keycloak and MongoDB
 
-### Part 1: Keycloak and MongoDB setup
+## Architecture Overview
+
+PAC consists of three main components:
+
+1. **PAC Controller** - Kubernetes operator managing Catalog and Service CRDs
+2. **PAC Go Server** - REST API backend for UI and integrations
+3. **PAC Web UI** - React/Vite frontend with Keycloak authentication
+
+### Part 1: Keycloak and MongoDB Setup
 
 1. From a terminal, enter the following command to start Keycloak:
     ```
@@ -24,29 +35,50 @@ This guide provides step-by-step instructions for setting up and running the IBM
     mongo:latest
     ```
 
-### Part 2: PAC Server Setup
+### Part 2: PAC Controller Setup (Local Testing)
 
-1. Clone Repository
+The PAC Controller is a Kubernetes operator that manages Catalog and Service custom resources.
 
+> **Note:** This setup is for **local development and testing**.
+1. **Clone Repository**
+
+    ```bash
+    git clone https://github.com/IBM/power-access-cloud.git
+    cd power-access-cloud/api
     ```
-    git clone https://github.com/IBM/power-access-cloud/api.git
-    cd power-access-cloud
-    ```
 
-2. Set Up Kubernetes Cluster
+2. **Set Up Kubernetes Cluster**
     
-    Bring up any Kubernetes cluster (minikube, kind, or cloud-based cluster).
-
-3. Generate Manifests and Deploy
-
+    Bring up any Kubernetes cluster:
+    ```bash
+    # Using minikube
+    minikube start
+    
+    # Or using kind
+    kind create cluster
     ```
+
+3. **Generate Manifests and Install CRDs**
+
+    ```bash
+    cd api
     make generate && make manifests
-    make deploy
+    make install  # Install CRDs
     ```
 
-4. Configure Environment Variables
+### Part 3: PAC Go Server Setup
 
+The PAC Go Server provides REST APIs for the web UI and external integrations.
+
+1. **Navigate to API Directory**
+
+    ```bash
+    cd api
     ```
+
+2. **Configure Environment Variables**
+
+    ```bash
     export KEYCLOAK_CLIENT_ID=your_client_id
     export KEYCLOAK_CLIENT_SECRET=your_client_secret
     export KEYCLOAK_REALM=your_realm
@@ -56,13 +88,31 @@ This guide provides step-by-step instructions for setting up and running the IBM
     export MONGODB_URI=your_mongodb_connection_string
     ```
 
-5. Start the Backend Server
+3. **Build and Run**
     
-    ```
-    go run main.go
+    ```bash
+    # Build all binaries
+    make build
+    
+    # Run pac-go-server
+    ./bin/pac-go-server
+    
+    # Or run directly with go
+    go run ./cmd/pac-go-server/main.go
     ```
 
-### Part 3: PAC UI Setup
+    The API server will be available at `http://localhost:8080`
+
+4. **View API Documentation**
+
+    Generate Swagger docs:
+    ```bash
+    make swagger
+    ```
+    
+    Access Swagger UI at: `http://localhost:8080/swagger/index.html`
+
+### Part 4: PAC UI Setup
 
 1. Clone Repository
 
@@ -86,18 +136,32 @@ This guide provides step-by-step instructions for setting up and running the IBM
 3. Install Dependencies and Run
 
     ```
+    cd web
     yarn install
-    npm start
+    yarn dev
     ```
 
     The UI will be available at http://localhost:3000
 
-### Part 4: PAC Controller Setup
-1. Create IBM Cloud API Key
-2. Configure and Run Controller
+## Project Structure
 
-    ```
-    export IBMCLOUD_APIKEY=your_ibm_cloud_api_key
-    cd pac
-    make run
-    ```    
+```
+api/
+├── main.go                    # Controller entry point
+├── cmd/
+│   ├── pac-go-server/        # REST API server
+│   ├── event-notifier/       # Event notification service
+│   └── swagger/              # Swagger documentation
+├── controllers/              # Kubernetes controllers
+│   └── app/                  # App controllers (Catalog, Service)
+├── apis/                     # CRD definitions
+│   └── app/v1alpha1/        # App CRDs (Catalog, Service, Config)
+├── internal/                 # Internal packages
+│   └── pkg/pac-go-server/   # API server implementation
+└── config/                   # Kubernetes manifests
+
+web/
+├── src/                      # React source code
+├── public/                   # Static assets
+└── package.json             # Dependencies (uses Yarn)
+```
