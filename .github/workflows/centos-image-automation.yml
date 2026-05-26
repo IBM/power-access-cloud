@@ -1,0 +1,175 @@
+name: CentOS Image Automation
+
+on:
+  schedule:
+    # Run every 15 days at 2:00 AM UTC
+    - cron: "0 2 */15 * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment for image deployment"
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: "staging"
+      centos_version:
+        description: "CentOS Stream version (e.g., 9, 10)"
+        required: false
+        default: "10"
+      image_size:
+        description: "Image disk size in GB"
+        required: false
+        default: "120"
+
+env:
+  WORK_DIR: /tmp/centos-images
+
+jobs:
+  centos-image-automation:
+    runs-on: [self-hosted, Linux, ppc64le]
+    timeout-minutes: 240 # 4 hours max
+    strategy:
+      matrix:
+        # For manual runs, use the input version; for scheduled runs, build both 9 and 10
+        centos_version: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('[{0}]', github.event.inputs.centos_version)) || fromJSON('[9, 10]') }}
+      fail-fast: false # Continue with other versions even if one fails
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up environment
+        run: |
+          mkdir -p ${{ env.WORK_DIR }}
+
+          # Ensure required tools are available
+          command -v curl >/dev/null 2>&1 || { echo "curl is required but not installed"; exit 1; }
+          command -v wget >/dev/null 2>&1 || { echo "wget is required but not installed"; exit 1; }
+          command -v jq >/dev/null 2>&1 || { echo "jq is required but not installed"; exit 1; }
+
+      - name: Verify pvsadm installation
+        run: |
+          if ! command -v pvsadm &> /dev/null; then
+            echo "ERROR: pvsadm is not installed on this runner"
+            echo "Please install pvsadm on the self-hosted runner"
+            exit 1
+          fi
+          pvsadm version
+
+      - name: Copy scripts and template to work directory
+        run: |
+          echo "Copying scripts to work directory..."
+          cp hack/scripts/download-and-convert-centos.sh ${{ env.WORK_DIR }}/
+          cp hack/scripts/upload-to-cos.sh ${{ env.WORK_DIR }}/
+          cp hack/scripts/import-to-powervs.sh ${{ env.WORK_DIR }}/
+          cp hack/scripts/image-prep.template.static ${{ env.WORK_DIR }}/
+
+          # Make scripts executable
+          chmod +x ${{ env.WORK_DIR }}/*.sh
+
+      - name: Download and convert CentOS ${{ matrix.centos_version }} image
+        env:
+          CENTOS_VERSION: ${{ matrix.centos_version }}
+          IMAGE_SIZE: ${{ github.event.inputs.image_size || '120' }}
+          IMAGE_PREP_TEMPLATE: ${{ env.WORK_DIR }}/image-prep.template.static
+        run: |
+          echo "Starting conversion for CentOS Stream ${{ matrix.centos_version }}..."
+          cd ${{ env.WORK_DIR }}
+
+          if ! ./download-and-convert-centos.sh; then
+            echo "ERROR: Conversion failed"
+            exit 1
+          fi
+
+          echo "Conversion completed successfully"
+
+      - name: Set environment-specific variables
+        id: set-env
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment || 'production' }}"
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+
+          if [ "$ENVIRONMENT" = "staging" ]; then
+            echo "powervs_instance_id=${{ secrets.POWERVS_STAGING_INSTANCE_ID }}" >> $GITHUB_OUTPUT
+            echo "cos_bucket_name=${{ secrets.COS_STAGING_BUCKET_NAME }}" >> $GITHUB_OUTPUT
+          else
+            echo "powervs_instance_id=${{ secrets.POWERVS_PROD_INSTANCE_ID }}" >> $GITHUB_OUTPUT
+            echo "cos_bucket_name=${{ secrets.COS_PROD_BUCKET_NAME }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload OVA to IBM Cloud Object Storage
+        env:
+          IBM_API_KEY: ${{ secrets.IBM_API_KEY }}
+          COS_BUCKET_NAME: ${{ steps.set-env.outputs.cos_bucket_name }}
+          COS_INSTANCE_NAME: ${{ secrets.COS_INSTANCE_NAME }}
+          COS_REGION: ${{ secrets.COS_REGION }}
+        run: |
+          echo "Uploading to bucket: ${{ env.COS_BUCKET_NAME }}"
+          cd ${{ env.WORK_DIR }}
+
+          if ! ./upload-to-cos.sh; then
+            echo "ERROR: Upload failed"
+            exit 1
+          fi
+
+          echo "Upload completed successfully"
+
+      - name: Import image to PowerVS workspace (${{ steps.set-env.outputs.environment }})
+        env:
+          IBM_API_KEY: ${{ secrets.IBM_API_KEY }}
+          POWERVS_INSTANCE_ID: ${{ steps.set-env.outputs.powervs_instance_id }}
+          COS_BUCKET_NAME: ${{ steps.set-env.outputs.cos_bucket_name }}
+          COS_REGION: ${{ secrets.COS_REGION }}
+          COS_HMAC_ACCESS_KEY: ${{ secrets.COS_HMAC_ACCESS_KEY }}
+          COS_HMAC_SECRET_KEY: ${{ secrets.COS_HMAC_SECRET_KEY }}
+        run: |
+          echo "Deploying to ${{ steps.set-env.outputs.environment }} environment"
+          echo "PowerVS Instance ID: ${{ env.POWERVS_INSTANCE_ID }}"
+          echo "COS Bucket: ${{ env.COS_BUCKET_NAME }}"
+
+          cd ${{ env.WORK_DIR }}
+
+          if ! ./import-to-powervs.sh; then
+            echo "ERROR: Import failed"
+            exit 1
+          fi
+
+          echo "Import completed successfully"
+
+      - name: Cleanup after successful completion
+        if: success()
+        run: |
+          echo "All steps completed successfully - cleaning up..."
+          rm -rf ${{ env.WORK_DIR }}/* || echo "Cleanup warning (non-critical)"
+
+          # Clean up pvsadm temp directories and loop devices
+          sudo find /tmp -name "qcow2ova*" -type d -exec rm -rf {} + 2>/dev/null || true
+          sudo losetup -D 2>/dev/null || true
+
+          echo "Cleanup completed"
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "Workflow failed - performing partial cleanup..."
+
+          # Keep qcow2 and OVA files for debugging, but clean up temp files
+          sudo find /tmp -name "qcow2ova*" -type d -exec rm -rf {} + 2>/dev/null || true
+          sudo losetup -D 2>/dev/null || true
+
+          echo "Partial cleanup completed. Check ${{ env.WORK_DIR }} for debugging."
+
+      # Notification step can be added here if needed
+      # Options: Email, Slack, or other notification services
+
+      - name: Upload workflow artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: centos-${{ matrix.centos_version }}-automation-${{ github.run_number }}
+          path: |
+            ${{ env.WORK_DIR }}/*.log
+            ${{ env.WORK_DIR }}/*.json
+          retention-days: 30
