@@ -2,12 +2,12 @@ name: golangci-lint
 on:
   push:
     branches:
-      - 'main'
-      - 'release-*'
+      - "main"
+      - "release-*"
   pull_request:
     branches:
-      - 'main'
-      - 'release-*'
+      - "main"
+      - "release-*"
 
 permissions:
   contents: read
@@ -65,4 +65,4 @@ jobs:
           # skip-build-cache: true
 
           # Optional: The mode to install golangci-lint. It can be 'binary' or 'goinstall'.
-          # install-mode: "goinstall"
+          install-mode: "goinstall"
