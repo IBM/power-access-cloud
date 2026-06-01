@@ -102,3 +102,85 @@ func GetUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusNotFound, gin.H{"error": fmt.Errorf("user: %s not found", id)})
 }
+
+func AdminDeleteUser(c *gin.Context) {
+	id := c.Param("id")
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c)
+
+	// delete services first
+	services, err := ListUserServices(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, service := range services {
+		err := deleteService(c, service.Name)
+		if err != nil {
+			// returning a failed condition here to avoid orphaned services!
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	// delete keys
+	keys, err := getAllKeysForUser(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	for _, key := range keys {
+		err = deleteKey(c, key.ID.Hex())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	// delete User
+	err = kc.DeleteUser(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// AdminChangeGroup			godoc
+// @Summary			Change User Group
+// @Description		Change user group to provided group
+// @Tags			user
+// @Accept			json
+// @Produce			json
+// @Param			id path string true "user-id for user to be modified"
+// @Param			group path string true "new group to add user to"
+// @Param			Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success			200
+// @Router			/api/v1/users/{id}/group/{group} [put]
+func AdminChangeGroup(c *gin.Context) {
+	id := c.Param("id")
+	newGroup := c.Param("group")
+	config := client.GetConfigFromContext(c.Request.Context())
+	kc := client.NewKeyCloakClient(config, c)
+
+	currUserGroups, err := kc.GetUserGroups(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, group := range currUserGroups {
+		err := kc.DeleteUserFromGroup(id, *group.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+	err = kc.AddUserToGroup(id, newGroup)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, nil)
+}

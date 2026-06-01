@@ -39,6 +39,7 @@ definitions:
   models.Feedback:
     properties:
       comment:
+        maxLength: 250
         type: string
       created_at:
         description: CreatedAt is the time the event was created
@@ -59,6 +60,54 @@ definitions:
       name:
         type: string
       user_id:
+        type: string
+    type: object
+  models.MaintenanceCreateRequest:
+    properties:
+      enabled:
+        type: boolean
+      end_time:
+        type: string
+      message:
+        type: string
+      start_time:
+        type: string
+    required:
+    - end_time
+    - message
+    - start_time
+    type: object
+  models.MaintenanceListResponse:
+    properties:
+      maintenances:
+        items:
+          $ref: '#/definitions/models.MaintenanceResponse'
+        type: array
+    type: object
+  models.MaintenanceResponse:
+    properties:
+      enabled:
+        type: boolean
+      end_time:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      message:
+        type: string
+      start_time:
+        type: string
+    type: object
+  models.MaintenanceUpdateRequest:
+    properties:
+      enabled:
+        type: boolean
+      end_time:
+        type: string
+      message:
+        type: string
+      start_time:
         type: string
     type: object
   models.Quota:
@@ -95,6 +144,8 @@ definitions:
       status:
         $ref: '#/definitions/models.ServiceStatus'
       user_id:
+        type: string
+      username:
         type: string
     type: object
   models.ServiceStatus:
@@ -451,7 +502,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: quota-id to be fetched
+      - description: group-id to be fetched
         in: path
         name: id
         required: true
@@ -643,6 +694,120 @@ paths:
       summary: Get key
       tags:
       - keys
+  /api/v1/maintenance:
+    get:
+      consumes:
+      - application/json
+      description: Get maintenance windows. Use ?all=true (admin only) to get all
+        windows with audit details and pagination, otherwise returns only the earliest
+        active window
+      parameters:
+      - description: Get all windows (admin only)
+        in: query
+        name: all
+        type: boolean
+      - description: Page number for pagination (admin only)
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page (admin only)
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MaintenanceListResponse'
+      summary: Get maintenance notification windows
+      tags:
+      - maintenance
+    post:
+      consumes:
+      - application/json
+      description: Create a new maintenance notification window (admin only)
+      parameters:
+      - description: Maintenance window configuration
+        in: body
+        name: maintenance
+        required: true
+        schema:
+          $ref: '#/definitions/models.MaintenanceCreateRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.MaintenanceResponse'
+      summary: Create a new maintenance notification window
+      tags:
+      - maintenance
+  /api/v1/maintenance/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a maintenance notification window (admin only)
+      parameters:
+      - description: Maintenance Window ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a maintenance notification window
+      tags:
+      - maintenance
+    put:
+      consumes:
+      - application/json
+      description: Update an existing maintenance notification window (admin only)
+      parameters:
+      - description: Maintenance Window ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Maintenance window configuration
+        in: body
+        name: maintenance
+        required: true
+        schema:
+          $ref: '#/definitions/models.MaintenanceUpdateRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MaintenanceResponse'
+      summary: Update a maintenance notification window
+      tags:
+      - maintenance
   /api/v1/quota:
     get:
       consumes:
@@ -958,6 +1123,36 @@ paths:
         "200":
           description: OK
       summary: Get user
+      tags:
+      - user
+  /api/v1/users/{id}/group/{group}:
+    put:
+      consumes:
+      - application/json
+      description: Change user group to provided group
+      parameters:
+      - description: user-id for user to be modified
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: new group to add user to
+        in: path
+        name: group
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Change User Group
       tags:
       - user
 swagger: "2.0"

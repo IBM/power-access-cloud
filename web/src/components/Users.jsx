@@ -15,7 +15,13 @@ import {
   TableToolbarSearch,
   DataTableSkeleton,
   Tag,
+  OverflowMenu,
+  OverflowMenuItem,
 } from "@carbon/react";
+import DeleteUser from "./PopUp/DeleteUser";
+import ModifyUserGroups from "./PopUp/ModifyUserGroups";
+import UserService from "../services/UserService";
+import Notify from "./utils/Notify";
 
 const headers = [
   {
@@ -42,12 +48,22 @@ const headers = [
     key: "groups",
     header: "Groups",
   },
+  {
+    key: "actions",
+    header: "Actions",
+  },
 ];
 
 const Users = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [actionProps, setActionProps] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [title, setTitle] = useState("");
+  const [notifyKind, setNotifyKind] = useState("");
+  const [message, setMessage] = useState("");
+  const isAdmin = UserService.isAdminUser();
 
   const fetchData = async () => {
     let data = await allUsers();
@@ -60,6 +76,22 @@ const Users = () => {
   }, [headers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayData = clientSearchFilter(searchText, rows);
+
+  const handleResponse = (title, message, errored) => {
+    setTitle(title);
+    setMessage(message);
+    errored ? setNotifyKind("error") : setNotifyKind("success");
+  };
+
+  const handleDeleteUser = (user) => {
+    setSelectedUser(user);
+    setActionProps("DELETE_USER");
+  };
+
+  const handleModifyGroups = (user) => {
+    setSelectedUser(user);
+    setActionProps("MODIFY_GROUPS");
+  };
 
   const renderSkeleton = () => {
     const headerLabels = headers?.map((x) => x?.header);
@@ -76,6 +108,15 @@ const Users = () => {
 
   return (
     <>
+      <Notify title={title} message={message} nkind={notifyKind} setTitle={setTitle} />
+      {actionProps === "DELETE_USER" && selectedUser && (
+        <DeleteUser
+          user={selectedUser}
+          setActionProps={setActionProps}
+          response={handleResponse}
+          fetchData={fetchData}
+        />
+      )}
       {loading ? (renderSkeleton()) : (
         <>
           <DataTable rows={displayData} headers={headers} isSortable>
@@ -116,31 +157,47 @@ const Users = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => (
-                        <TableRow key={row.id}>
-                          {row.cells.map((cell) => (
-                            <TableCell key={cell.id}>
-                              {cell.info.header === "groups" ? (
-                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                  {Array.isArray(cell.value) ? (
-                                    cell.value.map((group, idx) => (
-                                      <Tag key={idx} type="blue" size="md">
-                                        {group}
+                      {rows.map((row) => {
+                        const userData = displayData.find(u => u.id === row.id);
+                        return (
+                          <TableRow key={row.id}>
+                            {row.cells.map((cell) => (
+                              <TableCell key={cell.id}>
+                                {cell.info.header === "groups" ? (
+                                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                    {Array.isArray(cell.value) ? (
+                                      cell.value.map((group, idx) => (
+                                        <Tag key={idx} type="blue" size="md">
+                                          {group}
+                                        </Tag>
+                                      ))
+                                    ) : cell.value ? (
+                                      <Tag type="blue" size="md">
+                                        {cell.value}
                                       </Tag>
-                                    ))
-                                  ) : cell.value ? (
-                                    <Tag type="blue" size="md">
-                                      {cell.value}
-                                    </Tag>
-                                  ) : null}
-                                </div>
-                              ) : (
-                                cell.value
-                              )}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
+                                    ) : null}
+                                  </div>
+                                ) : cell.info.header === "actions" && isAdmin ? (
+                                  <OverflowMenu flipped size="sm" ariaLabel="User actions">
+                                    <OverflowMenuItem
+                                      itemText="Modify Groups"
+                                      onClick={() => handleModifyGroups(userData)}
+                                    />
+                                    <OverflowMenuItem
+                                      itemText="Delete User"
+                                      hasDivider
+                                      isDelete
+                                      onClick={() => handleDeleteUser(userData)}
+                                    />
+                                  </OverflowMenu>
+                                ) : cell.info.header === "actions" ? null : (
+                                  cell.value
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -149,6 +206,14 @@ const Users = () => {
           </DataTable>
           {<FooterPagination displayData={rows} />}
         </>
+      )}
+      {actionProps === "MODIFY_GROUPS" && selectedUser && (
+        <ModifyUserGroups
+          user={selectedUser}
+          setActionProps={setActionProps}
+          response={handleResponse}
+          fetchData={fetchData}
+        />
       )}
     </>
   );

@@ -779,6 +779,173 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/maintenance": {
+            "get": {
+                "description": "Get maintenance windows. Use ?all=true (admin only) to get all windows with audit details and pagination, otherwise returns only the earliest active window",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "maintenance"
+                ],
+                "summary": "Get maintenance notification windows",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Get all windows (admin only)",
+                        "name": "all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number for pagination (admin only)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page (admin only)",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MaintenanceListResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new maintenance notification window (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "maintenance"
+                ],
+                "summary": "Create a new maintenance notification window",
+                "parameters": [
+                    {
+                        "description": "Maintenance window configuration",
+                        "name": "maintenance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.MaintenanceCreateRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.MaintenanceResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/maintenance/{id}": {
+            "put": {
+                "description": "Update an existing maintenance notification window (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "maintenance"
+                ],
+                "summary": "Update a maintenance notification window",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Maintenance Window ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Maintenance window configuration",
+                        "name": "maintenance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.MaintenanceUpdateRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MaintenanceResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a maintenance notification window (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "maintenance"
+                ],
+                "summary": "Delete a maintenance notification window",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Maintenance Window ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/api/v1/quota": {
             "get": {
                 "description": "Get user quota",
@@ -1248,6 +1415,50 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/users/{id}/group/{group}": {
+            "put": {
+                "description": "Change user group to provided group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Change User Group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user-id for user to be modified",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "new group to add user to",
+                        "name": "group",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1312,7 +1523,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "comment": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 250
                 },
                 "created_at": {
                     "description": "CreatedAt is the time the event was created",
@@ -1342,6 +1554,79 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MaintenanceCreateRequest": {
+            "type": "object",
+            "required": [
+                "end_time",
+                "message",
+                "start_time"
+            ],
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MaintenanceListResponse": {
+            "type": "object",
+            "properties": {
+                "maintenances": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MaintenanceResponse"
+                    }
+                }
+            }
+        },
+        "models.MaintenanceResponse": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MaintenanceUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "start_time": {
                     "type": "string"
                 }
             }
@@ -1395,6 +1680,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.ServiceStatus"
                 },
                 "user_id": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

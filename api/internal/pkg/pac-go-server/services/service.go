@@ -24,8 +24,10 @@ import (
 
 const maxServiceNameLength = 50
 
-var dbCon db.DB
-var kubeClient kubernetes.Client
+var (
+	dbCon      db.DB
+	kubeClient kubernetes.Client
+)
 
 func SetDB(db db.DB) {
 	dbCon = db
@@ -315,7 +317,7 @@ func deleteService(c *gin.Context, serviceName string) error {
 	kc := client.NewKeyCloakClient(config, c.Request.Context())
 	userId := kc.GetUserID()
 
-	//allow admin to delete the not owned services as well
+	// allow admin to delete the not owned services as well
 	if kc.IsRole(utils.ManagerRole) {
 		userId = ""
 	}
@@ -355,7 +357,6 @@ func deleteService(c *gin.Context, serviceName string) error {
 				logger.Error("failed to delete request in database", zap.String("id", request.ID.String()), zap.Error(err))
 			}
 		}
-
 	}
 	return nil
 }
@@ -459,8 +460,7 @@ func getUsedQuota(userId string) (models.Capacity, error) {
 	return consumedCapacity, nil
 }
 
-//TODO: Move to utils if needed
-
+// TODO: Move to utils if needed
 func AddCapacity(capacity models.Capacity, catalogCapacity pac.Capacity) (models.Capacity, error) {
 	cpu, err := utils.CastStrToFloat(catalogCapacity.CPU)
 	if err != nil {
@@ -470,4 +470,12 @@ func AddCapacity(capacity models.Capacity, catalogCapacity pac.Capacity) (models
 		CPU:    capacity.CPU + cpu,
 		Memory: capacity.Memory + catalogCapacity.Memory,
 	}, nil
+}
+
+func ListUserServices(userId string) ([]models.Service, error) {
+	services, err := kubeClient.GetServices(userId)
+	if err != nil {
+		return nil, err
+	}
+	return convertToServices(services), nil
 }
