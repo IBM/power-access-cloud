@@ -1,74 +1,79 @@
-# Getting Started with Create React App
+# PAC Web UI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Power Access Cloud (PAC) web frontend built with React and Vite.
+
+## Prerequisites
+
+- Node.js (v18 or higher recommended)
+- Yarn package manager
+
+## Getting Started
+
+### Install Dependencies
+
+```bash
+yarn install
+```
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+### `yarn dev`
 
-Runs the app in the development mode.\
+Runs the app in development mode with environment configuration.\
+This script sets up environment variables and starts the Vite dev server.
+
+```bash
+yarn dev
+```
+
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The page will reload when you make changes. You may also see any lint errors in the console.
 
-### `npm test`
+### `yarn start`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Alternative command to start the development server using env-cmd:
 
-### `npm run build`
+```bash
+yarn start
+```
 
-Builds the app for production to the `build` folder.\
+### `yarn build`
+
+Builds the app for production to the `dist` folder:
+
+```bash
+yarn build
+```
+
 It correctly bundles React in production mode and optimizes the build for the best performance.
+The build is minified and the filenames include the hashes. Your app is ready to be deployed!
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Technology Stack
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **React 18** - UI library
+- **Vite** - Build tool and dev server (fast HMR)
+- **Redux Toolkit** - State management
+- **Redux Persist** - Persist state to localStorage
+- **Axios** - HTTP client for API calls
+- **Keycloak** - Authentication and authorization
+- **Carbon Design System** - IBM's design system for UI components
+- **React Router** - Client-side routing
+- **Sass** - CSS preprocessor
+- **Yarn** - Package manager
 
-### `npm run eject`
+## Package Manager
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+This project uses **Yarn** as its package manager. All commands should use `yarn` instead of `npm`:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Install dependencies: `yarn install` or just `yarn`
+- Add a package: `yarn add <package-name>`
+- Remove a package: `yarn remove <package-name>`
+- Run scripts: `yarn <script-name>`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
+The project includes a `yarn.lock` file which ensures consistent dependency versions across all environments.
 
 ## How to use docker compose environment for local development
 
