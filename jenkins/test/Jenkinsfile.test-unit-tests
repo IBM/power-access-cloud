@@ -1,0 +1,115 @@
+// Unit Test Pipeline
+
+@Library('pac-shared-lib') _
+
+pipeline {
+    agent {
+        docker {
+            label 'shared-x86-centos9'
+            image 'registry.access.redhat.com/ubi9/ubi:latest'
+        }
+    }
+
+    options {
+        timestamps()
+        timeout(time: 20, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        GOPROXY = 'https://proxy.golang.org,direct'
+        GOSUMDB = 'sum.golang.org'
+        PATH    = "/usr/local/go/bin:${env.PATH}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "=== Checkout repository ==="
+                checkout scm
+            }
+        }
+
+        stage('Install Go') {
+            steps {
+                script {
+                    env.GO_VERSION = goVersion()
+                    echo "=== Install Go ${env.GO_VERSION} ==="
+                    sh '''
+                        echo "Installing Go ${GO_VERSION}..."
+                        cd /tmp
+                        GO_TARBALL="go${GO_VERSION}.linux-amd64.tar.gz"
+                        curl -fsSL -o "${GO_TARBALL}" "https://go.dev/dl/${GO_TARBALL}"
+                        rm -rf /usr/local/go
+                        tar -C /usr/local -xzf "${GO_TARBALL}"
+                        rm -f "${GO_TARBALL}"
+                        /usr/local/go/bin/go version
+                    '''
+                }
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                echo "=== Install dependencies ==="
+                dir('api') {
+                    sh '''
+                        export PATH=/usr/local/go/bin:$PATH
+                        go version
+                        go mod tidy
+                    '''
+                }
+            }
+        }
+
+        stage('Run unit tests') {
+            steps {
+                echo "=== Run unit tests ==="
+                dir('api') {
+                    sh '''
+                        export PATH=/usr/local/go/bin:$PATH
+                        mkdir -p out
+                        go test -coverprofile=out/coverage.out -v ./...
+                    '''
+                }
+            }
+        }
+
+        stage('Generate HTML coverage report') {
+            steps {
+                echo "=== Generate HTML coverage report ==="
+                dir('api') {
+                    sh '''
+                        export PATH=/usr/local/go/bin:$PATH
+                        go tool cover -html=out/coverage.out -o out/coverage.html
+                    '''
+                }
+            }
+        }
+
+        stage('Upload coverage report as artifact') {
+            steps {
+                echo "=== Upload coverage report as artifact ==="
+                archiveArtifacts artifacts: 'api/out/coverage.out,api/out/coverage.html',
+                                 allowEmptyArchive: false
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "=== Unit Test Pipeline Completed ==="
+            echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+        }
+        success {
+            echo "Unit tests passed!"
+        }
+        failure {
+            echo "Unit tests failed!"
+        }
+        cleanup {
+            cleanWs()
+        }
+    }
+}
