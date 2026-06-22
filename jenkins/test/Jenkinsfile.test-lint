@@ -1,0 +1,155 @@
+pipeline {
+    agent {
+        docker {
+            label 'shared-x86-centos9'
+            image 'registry.access.redhat.com/ubi9/ubi:latest'
+            args '-v $HOME/.cache/go-mod:/go/pkg/mod -v $HOME/go:/usr/local/go -v $HOME/.cache/golangci-lint:/root/.cache/golangci-lint'
+        }
+    }
+    
+    options {
+        timestamps()
+        timeout(time: 45, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+    
+    environment {
+        GO_VERSION = '1.25'
+        GOLANGCI_LINT_VERSION = 'v1.64.0'
+        GOPROXY = 'https://proxy.golang.org,direct'
+        GOSUMDB = 'sum.golang.org'
+        GOTOOLCHAIN = 'local'
+        PATH = "/usr/local/go/bin:/root/go/bin:${env.PATH}"
+        GOPATH = '/root/go'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "=== Checkout repository ==="
+                checkout scm
+            }
+        }
+        
+        stage('Install Go') {
+            steps {
+                echo "=== Install Go ${GO_VERSION} ==="
+                sh '''
+                    if [ ! -f /usr/local/go/bin/go ]; then
+                        echo "Installing Go ${GO_VERSION}..."
+                        cd /tmp
+                        
+                        # Try different version formats and verify download
+                        for version_suffix in "" ".0" ".1"; do
+                            GO_TARBALL="go${GO_VERSION}${version_suffix}.linux-amd64.tar.gz"
+                            GO_URL="https://go.dev/dl/${GO_TARBALL}"
+                            
+                            echo "Attempting to download: ${GO_URL}"
+                            if curl -fsSL -o "${GO_TARBALL}" "${GO_URL}"; then
+                                # Verify it's a valid gzip file
+                                if gzip -t "${GO_TARBALL}" 2>/dev/null; then
+                                    echo "Successfully downloaded and verified ${GO_TARBALL}"
+                                    tar -C /usr/local -xzf "${GO_TARBALL}"
+                                    rm -f "${GO_TARBALL}"
+                                    break
+                                else
+                                    echo "Downloaded file is not a valid gzip archive, trying next version..."
+                                    rm -f "${GO_TARBALL}"
+                                fi
+                            else
+                                echo "Download failed for ${GO_URL}, trying next version..."
+                            fi
+                        done
+                        
+                        # Verify installation
+                        if [ ! -f /usr/local/go/bin/go ]; then
+                            echo "ERROR: Failed to install Go ${GO_VERSION}"
+                            exit 1
+                        fi
+                    else
+                        echo "Go is already installed, skipping installation"
+                    fi
+                    
+                    /usr/local/go/bin/go version
+                '''
+            }
+        }
+        
+        stage('Install golangci-lint') {
+            steps {
+                echo "=== Install golangci-lint ${GOLANGCI_LINT_VERSION} ==="
+                sh '''
+                    set -e
+                    export PATH=/usr/local/go/bin:$PATH
+                    
+                    if [ ! -f /root/go/bin/golangci-lint ]; then
+                        echo "Installing golangci-lint ${GOLANGCI_LINT_VERSION} using go install..."
+                        
+                        # Install using go install (matching GitHub Actions install-mode: goinstall)
+                        go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+                        
+                        # Verify installation
+                        if [ ! -f /root/go/bin/golangci-lint ]; then
+                            echo "ERROR: golangci-lint installation failed"
+                            exit 1
+                        fi
+                    else
+                        echo "golangci-lint is already installed, skipping installation"
+                    fi
+                    
+                    # Verify version
+                    echo "Verifying golangci-lint installation..."
+                    /root/go/bin/golangci-lint --version
+                    echo "golangci-lint installed successfully"
+                '''
+            }
+        }
+        
+        stage('Download dependencies') {
+            steps {
+                echo "=== Download Go modules ==="
+                dir('api') {
+                    sh '''
+                        export PATH=/usr/local/go/bin:$PATH
+                        go version
+                        go mod download
+                    '''
+                }
+            }
+        }
+        
+        stage('Run golangci-lint') {
+            steps {
+                echo "=== Run golangci-lint ==="
+                dir('api') {
+                    sh '''
+                        export PATH=/usr/local/go/bin:/root/go/bin:$PATH
+                        
+                        echo "Running golangci-lint with 30m timeout..."
+                        golangci-lint run --timeout=30m
+                        
+                        echo "Linting completed successfully!"
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "=== Golangci-lint Pipeline Completed ==="
+            echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+        }
+        success {
+            echo "Linting passed!"
+        }
+        failure {
+            echo "Linting failed! Please fix the issues reported above."
+        }
+        cleanup {
+            cleanWs()
+        }
+    }
+}
+
