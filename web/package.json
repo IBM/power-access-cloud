@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.4",
-    "vite": "^7.3.2"
+    "vite": "^7.3.5"
   },
   "resolutions": {
     "picomatch": "^4.0.4",
