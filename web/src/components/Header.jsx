@@ -130,6 +130,9 @@ const HeaderNav = ({ onSideNavToggle }) => {
                 <HeaderMenuItem onClick={() => setActionProps(action)}>
                   Feedback
                 </HeaderMenuItem>
+                <HeaderMenuItem as={Link} to="/chat-support">
+                  Chat Support
+                </HeaderMenuItem>
                 <ToastNotify
                   title={title}
                   subtitle={message}

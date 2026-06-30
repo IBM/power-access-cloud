@@ -128,6 +128,9 @@ func CreateRouter() *gin.Engine {
 	// feedback related endpoints
 	authorized.POST("/feedbacks", services.CreateFeedback)
 
+	// chat websocket endpoint
+	authorized.GET("/chat", services.HandleChatWebSocket)
+
 	// maintenance notification related endpoints
 	authorized.GET("/maintenance", services.GetMaintenanceWindows)
 
