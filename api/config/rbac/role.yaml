@@ -2,64 +2,21 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: manager-role
 rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - app.pac.io
   resources:
   - catalogs
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - app.pac.io
-  resources:
-  - catalogs/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - app.pac.io
-  resources:
-  - catalogs/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - app.pac.io
-  resources:
   - configs
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - app.pac.io
-  resources:
-  - configs/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - app.pac.io
-  resources:
-  - configs/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - app.pac.io
-  resources:
   - services
   verbs:
   - create
@@ -72,25 +29,21 @@ rules:
 - apiGroups:
   - app.pac.io
   resources:
+  - catalogs/finalizers
+  - configs/finalizers
   - services/finalizers
   verbs:
   - update
 - apiGroups:
   - app.pac.io
   resources:
+  - catalogs/status
+  - configs/status
   - services/status
   verbs:
   - get
   - patch
   - update
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
 - apiGroups:
   - manageiq.pac.io
   resources:

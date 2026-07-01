@@ -56,4 +56,9 @@ type DB interface {
 	CreateMaintenanceWindow(window *models.MaintenanceWindow) error
 	UpdateMaintenanceWindow(window *models.MaintenanceWindow) error
 	DeleteMaintenanceWindow(id string, deletedBy string, deletedAt *time.Time) error
+
+	// Chat operations
+	InsertChatMessage(*models.ChatMessage) error
+	GetNextConversationID(context.Context, string) (int64, error)
+	GetChatMessages(context.Context, string, int64) ([]models.ChatMessage, error)
 }

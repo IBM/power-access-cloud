@@ -22,6 +22,7 @@ import { Theme } from "@carbon/react";
 import Feedbacks from "./Feedbacks";
 import MaintenanceNotification from "./MaintenanceNotification";
 import MaintenanceManager from "./MaintenanceManager";
+import ChatSupport from "./ChatSupport";
 
 const RouterClass = React.memo(({ isAdmin }) => {
     return (
@@ -45,6 +46,9 @@ const RouterClass = React.memo(({ isAdmin }) => {
         )}
         {!isAdmin && (
           <Route path="/catalogs" element={<TnCRoute Component={Catalogs} />} />
+        )}
+        {!isAdmin && (
+          <Route path="/chat-support" element={<TnCRoute Component={ChatSupport} />} />
         )}
 
         {isAdmin && (

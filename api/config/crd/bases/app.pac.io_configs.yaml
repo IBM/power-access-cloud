@@ -3,8 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: configs.app.pac.io
 spec:
   group: app.pac.io
@@ -21,20 +20,24 @@ spec:
         description: Config is the Schema for the configs API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
           spec:
-            description: 'ConfigSpec defines the desired state of Config TODO: Add
-              appropriate kubebuilder markers for the field'
+            description: ConfigSpec defines the desired state of Config
             properties:
               MIQClientID:
                 description: MIQClientID is the client ID created in the keycloak
@@ -47,14 +50,16 @@ spec:
                 description: MIQUserName is the user name used for talking ManageIQ
                 type: string
               credentialSecret:
-                description: 'CredentialSecret is the secret contains the credential
-                  like MIQ password, ClientSecret Secret contains the following data:
-                  miq-password: <ManageIQ Password> miq-client-password: <ManageIQ
-                  Client Password>'
+                description: |-
+                  CredentialSecret is the secret contains the credential like MIQ password, ClientSecret
+                  Secret contains the following data:
+                  miq-password: <ManageIQ Password>
+                  miq-client-password: <ManageIQ Client Password>
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: |-
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
@@ -85,7 +90,6 @@ spec:
                   region:
                     type: string
                   zone:
-                    description: 'TODO: remove if not required'
                     type: string
                 required:
                 - ID
