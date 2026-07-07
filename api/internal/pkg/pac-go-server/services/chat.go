@@ -5,22 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 
 	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		// Allow all origins for now - should be restricted in production
-		return true
-	},
-}
 
 // HandleChatWebSocket handles WebSocket connections for chat
 func HandleChatWebSocket(c *gin.Context) {
@@ -38,12 +30,15 @@ func HandleChatWebSocket(c *gin.Context) {
 	logger.Info("WebSocket connection request", zap.String("userID", userIDStr))
 	
 	// Upgrade HTTP connection to WebSocket
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	// coder/websocket uses Accept instead of Upgrade
+	conn, err := websocket.Accept(c.Writer, c.Request, &websocket.AcceptOptions{
+		OriginPatterns: []string{"*"}, // Allow all origins for now - should be restricted in production
+	})
 	if err != nil {
 		logger.Error("failed to upgrade to websocket", zap.Error(err))
 		return
 	}
-	defer conn.Close()
+	defer conn.Close(websocket.StatusInternalError, "internal error")
 	
 	logger.Info("WebSocket connection established", zap.String("userID", userIDStr))
 	
@@ -52,28 +47,32 @@ func HandleChatWebSocket(c *gin.Context) {
 	conversationID, err := dbCon.GetNextConversationID(ctx, userIDStr)
 	if err != nil {
 		logger.Error("failed to get conversation ID", zap.Error(err))
-		conn.WriteJSON(gin.H{"error": "Failed to initialize conversation"})
+		conn.Close(websocket.StatusInternalError, "Failed to initialize conversation")
 		return
 	}
 	
-	logger.Info("Conversation initialized", 
-		zap.String("userID", userIDStr), 
+	logger.Info("Conversation initialized",
+		zap.String("userID", userIDStr),
 		zap.Int64("conversationID", conversationID))
 	
 	// Handle incoming messages
 	for {
 		var incomingMsg models.ChatMessage
-		err := conn.ReadJSON(&incomingMsg)
+		err := wsjson.Read(ctx, conn, &incomingMsg)
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				logger.Error("websocket error", zap.Error(err))
+			// Check if it's a normal close
+			closeStatus := websocket.CloseStatus(err)
+			if closeStatus == websocket.StatusNormalClosure || closeStatus == websocket.StatusGoingAway {
+				logger.Info("websocket connection closed normally", zap.String("userID", userIDStr))
+			} else if closeStatus != -1 {
+				logger.Error("websocket error", zap.Error(err), zap.Int("closeStatus", int(closeStatus)))
 			} else {
-				logger.Info("websocket connection closed", zap.String("userID", userIDStr))
+				logger.Error("websocket read error", zap.Error(err))
 			}
 			break
 		}
 		
-		logger.Info("Received message", 
+		logger.Info("Received message",
 			zap.String("userID", userIDStr),
 			zap.String("message", incomingMsg.Message))
 		
@@ -89,7 +88,7 @@ func HandleChatWebSocket(c *gin.Context) {
 		// Save user message to MongoDB
 		if err := dbCon.InsertChatMessage(userMessage); err != nil {
 			logger.Error("failed to save user message", zap.Error(err))
-			conn.WriteJSON(gin.H{"error": "Failed to save message"})
+			wsjson.Write(ctx, conn, gin.H{"error": "Failed to save message"})
 			continue
 		}
 		
@@ -107,7 +106,7 @@ func HandleChatWebSocket(c *gin.Context) {
 		// Save admin response to MongoDB
 		if err := dbCon.InsertChatMessage(adminMessage); err != nil {
 			logger.Error("failed to save admin message", zap.Error(err))
-			conn.WriteJSON(gin.H{"error": "Failed to save response"})
+			wsjson.Write(ctx, conn, gin.H{"error": "Failed to save response"})
 			continue
 		}
 		
@@ -121,11 +120,13 @@ func HandleChatWebSocket(c *gin.Context) {
 			"timestamp":       adminMessage.Timestamp.Format(time.RFC3339),
 		}
 		
-		if err := conn.WriteJSON(response); err != nil {
+		if err := wsjson.Write(ctx, conn, response); err != nil {
 			logger.Error("failed to send response", zap.Error(err))
 			break
 		}
 		
 		logger.Info("Response sent to client", zap.String("userID", userIDStr))
 	}
+	
+	conn.Close(websocket.StatusNormalClosure, "")
 }

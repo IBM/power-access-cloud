@@ -10,6 +10,7 @@ require (
 	github.com/IBM/platform-services-go-sdk v0.89.0
 	github.com/IBM/vpc-go-sdk v0.74.1
 	github.com/Nerzal/gocloak/v13 v13.9.0
+	github.com/coder/websocket v1.8.15
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-logr/logr v1.4.3
 	github.com/go-playground/validator/v10 v10.28.0
@@ -31,6 +32,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.4
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.45.0
+	golang.org/x/text v0.31.0
 	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v0.27.2
@@ -87,7 +89,6 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
@@ -136,7 +137,6 @@ require (
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
