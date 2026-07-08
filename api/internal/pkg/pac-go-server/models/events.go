@@ -5,7 +5,7 @@ import (
 	"text/template"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type EventType string
@@ -44,7 +44,7 @@ const (
 
 type Event struct {
 	// ID is the event identifier
-	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	ID bson.ObjectID `json:"id" bson:"_id,omitempty"`
 	// EventType is the event type
 	Type EventType `json:"type" bson:"type"`
 	// CreatedAt is the time the event was created

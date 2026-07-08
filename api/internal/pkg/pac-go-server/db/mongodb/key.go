@@ -5,9 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
@@ -53,7 +52,7 @@ func (db *MongoDB) CreateKey(keys *models.Key) error {
 func (db *MongoDB) GetKeyByID(id string) (*models.Key, error) {
 	var key models.Key
 
-	objectId, err := primitive.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid id: %w", err)
 	}
@@ -74,7 +73,7 @@ func (db *MongoDB) GetKeyByID(id string) (*models.Key, error) {
 }
 
 func (db *MongoDB) DeleteKey(id string) error {
-	objectId, err := primitive.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return fmt.Errorf("invalid id: %w", err)
 	}

@@ -1,9 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import "go.mongodb.org/mongo-driver/v2/bson"
 
 type Quota struct {
-	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	ID       bson.ObjectID `json:"id" bson:"_id,omitempty"`
 	GroupID  string             `json:"group_id" bson:"group_id"`
 	Capacity Capacity           `json:"capacity" bson:"capacity"`
 }

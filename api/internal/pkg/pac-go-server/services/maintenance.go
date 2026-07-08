@@ -10,7 +10,7 @@ import (
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.uber.org/zap"
 )
 
@@ -230,7 +230,7 @@ func CreateMaintenanceWindow(c *gin.Context) {
 
 	// Create maintenance window
 	window := &models.MaintenanceWindow{
-		ID:        primitive.NewObjectID(),
+		ID:        bson.NewObjectID(),
 		Enabled:   request.Enabled,
 		StartTime: request.StartTime,
 		EndTime:   request.EndTime,
