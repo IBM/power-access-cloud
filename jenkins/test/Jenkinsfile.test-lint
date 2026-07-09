@@ -1,0 +1,121 @@
+// Golangci-lint Pipeline
+
+@Library('pac-shared-lib') _
+
+pipeline {
+    agent {
+        docker {
+            label 'shared-x86-centos9'
+            image 'registry.access.redhat.com/ubi9/ubi:latest'
+            args '-v $HOME/.cache/golangci-lint:/root/.cache/golangci-lint'
+        }
+    }
+
+    options {
+        timestamps()
+        timeout(time: 45, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        GOLANGCI_LINT_VERSION = 'v1.64.0'
+        GOPROXY               = 'https://proxy.golang.org,direct'
+        GOSUMDB               = 'sum.golang.org'
+        PATH                  = "/usr/local/go/bin:/root/go/bin:${env.PATH}"
+        GOPATH                = '/root/go'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "=== Checkout repository ==="
+                checkout scm
+            }
+        }
+
+        stage('Install Go') {
+            steps {
+                script {
+                    env.GO_VERSION = goVersion()
+                    echo "=== Install Go ${env.GO_VERSION} ==="
+                    sh '''
+                        echo "Installing Go ${GO_VERSION}..."
+                        cd /tmp
+                        GO_TARBALL="go${GO_VERSION}.linux-amd64.tar.gz"
+                        curl -fsSL -o "${GO_TARBALL}" "https://go.dev/dl/${GO_TARBALL}"
+                        rm -rf /usr/local/go
+                        tar -C /usr/local -xzf "${GO_TARBALL}"
+                        rm -f "${GO_TARBALL}"
+                        /usr/local/go/bin/go version
+                    '''
+                }
+            }
+        }
+
+        stage('Install golangci-lint') {
+            steps {
+                echo "=== Install golangci-lint ${GOLANGCI_LINT_VERSION} ==="
+                sh '''
+                    set -e
+                    export PATH=/usr/local/go/bin:$PATH
+
+                    if [ ! -f /root/go/bin/golangci-lint ]; then
+                        echo "Installing golangci-lint ${GOLANGCI_LINT_VERSION}..."
+                        go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+                        if [ ! -f /root/go/bin/golangci-lint ]; then
+                            echo "ERROR: golangci-lint installation failed"
+                            exit 1
+                        fi
+                    else
+                        echo "golangci-lint already installed, skipping"
+                    fi
+
+                    /root/go/bin/golangci-lint --version
+                '''
+            }
+        }
+
+        stage('Download dependencies') {
+            steps {
+                echo "=== Download Go modules ==="
+                dir('api') {
+                    sh '''
+                        export PATH=/usr/local/go/bin:$PATH
+                        go version
+                        go mod download
+                    '''
+                }
+            }
+        }
+
+        stage('Run golangci-lint') {
+            steps {
+                echo "=== Run golangci-lint ==="
+                dir('api') {
+                    sh '''
+                        export PATH=/usr/local/go/bin:/root/go/bin:$PATH
+                        golangci-lint run --timeout=30m
+                        echo "Linting completed successfully!"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "=== Golangci-lint Pipeline Completed ==="
+            echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+        }
+        success {
+            echo "Linting passed!"
+        }
+        failure {
+            echo "Linting failed! Please fix the issues reported above."
+        }
+        cleanup {
+            cleanWs()
+        }
+    }
+}

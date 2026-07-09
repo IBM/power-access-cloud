@@ -1,0 +1,196 @@
+@Library('pac-shared-lib') _
+
+pipeline {
+    agent {
+        docker {
+            label 'shared-x86-centos9'
+            image 'quay.io/podman/stable:latest'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.local/share/containers:/var/lib/containers --privileged'
+        }
+    }
+
+    parameters {
+        booleanParam(
+            name: 'SAVE_IMAGE_TAR',
+            defaultValue: false,
+            description: 'Save and upload image as tar file (useful for testing)'
+        )
+    }
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        REGISTRY    = 'icr.io'
+        IMAGE_NAME  = 'power-access-cloud'
+        CONTEXT_DIR = './web'
+        DOCKERFILE  = './web/Dockerfile.ubi'
+        PLATFORM    = 'linux/amd64'
+
+        TRIVY_SBOM_FILE  = 'trivy.json'
+        PARLAY_SBOM_FILE = 'parlay.json'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Setup Podman') {
+            steps {
+                echo "=== Setup Podman ==="
+                sh 'podman version'
+            }
+        }
+
+        stage('ICR Registry Login') {
+            when {
+                allOf {
+                    not { changeRequest() }
+                    not { expression { params.SAVE_IMAGE_TAR == true } }
+                    anyOf {
+                        branch 'main'
+                        branch pattern: 'release-.*', comparator: 'REGEXP'
+                    }
+                }
+            }
+            steps {
+                echo "=== Log into registry ${REGISTRY} ==="
+                withCredentials([
+                    string(credentialsId: 'ICR_USERNAME', variable: 'ICR_USER'),
+                    string(credentialsId: 'ICR_APIKEY',   variable: 'ICR_KEY')
+                ]) {
+                    sh '''
+                        echo "${ICR_KEY}" | podman login ${REGISTRY} -u "${ICR_USER}" --password-stdin
+                        echo "ICR login successful"
+                    '''
+                }
+            }
+        }
+
+        stage('Extract Container metadata') {
+            steps {
+                echo "=== Extract container metadata ==="
+                script {
+                    withCredentials([string(credentialsId: 'ICR_NAMESPACE', variable: 'ICR_NS')]) {
+                        def tagName = ''
+                        if (env.CHANGE_ID) {
+                            tagName = "pr-${env.CHANGE_ID}"
+                        } else if (env.BRANCH_NAME == 'main') {
+                            tagName = 'main'
+                        } else if (env.BRANCH_NAME?.startsWith('release-')) {
+                            tagName = env.BRANCH_NAME
+                        } else if (env.TAG_NAME) {
+                            tagName = env.TAG_NAME
+                        } else {
+                            tagName = "manual-${env.BUILD_NUMBER}"
+                        }
+                        env.FULL_IMAGE_TAG = "${REGISTRY}/${ICR_NS}/web:${tagName}"
+                    }
+                    echo "Image will be tagged as: ${env.FULL_IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Build Container image') {
+            steps {
+                echo "=== Build container image with Podman ==="
+                sh """
+                    podman build \\
+                        --platform ${PLATFORM} \\
+                        -f ${DOCKERFILE} \\
+                        -t ${env.FULL_IMAGE_TAG} \\
+                        ${CONTEXT_DIR}
+
+                    echo "Build completed successfully!"
+                """
+            }
+        }
+
+        stage('Push to ICR') {
+            when {
+                allOf {
+                    not { changeRequest() }
+                    not { expression { params.SAVE_IMAGE_TAR == true } }
+                    anyOf {
+                        branch 'main'
+                        branch pattern: 'release-.*', comparator: 'REGEXP'
+                    }
+                }
+            }
+            steps {
+                echo "=== Push image to ICR registry ==="
+                sh """
+                    podman push ${env.FULL_IMAGE_TAG}
+                    echo "Image pushed successfully: ${env.FULL_IMAGE_TAG}"
+                """
+            }
+        }
+
+        stage('Save image to tar') {
+            when {
+                anyOf {
+                    changeRequest()
+                    expression { params.SAVE_IMAGE_TAR == true }
+                }
+            }
+            steps {
+                echo "=== Save image to tar ==="
+                sh """
+                    rm -f web-image.tar
+                    podman save ${env.FULL_IMAGE_TAG} -o web-image.tar
+                    ls -lh web-image.tar
+                """
+            }
+        }
+
+        stage('Upload image tar') {
+            when {
+                anyOf {
+                    changeRequest()
+                    expression { params.SAVE_IMAGE_TAR == true }
+                }
+            }
+            steps {
+                echo "=== Upload image tar ==="
+                archiveArtifacts artifacts: 'web-image.tar', fingerprint: true
+                echo "Image tar archived"
+            }
+        }
+
+        stage('License Scan') {
+            steps {
+                script {
+                    echo "=== Running license scan ==="
+                    def imageSource = (env.CHANGE_ID || params.SAVE_IMAGE_TAR) ? 'web-image.tar' : env.FULL_IMAGE_TAG
+                    licenseScan(imageSource: imageSource, trivyFile: env.TRIVY_SBOM_FILE, parlayFile: env.PARLAY_SBOM_FILE)
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh '''
+                podman logout docker.io || true
+                podman logout ${REGISTRY} || true
+                rm -f web-image.tar || true
+            '''
+        }
+        success {
+            echo "Web Docker build pipeline completed successfully!"
+        }
+        failure {
+            echo "Web Docker build pipeline failed!"
+        }
+        cleanup {
+            cleanWs()
+        }
+    }
+}

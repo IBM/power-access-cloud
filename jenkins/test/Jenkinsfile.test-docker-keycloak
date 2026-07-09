@@ -1,0 +1,228 @@
+@Library('pac-shared-lib') _
+
+pipeline {
+    agent {
+        docker {
+            label 'shared-x86-centos9'
+            image 'quay.io/podman/stable:latest'
+            args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+
+    parameters {
+        booleanParam(
+            name: 'SAVE_IMAGE_TAR',
+            defaultValue: false,
+            description: 'Save image as tar file (for testing without registry push)'
+        )
+    }
+
+    options {
+        timestamps()
+        timeout(time: 60, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    environment {
+        REGISTRY    = 'icr.io'
+        IMAGE_NAME  = 'keycloak'
+        CONTEXT_DIR = './keycloak-infra/keycloak'
+        DOCKERFILE  = './keycloak-infra/keycloak/Dockerfile'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "=== Checkout repository ==="
+                checkout scm
+            }
+        }
+
+        stage('Read Keycloak Version') {
+            steps {
+                script {
+                    echo "=== Reading Keycloak version ==="
+                    env.KEYCLOAK_VERSION = sh(
+                        script: 'cat keycloak-infra/keycloak/KEYCLOAK_VERSION',
+                        returnStdout: true
+                    ).trim()
+                    echo "Keycloak version: ${env.KEYCLOAK_VERSION}"
+                }
+            }
+        }
+
+        stage('Determine Image Tag') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'ICR_NAMESPACE', variable: 'ICR_NS')]) {
+                        def tagName = ''
+                        if (env.CHANGE_ID) {
+                            // PR build — matches type=ref,event=pr
+                            tagName = "pr-${env.CHANGE_ID}"
+                        } else if (env.TAG_NAME) {
+                            // Semver tag — matches type=semver,suffix=-KEYCLOAK_VERSION
+                            tagName = "${env.TAG_NAME}-${env.KEYCLOAK_VERSION}"
+                        } else if (env.BRANCH_NAME) {
+                            // Branch build (main, release-*) — matches type=ref,event=branch
+                            tagName = env.BRANCH_NAME.replaceAll('/', '-')
+                        } else {
+                            // Manual/other
+                            tagName = "manual-${env.BUILD_NUMBER}"
+                        }
+                        env.IMAGE_TAG = "${env.REGISTRY}/${ICR_NS}/${env.IMAGE_NAME}:${tagName}"
+                    }
+                    echo "Image Tag: ${env.IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Prepare Theme') {
+            steps {
+                echo "=== Syncing theme content ==="
+                dir('keycloak-infra/keycloak') {
+                    sh '''
+                        set -e
+
+                        KEYCLOAK_VERSION=$(cat KEYCLOAK_VERSION)
+                        KEYCLOAK_IMAGE="quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}"
+
+                        echo "Keycloak image: ${KEYCLOAK_IMAGE}"
+
+                        # Clean up any leftover container from a previous run
+                        podman rm -f keycloak_themes 2>/dev/null || true
+                        rm -f keycloak-themes.jar
+                        rm -rf META-INF theme
+
+                        # Spin up the Keycloak container and copy the themes jar out of it
+                        podman run --entrypoint bash -d --name keycloak_themes "${KEYCLOAK_IMAGE}" -c "sleep infinity"
+                        podman exec keycloak_themes bash -c \
+                            "mkdir -p /tmp/extract && cp -f /opt/keycloak/lib/lib/main/org.keycloak.keycloak-themes-${KEYCLOAK_VERSION}*.jar /tmp/extract/keycloak-themes.jar"
+                        podman cp keycloak_themes:/tmp/extract/keycloak-themes.jar .
+                        podman rm -f keycloak_themes
+
+                        # Extract the jar (a jar is a zip — unzip ships in the podman image)
+                        unzip -qo keycloak-themes.jar
+                        rm -f keycloak-themes.jar
+                        rm -rf META-INF
+
+                        # Overlay the custom PAC theme
+                        cp -r pac/ theme/pac
+
+                        echo "Theme sync complete. Contents of theme/:"
+                        ls theme/
+                    '''
+                }
+            }
+        }
+
+        stage('Login to ICR') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch pattern: 'release-.*', comparator: 'REGEXP'
+                    tag pattern: 'v*.*.*', comparator: 'REGEXP'
+                }
+            }
+            steps {
+                echo "=== Logging into ICR ==="
+                withCredentials([
+                    string(credentialsId: 'ICR_USERNAME', variable: 'ICR_USER'),
+                    string(credentialsId: 'ICR_APIKEY',   variable: 'ICR_KEY')
+                ]) {
+                    sh '''
+                        echo "${ICR_KEY}" | podman login ${REGISTRY} -u "${ICR_USER}" --password-stdin
+                        echo "Logged into ICR successfully"
+                    '''
+                }
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                echo "=== Building Keycloak image ==="
+                sh """
+                    podman build \\
+                        --build-arg KEYCLOAK_BASE_IMAGE=quay.io/keycloak/keycloak:${env.KEYCLOAK_VERSION} \\
+                        -t ${env.IMAGE_TAG} \\
+                        -f ${DOCKERFILE} \\
+                        ${CONTEXT_DIR}
+
+                    echo "Image built successfully: ${env.IMAGE_TAG}"
+                """
+            }
+        }
+
+        stage('Push to ICR') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch pattern: 'release-.*', comparator: 'REGEXP'
+                    tag pattern: 'v*.*.*', comparator: 'REGEXP'
+                }
+            }
+            steps {
+                echo "=== Pushing image to ICR ==="
+                sh """
+                    podman push ${env.IMAGE_TAG}
+                    echo "Image pushed successfully to ICR"
+                """
+            }
+        }
+
+        stage('Save Image Tar') {
+            when {
+                anyOf {
+                    expression { env.CHANGE_ID != null }
+                    expression { params.SAVE_IMAGE_TAR == true }
+                }
+            }
+            steps {
+                echo "=== Saving image as tar file ==="
+                sh """
+                    rm -f keycloak-image.tar
+                    podman save ${env.IMAGE_TAG} -o keycloak-image.tar
+                    ls -lh keycloak-image.tar
+                    echo "Image saved to keycloak-image.tar"
+                """
+            }
+        }
+
+        stage('Upload Image Tar') {
+            when {
+                anyOf {
+                    expression { env.CHANGE_ID != null }
+                    expression { params.SAVE_IMAGE_TAR == true }
+                }
+            }
+            steps {
+                echo "=== Uploading image tar as artifact ==="
+                archiveArtifacts artifacts: 'keycloak-image.tar', allowEmptyArchive: false
+                echo "Image tar archived"
+            }
+        }
+
+        stage('License Scan') {
+            steps {
+                script {
+                    echo "=== Running license scan ==="
+                    def imageSource = (env.CHANGE_ID || params.SAVE_IMAGE_TAR) ? 'keycloak-image.tar' : env.IMAGE_TAG
+                    licenseScan(imageSource: imageSource, trivyFile: 'trivy.json', parlayFile: 'parlay.json')
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "=== Keycloak Docker Build Pipeline Completed ==="
+            echo "Image Tag: ${env.IMAGE_TAG ?: 'NOT_SET'}"
+            echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+        }
+        success {
+            echo "Keycloak image build successful!"
+        }
+        failure {
+            echo "Keycloak image build failed!"
+        }
+    }
+}
