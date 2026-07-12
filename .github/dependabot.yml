@@ -6,6 +6,18 @@
 version: 2
 updates:
   - package-ecosystem: "gomod"
-    directory: "/"
+    directory: "/api"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/api"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/web"
+    schedule:
+      interval: "daily"
