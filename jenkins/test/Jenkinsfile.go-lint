@@ -107,6 +107,7 @@ pipeline {
         always {
             echo "=== Golangci-lint Pipeline Completed ==="
             echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+            notifyGitHub(currentBuild.result)
         }
         success {
             echo "Linting passed!"

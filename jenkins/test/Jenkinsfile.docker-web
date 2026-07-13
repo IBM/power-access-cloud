@@ -27,7 +27,8 @@ pipeline {
     environment {
         REGISTRY    = 'icr.io'
         IMAGE_NAME  = 'power-access-cloud'
-        CONTEXT_DIR = './api'
+        CONTEXT_DIR = './web'
+        DOCKERFILE  = './web/Dockerfile.ubi'
         PLATFORM    = 'linux/amd64'
 
         TRIVY_SBOM_FILE  = 'trivy.json'
@@ -37,17 +38,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo "=== Checkout repository ==="
                 checkout scm
-            }
-        }
-
-        stage('Set Go Version') {
-            steps {
-                script {
-                    env.GO_VERSION = goVersion()
-                    echo "Go version: ${env.GO_VERSION}"
-                }
             }
         }
 
@@ -55,29 +46,6 @@ pipeline {
             steps {
                 echo "=== Setup Podman ==="
                 sh 'podman version'
-            }
-        }
-
-        stage('Docker Hub Login') {
-            steps {
-                echo "=== Authenticate to Docker Hub ==="
-                script {
-                    try {
-                        withCredentials([usernamePassword(
-                            credentialsId: 'dockerhub-credentials',
-                            usernameVariable: 'DOCKERHUB_USERNAME',
-                            passwordVariable: 'DOCKERHUB_PASSWORD'
-                        )]) {
-                            sh '''
-                                echo "${DOCKERHUB_PASSWORD}" | podman login docker.io -u "${DOCKERHUB_USERNAME}" --password-stdin
-                                echo "Docker Hub authentication successful"
-                            '''
-                        }
-                    } catch (Exception e) {
-                        echo "WARNING: Docker Hub login failed: ${e.message}"
-                        echo "Continuing without authentication - may hit rate limits"
-                    }
-                }
             }
         }
 
@@ -98,8 +66,10 @@ pipeline {
                     string(credentialsId: 'ICR_USERNAME', variable: 'ICR_USER'),
                     string(credentialsId: 'ICR_APIKEY',   variable: 'ICR_KEY')
                 ]) {
-                    sh 'echo "${ICR_KEY}" | podman login ${REGISTRY} -u "${ICR_USER}" --password-stdin'
-                    echo "Logged into ${REGISTRY}"
+                    sh '''
+                        echo "${ICR_KEY}" | podman login ${REGISTRY} -u "${ICR_USER}" --password-stdin
+                        echo "ICR login successful"
+                    '''
                 }
             }
         }
@@ -112,15 +82,18 @@ pipeline {
                         def tagName = ''
                         if (env.CHANGE_ID) {
                             tagName = "pr-${env.CHANGE_ID}"
-                        } else if (env.BRANCH_NAME) {
-                            tagName = env.BRANCH_NAME.replaceAll('/', '-')
+                        } else if (env.BRANCH_NAME == 'main') {
+                            tagName = 'main'
+                        } else if (env.BRANCH_NAME?.startsWith('release-')) {
+                            tagName = env.BRANCH_NAME
+                        } else if (env.TAG_NAME) {
+                            tagName = env.TAG_NAME
                         } else {
-                            def gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                            tagName = "manual-${gitCommit}"
+                            tagName = "manual-${env.BUILD_NUMBER}"
                         }
-                        env.IMAGE_TAG = "${REGISTRY}/${ICR_NS}/api:${tagName}"
+                        env.FULL_IMAGE_TAG = "${REGISTRY}/${ICR_NS}/web:${tagName}"
                     }
-                    echo "Image Tag: ${env.IMAGE_TAG}"
+                    echo "Image will be tagged as: ${env.FULL_IMAGE_TAG}"
                 }
             }
         }
@@ -131,9 +104,11 @@ pipeline {
                 sh """
                     podman build \\
                         --platform ${PLATFORM} \\
-                        --build-arg GO_VERSION=${GO_VERSION} \\
-                        -t ${env.IMAGE_TAG} \\
+                        -f ${DOCKERFILE} \\
+                        -t ${env.FULL_IMAGE_TAG} \\
                         ${CONTEXT_DIR}
+
+                    echo "Build completed successfully!"
                 """
             }
         }
@@ -152,8 +127,8 @@ pipeline {
             steps {
                 echo "=== Push image to ICR registry ==="
                 sh """
-                    podman push ${env.IMAGE_TAG}
-                    echo "Image pushed successfully: ${env.IMAGE_TAG}"
+                    podman push ${env.FULL_IMAGE_TAG}
+                    echo "Image pushed successfully: ${env.FULL_IMAGE_TAG}"
                 """
             }
         }
@@ -167,10 +142,11 @@ pipeline {
             }
             steps {
                 echo "=== Save image to tar ==="
-                sh '''
-                    rm -f image.tar
-                    podman save "${IMAGE_TAG}" -o image.tar
-                '''
+                sh """
+                    rm -f web-image.tar
+                    podman save ${env.FULL_IMAGE_TAG} -o web-image.tar
+                    ls -lh web-image.tar
+                """
             }
         }
 
@@ -183,7 +159,7 @@ pipeline {
             }
             steps {
                 echo "=== Upload image tar ==="
-                archiveArtifacts artifacts: 'image.tar', allowEmptyArchive: false
+                archiveArtifacts artifacts: 'web-image.tar', fingerprint: true
                 echo "Image tar archived"
             }
         }
@@ -192,7 +168,7 @@ pipeline {
             steps {
                 script {
                     echo "=== Running license scan ==="
-                    def imageSource = (env.CHANGE_ID || params.SAVE_IMAGE_TAR) ? 'image.tar' : env.IMAGE_TAG
+                    def imageSource = (env.CHANGE_ID || params.SAVE_IMAGE_TAR) ? 'web-image.tar' : env.FULL_IMAGE_TAG
                     licenseScan(imageSource: imageSource, trivyFile: env.TRIVY_SBOM_FILE, parlayFile: env.PARLAY_SBOM_FILE)
                 }
             }
@@ -201,21 +177,20 @@ pipeline {
 
     post {
         always {
-            echo "=== Container Build Pipeline Completed ==="
-            echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+            sh '''
+                podman logout docker.io || true
+                podman logout ${REGISTRY} || true
+                rm -f web-image.tar || true
+            '''
+            notifyGitHub(currentBuild.result)
         }
         success {
-            echo "Container build succeeded!"
+            echo "Web Docker build pipeline completed successfully!"
         }
         failure {
-            echo "Container build failed!"
+            echo "Web Docker build pipeline failed!"
         }
         cleanup {
-            script {
-                if (env.IMAGE_TAG) {
-                    sh "podman rmi ${env.IMAGE_TAG} || true"
-                }
-            }
             cleanWs()
         }
     }

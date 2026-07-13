@@ -31,10 +31,15 @@ def generateTrivySBOM(String imageSource, String trivyFile) {
             trivy image --input ${imageSource} --format spdx-json --output ${trivyFile}
         """
     } else {
-        sh """
-            echo "Generating Trivy SBOM from registry..."
-            trivy image ${imageSource} --format spdx-json --output ${trivyFile}
-        """
+        // Trivy needs ICR credentials to pull from the private registry.
+        // TRIVY_USERNAME / TRIVY_PASSWORD are Trivy's built-in env vars for registry auth.
+        withCredentials([string(credentialsId: 'ICR_APIKEY', variable: 'ICR_KEY')]) {
+            sh """
+                echo "Generating Trivy SBOM from registry..."
+                TRIVY_USERNAME=iamapikey TRIVY_PASSWORD="\${ICR_KEY}" \\
+                    trivy image ${imageSource} --format spdx-json --output ${trivyFile}
+            """
+        }
     }
     sh "ls -lh ${trivyFile}"
 }
