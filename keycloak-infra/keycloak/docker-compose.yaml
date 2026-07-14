@@ -15,8 +15,12 @@ services:
       POSTGRES_PASSWORD: password
   keycloak:
     image: quay.io/keycloak/keycloak:26.5.7
-    command: start-dev
+    command: start-dev --import-realm
     environment:
+      KC_HOSTNAME_URL: "http://localhost:8080"
+      KC_HOSTNAME_ADMIN_URL: "http://localhost:8080"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
       KC_DB: postgres
       KC_DB_URL_HOST: postgres
       KC_DB_URL_DATABASE: keycloak
@@ -31,5 +35,6 @@ services:
       - 8080:8080
     volumes:
       - ./theme/:/opt/keycloak/themes
+      - ./pac/realm-export.json:/opt/keycloak/data/import/pac-realm.json
     depends_on:
       - postgres
