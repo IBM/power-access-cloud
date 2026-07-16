@@ -101,6 +101,7 @@ pipeline {
         always {
             echo "=== Unit Test Pipeline Completed ==="
             echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+            notifyGitHub(currentBuild.result)
         }
         success {
             echo "Unit tests passed!"

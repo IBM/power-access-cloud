@@ -217,12 +217,16 @@ pipeline {
             echo "=== Keycloak Docker Build Pipeline Completed ==="
             echo "Image Tag: ${env.IMAGE_TAG ?: 'NOT_SET'}"
             echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+            notifyGitHub(currentBuild.result)
         }
         success {
             echo "Keycloak image build successful!"
         }
         failure {
             echo "Keycloak image build failed!"
+        }
+        cleanup {
+            cleanWs()
         }
     }
 }
