@@ -1,0 +1,499 @@
+.chat-support-container {
+  display: flex;
+  height: calc(100vh - 48px);
+  background-color: #f4f4f4;
+
+  // ── Left panel ──────────────────────────────────────────────────────────────
+  .conversations-panel {
+    width: 300px;
+    min-width: 220px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+
+    .conversations-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #161616;
+      }
+
+      // When header contains both h3 and a refresh button (admin panel)
+      &:has(button) {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        h3 {
+          flex: 1;
+        }
+      }
+    }
+
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+
+      .conversation-item {
+        display: flex;
+        padding: 14px 18px;
+        cursor: pointer;
+        border-bottom: 1px solid #e0e0e0;
+
+        &:hover {
+          background-color: #f4f4f4;
+        }
+
+        &.active {
+          background-color: #e8e8e8;
+          border-left: 3px solid #0f62fe;
+        }
+
+        &.conversation-item--ended {
+          opacity: 0.6;
+          cursor: default;
+          border-left: 3px solid #c6c6c6;
+
+          &:hover {
+            background-color: transparent;
+          }
+        }
+
+        .conversation-avatar {
+          margin-right: 12px;
+          flex-shrink: 0;
+
+          .avatar-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #0f62fe;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 15px;
+
+            &.avatar-circle--ended {
+              background-color: #8d8d8d;
+            }
+          }
+        }
+
+        .conversation-details {
+          flex: 1;
+          overflow: hidden;
+
+          .conversation-id {
+            font-weight: 600;
+            font-size: 15px;
+            color: #161616;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .conversation-status {
+            font-size: 13px;
+            margin-bottom: 3px;
+
+            &.status-connected,
+            &.status-active {
+              color: #24a148;
+            }
+
+            &.status-disconnected,
+            &.status-reconnecting {
+              color: #f1620a;
+            }
+
+            &.status-error {
+              color: #da1e28;
+            }
+
+            &.status-connecting {
+              color: #8d8d8d;
+            }
+          }
+
+          .conversation-unread {
+            font-size: 12px;
+            color: #525252;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            .unread-dot {
+              display: inline-block;
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              background-color: #0f62fe;
+              flex-shrink: 0;
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state-text {
+      padding: 20px;
+      font-size: 13px;
+      color: #8d8d8d;
+      text-align: center;
+    }
+  }
+
+  // ── Right panel ─────────────────────────────────────────────────────────────
+  .chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    min-width: 0;
+
+    .chat-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #e0e0e0;
+      background-color: #f4f4f4;
+      flex-shrink: 0;
+
+      h2 {
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #161616;
+      }
+
+      .chat-status {
+        font-size: 13px;
+        color: #525252;
+
+        .status-label {
+          color: #161616;
+        }
+
+        .status-divider {
+          margin: 0 8px;
+          color: #8d8d8d;
+        }
+
+        .status-connected,
+        .status-active {
+          color: #24a148;
+          font-weight: 500;
+        }
+
+        .status-disconnected {
+          color: #f1620a;
+        }
+
+        .status-error {
+          color: #da1e28;
+        }
+      }
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      background-color: #fafafa;
+      display: flex;
+      flex-direction: column;
+
+      .empty-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+
+        p {
+          color: #8d8d8d;
+          font-size: 15px;
+        }
+      }
+
+      .message {
+        margin-bottom: 18px;
+        display: flex;
+
+        // Default (user view): own messages right, admin messages left.
+        &.message-user {
+          justify-content: flex-end;
+
+          .message-content {
+            background-color: #e0e0e0;
+            border-radius: 8px 8px 0 8px;
+            max-width: 65%;
+          }
+        }
+
+        &.message-admin {
+          justify-content: flex-start;
+
+          .message-content {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px 8px 8px 0;
+            max-width: 65%;
+          }
+        }
+
+        .message-content {
+          padding: 10px 14px;
+
+          .message-header {
+            margin-bottom: 4px;
+
+            .message-sender {
+              font-size: 12px;
+              color: #525252;
+              font-weight: 500;
+            }
+          }
+
+          .message-text {
+            font-size: 14px;
+            color: #161616;
+            line-height: 1.5;
+            word-wrap: break-word;
+          }
+        }
+      }
+    }
+
+    // ── Ended divider — shown below the last message when conv is closed ────────
+    .conv-ended-divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0 8px;
+
+      &::before,
+      &::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #c6c6c6;
+      }
+
+      span {
+        padding: 0 12px;
+        font-size: 12px;
+        color: #8d8d8d;
+        white-space: nowrap;
+      }
+    }
+
+    // ── Input area ─────────────────────────────────────────────────────────────
+    .chat-input-container {
+      padding: 16px 24px;
+      border-top: 1px solid #e0e0e0;
+      background-color: #ffffff;
+      flex-shrink: 0;
+
+      .chat-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .chat-input {
+          flex: 1;
+          padding: 10px 14px;
+          border: 1px solid #8d8d8d;
+          border-radius: 4px;
+          font-size: 14px;
+          outline: none;
+
+          &:focus {
+            border-color: #0f62fe;
+          }
+
+          &::placeholder {
+            color: #8d8d8d;
+          }
+
+          &:disabled {
+            background-color: #f4f4f4;
+            cursor: not-allowed;
+          }
+        }
+
+        // Admin reply uses a textarea instead of input
+        &.admin-reply-wrapper {
+          align-items: flex-end;
+
+          .chat-textarea {
+            flex: 1;
+
+            textarea {
+              resize: none;
+              font-size: 14px;
+            }
+          }
+        }
+
+        .send-button {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 10px 20px;
+          background-color: #0f62fe;
+          color: #ffffff;
+          border: none;
+          border-radius: 4px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          white-space: nowrap;
+          flex-shrink: 0;
+
+          &:hover:not(:disabled) {
+            background-color: #0353e9;
+          }
+
+          &:disabled {
+            background-color: #c6c6c6;
+            cursor: not-allowed;
+          }
+        }
+      }
+
+      // ── "Start new conversation" prompt shown when conv is ended ─────────────
+      .new-conv-prompt {
+        display: flex;
+        justify-content: center;
+        padding: 8px 0;
+
+        .new-conv-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 24px;
+          background-color: #0f62fe;
+          color: #ffffff;
+          border: none;
+          border-radius: 4px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+
+          &:hover:not(:disabled) {
+            background-color: #0353e9;
+          }
+
+          &:disabled {
+            background-color: #c6c6c6;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+
+    // ── Empty state when no conversation is selected (admin) ───────────────────
+    > .empty-state {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      p {
+        color: #8d8d8d;
+        font-size: 15px;
+      }
+    }
+  }
+
+  // ── End-conversation button (user + admin header)
+  .end-conv-button {
+    margin-left: 16px;
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid #da1e28;
+    border-radius: 4px;
+    color: #da1e28;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: #da1e28;
+      color: #ffffff;
+    }
+  }
+
+  .conv-ended-badge {
+    margin-left: 16px;
+    padding: 3px 10px;
+    background-color: #f4f4f4;
+    border: 1px solid #c6c6c6;
+    border-radius: 4px;
+    color: #525252;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  // ── Admin view: flip bubble sides so user msgs are left, admin msgs are right
+  &.chat-support-container--admin {
+    .chat-messages {
+      .message {
+        &.message-user {
+          justify-content: flex-start;
+
+          .message-content {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px 8px 8px 0;
+          }
+        }
+
+        &.message-admin {
+          justify-content: flex-end;
+
+          .message-content {
+            background-color: #0f62fe;
+            border: none;
+            border-radius: 8px 8px 0 8px;
+
+            .message-sender,
+            .message-text {
+              color: #ffffff;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── Scrollbar ──────────────────────────────────────────────────────────────────
+.conversations-list,
+.chat-messages {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f4f4f4;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c6c6c6;
+    border-radius: 4px;
+
+    &:hover {
+      background: #8d8d8d;
+    }
+  }
+}

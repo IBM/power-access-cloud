@@ -130,6 +130,9 @@ const HeaderNav = ({ onSideNavToggle }) => {
                 <HeaderMenuItem onClick={() => setActionProps(action)}>
                   Feedback
                 </HeaderMenuItem>
+                <HeaderMenuItem as={Link} to="/chat-support">
+                  Chat Support
+                </HeaderMenuItem>
                 <ToastNotify
                   title={title}
                   subtitle={message}
@@ -179,6 +182,7 @@ const HeaderNav = ({ onSideNavToggle }) => {
                   {isAdmin && <MenuLink url="/users" label="Users" />}
                   {isAdmin && <MenuLink url="/events" label="Events" />}
                   {isAdmin && <MenuLink url="/maintenance" label="Maintenance" />}
+                  {isAdmin && <MenuLink url="/chat-admin" label="Chat Support" />}
                 </SideNavItems>
               </SideNav>
               </div>

@@ -56,4 +56,15 @@ type DB interface {
 	CreateMaintenanceWindow(window *models.MaintenanceWindow) error
 	UpdateMaintenanceWindow(window *models.MaintenanceWindow) error
 	DeleteMaintenanceWindow(id string, deletedBy string, deletedAt *time.Time) error
+
+	// Chat support operations
+	InsertChatMessage(msg *models.ChatMessage) error
+	MarkConversationEnded(ctx context.Context, userID, username string, conversationID int64) error
+	IsConversationEnded(ctx context.Context, userID string, conversationID int64) (bool, error)
+	GetCurrentConversationID(ctx context.Context, userID string) (int64, error)
+	GetNextConversationID(ctx context.Context, userID string) (int64, error)
+	GetChatMessages(ctx context.Context, userID string, conversationID int64) ([]models.ChatMessage, error)
+	GetUserConversations(ctx context.Context, userID string) ([]models.ConversationSummary, error)
+	GetAllConversations(ctx context.Context) ([]models.ConversationSummary, error)
+	AdminReplyToConversation(ctx context.Context, msg *models.ChatMessage) error
 }
