@@ -1,10 +1,8 @@
 package services
 
 import (
+	"context"
 	"fmt"
-
-	// "net/http"
-
 	"time"
 
 	"go.uber.org/zap"
@@ -123,15 +121,20 @@ func isNotificationSentRecently(serviceName string, notificationType models.Even
 	return false
 }
 
-// ExpiryNotification raises notification for about-to-expire services
-func ExpiryNotification() {
-	go func() {
-		every := time.Duration(everyDay) * time.Hour
-		ticker := time.NewTicker(every)
-		defer ticker.Stop()
+// ExpiryNotification raises notification for about-to-expire services.
+// It blocks until ctx is cancelled, so callers must run it in a goroutine.
+func ExpiryNotification(ctx context.Context) {
+	every := time.Duration(everyDay) * time.Hour
+	ticker := time.NewTicker(every)
+	defer ticker.Stop()
 
-		for range ticker.C {
+	for {
+		select {
+		case <-ticker.C:
 			raiseNotification()
+		case <-ctx.Done():
+			log.GetLogger().Info("ExpiryNotification: context cancelled, exiting")
+			return
 		}
-	}()
+	}
 }

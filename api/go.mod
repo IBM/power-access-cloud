@@ -8,6 +8,7 @@ require (
 	github.com/IBM/platform-services-go-sdk v0.101.0
 	github.com/IBM/vpc-go-sdk v0.87.1
 	github.com/Nerzal/gocloak/v13 v13.9.0
+	github.com/coder/websocket v1.8.15
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-logr/logr v1.4.4
 	github.com/go-playground/validator/v10 v10.30.3

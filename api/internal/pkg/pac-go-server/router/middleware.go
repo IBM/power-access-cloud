@@ -7,11 +7,34 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 
 	pacClient "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client"
+	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 )
+
+// InjectTokenFromQuery promotes a ?token= query parameter to an
+// "Authorization: Bearer <token>" header. This is needed for WebSocket
+// connections because browsers cannot set custom headers on the WS upgrade
+// request. Must be placed before the Keycloak auth middlewares.
+func InjectTokenFromQuery(c *gin.Context) {
+	token := c.Query("token")
+	if token != "" && c.GetHeader("Authorization") == "" {
+		c.Request.Header.Set("Authorization", "Bearer "+token)
+		log.GetLogger().Debug("InjectTokenFromQuery: set Authorization header from ?token=",
+			zap.String("path", c.Request.URL.Path),
+		)
+	} else {
+		log.GetLogger().Warn("InjectTokenFromQuery: skipped",
+			zap.String("path", c.Request.URL.Path),
+			zap.Bool("token_present", token != ""),
+			zap.Bool("auth_header_present", c.GetHeader("Authorization") != ""),
+		)
+	}
+	c.Next()
+}
 
 func AllowAdminOnly(c *gin.Context) {
 	config := pacClient.GetConfigFromContext(c.Request.Context())
