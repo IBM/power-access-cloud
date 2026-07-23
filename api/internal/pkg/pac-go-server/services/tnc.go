@@ -8,7 +8,7 @@ import (
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // GetTermsAndConditionsStatus		godoc

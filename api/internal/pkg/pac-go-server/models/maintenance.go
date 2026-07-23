@@ -3,12 +3,12 @@ package models
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // MaintenanceWindow represents a single maintenance notification window
 type MaintenanceWindow struct {
-	ID        primitive.ObjectID `bson:"_id" json:"id"`
+	ID        bson.ObjectID `bson:"_id" json:"id"`
 	Enabled   bool               `bson:"enabled" json:"enabled"`
 	StartTime time.Time          `bson:"start_time" json:"start_time"`
 	EndTime   time.Time          `bson:"end_time" json:"end_time"`

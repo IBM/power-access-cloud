@@ -7,8 +7,8 @@ import (
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/services"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // InsertFeedback - insert feedback record into the DB

@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // GetAllMaintenanceWindows retrieves all non-deleted maintenance windows from the database
@@ -39,7 +38,7 @@ func (db *MongoDB) GetMaintenanceWindowByID(id string) (*models.MaintenanceWindo
 	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
 	defer cancel()
 
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid maintenance window ID: %w", err)
 	}
@@ -112,7 +111,7 @@ func (db *MongoDB) DeleteMaintenanceWindow(id string, deletedBy string, deletedA
 	ctx, cancel := context.WithTimeout(context.Background(), dbContextTimeout)
 	defer cancel()
 
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return fmt.Errorf("invalid maintenance window ID: %w", err)
 	}

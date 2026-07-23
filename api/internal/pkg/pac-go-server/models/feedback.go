@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type Rating string
@@ -17,7 +17,7 @@ const (
 )
 
 type Feedback struct {
-	ID      primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	ID      bson.ObjectID `json:"id" bson:"_id,omitempty"`
 	UserID  string             `json:"user_id" bson:"user_id,omitempty"`
 	Rating  Rating             `json:"rating" bson:"rating,omitempty"`
 	Comment string             `json:"comment" bson:"comment,omitempty" binding:"max=250"`

@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 )
@@ -48,7 +47,7 @@ func (db *MongoDB) NewRequest(request *models.Request) (string, error) {
 		return "", fmt.Errorf("error inserting request: %w", err)
 	}
 
-	oid, ok := res.InsertedID.(primitive.ObjectID)
+	oid, ok := res.InsertedID.(bson.ObjectID)
 	if !ok {
 		return "", errors.New("unable to get inserted id for request")
 	}
@@ -85,7 +84,7 @@ func (db *MongoDB) GetRequestByGroupIDAndUserID(groupID string, userID string) (
 func (db *MongoDB) GetRequestByID(id string) (*models.Request, error) {
 	var request models.Request
 
-	objectId, err := primitive.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid id: %w", err)
 	}
@@ -107,7 +106,7 @@ func (db *MongoDB) GetRequestByID(id string) (*models.Request, error) {
 }
 
 func (db *MongoDB) DeleteRequest(id string) error {
-	objectId, err := primitive.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return fmt.Errorf("invalid id: %w", err)
 	}
@@ -123,7 +122,7 @@ func (db *MongoDB) DeleteRequest(id string) error {
 }
 
 func (db *MongoDB) UpdateRequestState(id string, state models.RequestStateType) error {
-	objectId, err := primitive.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return fmt.Errorf("invalid id: %w", err)
 	}
@@ -139,7 +138,7 @@ func (db *MongoDB) UpdateRequestState(id string, state models.RequestStateType) 
 }
 
 func (db *MongoDB) UpdateRequestStateWithComment(id string, state models.RequestStateType, comment string) error {
-	objectId, err := primitive.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return fmt.Errorf("invalid id: %w", err)
 	}

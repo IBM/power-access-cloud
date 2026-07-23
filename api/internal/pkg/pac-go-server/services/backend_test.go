@@ -15,7 +15,7 @@ import (
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/golang/mock/gomock"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -594,8 +594,8 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 		return []models.Feedback{feedback}
 	case "get-all-maintenance-windows":
 		now := time.Now()
-		objectID1, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439011")
-		objectID2, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439012")
+		objectID1, _ := bson.ObjectIDFromHex("507f1f77bcf86cd799439011") // pragma: allowlist secret
+		objectID2, _ := bson.ObjectIDFromHex("507f1f77bcf86cd799439012") // pragma: allowlist secret
 		window1 := models.MaintenanceWindow{
 			ID:        objectID1,
 			Enabled:   true,
@@ -621,7 +621,7 @@ func getResource(apiType string, customValues map[string]interface{}) interface{
 		return []models.MaintenanceWindow{window1, window2}
 	case "get-maintenance-window-by-id":
 		now := time.Now()
-		objectID, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439011")
+		objectID, _ := bson.ObjectIDFromHex("507f1f77bcf86cd799439011") // pragma: allowlist secret
 		window := models.MaintenanceWindow{
 			ID:        objectID,
 			Enabled:   true,

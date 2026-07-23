@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/zap"
 
 	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
@@ -42,7 +42,7 @@ func (db *MongoDB) AcceptTermsAndConditions(terms *models.TermsAndConditions) er
 	defer cancel()
 	filter := bson.D{{Key: "user_id", Value: terms.UserID}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "user_id", Value: terms.UserID}, {Key: "accepted", Value: terms.Accepted}, {Key: "accepted_at", Value: terms.AcceptedAt}}}}
-	opts := options.Update().SetUpsert(true)
+	opts := options.UpdateOne().SetUpsert(true)
 	_, err := collection.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
 		return fmt.Errorf("error updating terms and coditions: %w", err)
