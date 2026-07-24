@@ -36,6 +36,16 @@ def call(String buildResult) {
         .replaceAll('git@github.com:', '')
         .replaceAll('\\.git$', '')
 
+    // Build JSON in Groovy so every value is properly escaped by JsonOutput.toJson(),
+    // avoiding shell quoting issues (e.g. BUILD_URL contains ":" and "/" characters
+    // that can break a single-quoted JSON literal when interpolated by Groovy).
+    def payload = groovy.json.JsonOutput.toJson([
+        state      : state,
+        target_url : env.BUILD_URL ?: '',
+        description: desc,
+        context    : context
+    ])
+
     withCredentials([string(credentialsId: 'github-pat', variable: 'GH_TOKEN')]) {
         sh """
             echo "Posting GitHub status: state=${state}, context=${context}, repo=${repoName}, sha=${commitSha}"
@@ -44,12 +54,7 @@ def call(String buildResult) {
                 -H "Authorization: token \${GH_TOKEN}" \\
                 -H "Content-Type: application/json" \\
                 "https://api.github.com/repos/${repoName}/statuses/${commitSha}" \\
-                -d '{
-                    "state":       "${state}",
-                    "target_url":  "${env.BUILD_URL}",
-                    "description": "${desc}",
-                    "context":     "${context}"
-                }'
+                --data-raw '${payload}'
         """
     }
 }
