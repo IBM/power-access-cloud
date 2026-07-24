@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => {
         "/pac-go-server": {
           target: proxyTarget,
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/pac-go-server/, '/api/v1'),
         }
       },
