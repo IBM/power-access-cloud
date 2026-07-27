@@ -30,16 +30,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "=== Checkout repository ==="
-                checkout scm
                 script {
-                    if (env.CHANGE_ID) {
-                        env.PR_HEAD_SHA = sh(
-                            script: "git rev-parse refs/remotes/origin/PR-${env.CHANGE_ID}",
-                            returnStdout: true
-                        ).trim()
-                    } else {
-                        env.PR_HEAD_SHA = env.GIT_COMMIT
-                    }
+                    def scmVars = checkout scm
+                    env.PR_HEAD_SHA = scmVars.GIT_COMMIT
                     echo "PR_HEAD_SHA: ${env.PR_HEAD_SHA}"
                 }
             }
