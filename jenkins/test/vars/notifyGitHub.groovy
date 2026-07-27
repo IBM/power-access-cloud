@@ -26,30 +26,38 @@ def call(String buildResult) {
     def jobName = (parts && parts.size() >= 2) ? parts[parts.size() - 2] : (parts ? parts[0] : 'jenkins')
     def context = "jenkins/${jobName}"
 
-    // Use Jenkins built-in env vars — no git binary needed in post{} block
-    // GIT_COMMIT is always set by Jenkins checkout
-    // GIT_URL is the remote URL set by Jenkins checkout
-    def commitSha = env.GIT_COMMIT
+    // PR_HEAD_SHA is set explicitly right after checkout scm in each Jenkinsfile
+    // via: env.PR_HEAD_SHA = sh(script:'git rev-parse refs/remotes/origin/PR-${CHANGE_ID}', ...)
+    // This is the only reliable source — both GIT_COMMIT and CHANGE_SHA contain the
+    // ephemeral pr-merge SHA when the pr-merge checkout strategy is used, which does
+    // not exist on GitHub and causes a 422 on the statuses API.
+    def commitSha = env.PR_HEAD_SHA ?: env.CHANGE_SHA ?: env.GIT_COMMIT
     def repoUrl   = env.GIT_URL ?: env.GIT_URL_1 ?: ''
     def repoName  = repoUrl
         .replaceAll('https://github.com/', '')
         .replaceAll('git@github.com:', '')
         .replaceAll('\\.git$', '')
 
-    withCredentials([string(credentialsId: 'github-pat', variable: 'GH_TOKEN')]) {
-        sh """
-            echo "Posting GitHub status: state=${state}, context=${context}, repo=${repoName}, sha=${commitSha}"
+    try {
+        withCredentials([string(credentialsId: 'github-pat', variable: 'GH_TOKEN')]) {
+            sh """
+                echo "Posting GitHub status: state=${state}, context=${context}, repo=${repoName}, sha=${commitSha}"
 
-            curl -sf -X POST \\
-                -H "Authorization: token \${GH_TOKEN}" \\
-                -H "Content-Type: application/json" \\
-                "https://api.github.com/repos/${repoName}/statuses/${commitSha}" \\
-                -d '{
-                    "state":       "${state}",
-                    "target_url":  "${env.BUILD_URL}",
-                    "description": "${desc}",
-                    "context":     "${context}"
-                }'
-        """
+                curl -s --fail-with-body -X POST \\
+                    -H "Authorization: token \${GH_TOKEN}" \\
+                    -H "Content-Type: application/json" \\
+                    "https://api.github.com/repos/${repoName}/statuses/${commitSha}" \\
+                    -d '{
+                        "state":       "${state}",
+                        "target_url":  "${env.BUILD_URL}",
+                        "description": "${desc}",
+                        "context":     "${context}"
+                    }'
+            """
+        }
+    } catch (Exception e) {
+        // Never fail the build just because the GitHub status post failed.
+        // The error body is already printed above by --fail-with-body.
+        echo "WARNING: Failed to post GitHub status — ${e.message}"
     }
 }
