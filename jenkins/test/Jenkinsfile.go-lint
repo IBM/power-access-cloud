@@ -14,7 +14,7 @@ pipeline {
     options {
         timestamps()
         timeout(time: 45, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '5'))
         disableConcurrentBuilds()
     }
 
@@ -112,15 +112,13 @@ pipeline {
             echo "=== Golangci-lint Pipeline Completed ==="
             echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
             notifyGitHub(currentBuild.result)
+            pipelineTeardown()
         }
         success {
             echo "Linting passed!"
         }
         failure {
             echo "Linting failed! Please fix the issues reported above."
-        }
-        cleanup {
-            cleanWs()
         }
     }
 }

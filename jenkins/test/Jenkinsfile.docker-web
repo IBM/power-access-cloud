@@ -20,7 +20,7 @@ pipeline {
     options {
         timestamps()
         timeout(time: 30, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '3'))
         disableConcurrentBuilds()
     }
 
@@ -186,16 +186,19 @@ pipeline {
                 podman logout ${REGISTRY} || true
                 rm -f web-image.tar || true
             '''
+            script {
+                if (env.FULL_IMAGE_TAG) {
+                    sh "podman rmi ${env.FULL_IMAGE_TAG} || true"
+                }
+            }
             notifyGitHub(currentBuild.result)
+            pipelineTeardown()
         }
         success {
             echo "Web Docker build pipeline completed successfully!"
         }
         failure {
             echo "Web Docker build pipeline failed!"
-        }
-        cleanup {
-            cleanWs()
         }
     }
 }
