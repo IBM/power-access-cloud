@@ -11,7 +11,7 @@ require (
 	github.com/IBM/vpc-go-sdk v0.87.1
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/gin-gonic/gin v1.11.0
-	github.com/go-logr/logr v1.4.3
+	github.com/go-logr/logr v1.4.4
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/golang/mock v1.6.0
