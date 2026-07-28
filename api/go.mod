@@ -29,7 +29,7 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/tbaehler/gin-keycloak v1.7.0
 	go.mongodb.org/mongo-driver/v2 v2.6.2
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.54.0
 	golang.org/x/text v0.40.0
 	k8s.io/api v0.27.2
