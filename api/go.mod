@@ -1,11 +1,9 @@
 module github.com/IBM/power-access-cloud/api
 
-go 1.25.0
-
-toolchain go1.25.1
+go 1.25.2
 
 require (
-	github.com/IBM-Cloud/power-go-client v1.13.0
+	github.com/IBM-Cloud/power-go-client v1.16.2
 	github.com/IBM/go-sdk-core/v5 v5.23.2
 	github.com/IBM/platform-services-go-sdk v0.101.0
 	github.com/IBM/vpc-go-sdk v0.87.1
