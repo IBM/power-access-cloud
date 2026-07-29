@@ -20,7 +20,7 @@ pipeline {
     options {
         timestamps()
         timeout(time: 60, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '3'))
     }
 
     environment {
@@ -221,16 +221,19 @@ pipeline {
             echo "=== Keycloak Docker Build Pipeline Completed ==="
             echo "Image Tag: ${env.IMAGE_TAG ?: 'NOT_SET'}"
             echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+            script {
+                if (env.IMAGE_TAG) {
+                    sh "podman rmi ${env.IMAGE_TAG} || true"
+                }
+            }
             notifyGitHub(currentBuild.result)
+            pipelineTeardown()
         }
         success {
             echo "Keycloak image build successful!"
         }
         failure {
             echo "Keycloak image build failed!"
-        }
-        cleanup {
-            cleanWs()
         }
     }
 }

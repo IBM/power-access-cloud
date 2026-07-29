@@ -13,7 +13,7 @@ pipeline {
     options {
         timestamps()
         timeout(time: 20, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '5'))
         disableConcurrentBuilds()
     }
 
@@ -106,15 +106,13 @@ pipeline {
             echo "=== Unit Test Pipeline Completed ==="
             echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
             notifyGitHub(currentBuild.result)
+            pipelineTeardown()
         }
         success {
             echo "Unit tests passed!"
         }
         failure {
             echo "Unit tests failed!"
-        }
-        cleanup {
-            cleanWs()
         }
     }
 }

@@ -20,7 +20,7 @@ pipeline {
     options {
         timestamps()
         timeout(time: 30, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '3'))
         disableConcurrentBuilds()
     }
 
@@ -207,21 +207,19 @@ pipeline {
         always {
             echo "=== Container Build Pipeline Completed ==="
             echo "Status: ${currentBuild.result ?: 'SUCCESS'}"
+            script {
+                if (env.IMAGE_TAG) {
+                    sh "podman rmi ${env.IMAGE_TAG} || true"
+                }
+            }
             notifyGitHub(currentBuild.result)
+            pipelineTeardown()
         }
         success {
             echo "Container build succeeded!"
         }
         failure {
             echo "Container build failed!"
-        }
-        cleanup {
-            script {
-                if (env.IMAGE_TAG) {
-                    sh "podman rmi ${env.IMAGE_TAG} || true"
-                }
-            }
-            cleanWs()
         }
     }
 }
