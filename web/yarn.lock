@@ -1511,10 +1511,10 @@ json5@^2.2.3:
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
   integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==
 
-keycloak-js@^26.2.0:
-  version "26.2.3"
-  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-26.2.3.tgz#f68a7dae060de6a0f87bb6a378d57381cc617c5a"
-  integrity sha512-widjzw/9T6bHRgEp6H/Se3NCCarU7u5CwFKBcwtu7xfA1IfdZb+7Q7/KGusAnBo34Vtls8Oz9vzSqkQvQ7+b4Q==
+keycloak-js@^26.2.4:
+  version "26.2.4"
+  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-26.2.4.tgz#b96ff33ed08ff6fd8d1e09d9e5055c7b3f2fa918"
+  integrity sha512-PnXpR3ubETGOt0B/Qt2lxmPbkZr5bc3vlQsOqDoTPPQsZRp7JjhTKxlJ187uWh8qJhvBab6Gsjb06a8ayOPfuw==
 
 lightningcss-android-arm64@1.33.0:
   version "1.33.0"
