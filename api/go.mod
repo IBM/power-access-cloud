@@ -1,6 +1,6 @@
 module github.com/IBM/power-access-cloud/api
 
-go 1.25.2
+go 1.26.5
 
 require (
 	github.com/IBM-Cloud/power-go-client v1.16.2
