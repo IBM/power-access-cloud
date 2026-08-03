@@ -9,16 +9,16 @@ import (
 // MaintenanceWindow represents a single maintenance notification window
 type MaintenanceWindow struct {
 	ID        bson.ObjectID `bson:"_id" json:"id"`
-	Enabled   bool               `bson:"enabled" json:"enabled"`
-	StartTime time.Time          `bson:"start_time" json:"start_time"`
-	EndTime   time.Time          `bson:"end_time" json:"end_time"`
-	Message   string             `bson:"message" json:"message"`
-	CreatedBy string             `bson:"created_by" json:"created_by"`
-	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
-	UpdatedBy string             `bson:"updated_by" json:"updated_by"`
-	UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	DeletedBy string             `bson:"deleted_by,omitempty" json:"deleted_by,omitempty"`
-	DeletedAt *time.Time         `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
+	Enabled   bool          `bson:"enabled" json:"enabled"`
+	StartTime time.Time     `bson:"start_time" json:"start_time"`
+	EndTime   time.Time     `bson:"end_time" json:"end_time"`
+	Message   string        `bson:"message" json:"message"`
+	CreatedBy string        `bson:"created_by" json:"created_by"`
+	CreatedAt time.Time     `bson:"created_at" json:"created_at"`
+	UpdatedBy string        `bson:"updated_by" json:"updated_by"`
+	UpdatedAt time.Time     `bson:"updated_at" json:"updated_at"`
+	DeletedBy string        `bson:"deleted_by,omitempty" json:"deleted_by,omitempty"`
+	DeletedAt *time.Time    `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
 }
 
 // MaintenanceResponse is the public response for a single maintenance window
