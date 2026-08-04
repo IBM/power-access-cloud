@@ -12,7 +12,7 @@ WORKDIR /app
 USER 1001
 
 # Install dependencies and build
-COPY package.json yarn.lock ./
+COPY .env package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn build
