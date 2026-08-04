@@ -25,12 +25,14 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	capiutil "sigs.k8s.io/cluster-api/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	appv1alpha1 "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	appscope "github.com/IBM/power-access-cloud/api/controllers/app/scope"
 	"github.com/IBM/power-access-cloud/api/controllers/util"
@@ -52,7 +54,12 @@ func filterOwnedServices(ctx context.Context, scope *appscope.CatalogScope) ([]c
 			return nil
 		}
 
-		if capiutil.IsOwnedByObject(acc, scope.Catalog) {
+		catalogGK := schema.GroupKind{
+			Group: v1alpha1.GroupVersion.Group,
+			Kind: "Catalog",
+		}
+
+		if capiutil.IsOwnedByObject(acc, scope.Catalog, catalogGK) {
 			ownedServices = append(ownedServices, obj)
 		}
 

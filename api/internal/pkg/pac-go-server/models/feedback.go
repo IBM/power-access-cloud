@@ -18,9 +18,9 @@ const (
 
 type Feedback struct {
 	ID      bson.ObjectID `json:"id" bson:"_id,omitempty"`
-	UserID  string             `json:"user_id" bson:"user_id,omitempty"`
-	Rating  Rating             `json:"rating" bson:"rating,omitempty"`
-	Comment string             `json:"comment" bson:"comment,omitempty" binding:"max=250"`
+	UserID  string        `json:"user_id" bson:"user_id,omitempty"`
+	Rating  Rating        `json:"rating" bson:"rating,omitempty"`
+	Comment string        `json:"comment" bson:"comment,omitempty" binding:"max=250"`
 	// CreatedAt is the time the event was created
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 }

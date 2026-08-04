@@ -46,7 +46,7 @@ func TestFormatErrorForEmail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := FormatErrorForEmail(tt.input)
-			
+
 			for _, expected := range tt.expected {
 				if !strings.Contains(result, expected) {
 					t.Errorf("FormatErrorForEmail() result missing expected string.\nExpected to contain: %q\nGot: %q", expected, result)
@@ -59,7 +59,7 @@ func TestFormatErrorForEmail(t *testing.T) {
 func TestFormatErrorForLog(t *testing.T) {
 	input := `[POST /api][400] {&#34;error&#34;:&#34;Bad Request&#34;}`
 	result := FormatErrorForLog(input)
-	
+
 	// Should decode HTML entities but keep structure
 	if !strings.Contains(result, `"error"`) {
 		t.Errorf("FormatErrorForLog() should decode HTML entities. Got: %q", result)
@@ -92,7 +92,7 @@ func TestFormatJSONString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := formatJSONString(tt.input)
-			
+
 			for _, expected := range tt.expected {
 				if !strings.Contains(result, expected) {
 					t.Errorf("formatJSONString() result missing expected string.\nExpected to contain: %q\nGot: %q", expected, result)
