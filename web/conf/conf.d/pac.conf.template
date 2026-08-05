@@ -17,6 +17,15 @@ server {
         proxy_set_header   X-Forwarded-Proto $scheme;
         proxy_set_header   Host              $http_host;
         proxy_set_header   X-Real-IP         $remote_addr;
+        # Required for WebSocket proxying — without these nginx strips the
+        # Upgrade header and the Go backend responds with 426.
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade    $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        # nginx default proxy_read_timeout is 60 s. For WebSocket connections
+        # that means any 60 s of silence drops the connection. Set to 1 h so
+        # idle chat sessions are not killed by nginx between messages.
+        proxy_read_timeout 3600s;
   }
   error_page   500 502 503 504  /50x.html;
   location = /50x.html {

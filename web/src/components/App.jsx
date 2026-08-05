@@ -22,6 +22,8 @@ import { Theme } from "@carbon/react";
 import Feedbacks from "./Feedbacks";
 import MaintenanceNotification from "./MaintenanceNotification";
 import MaintenanceManager from "./MaintenanceManager";
+import ChatSupport from "./ChatSupport";
+import ChatAdmin from "./ChatAdmin";
 
 const RouterClass = React.memo(({ isAdmin }) => {
     return (
@@ -45,6 +47,9 @@ const RouterClass = React.memo(({ isAdmin }) => {
         )}
         {!isAdmin && (
           <Route path="/catalogs" element={<TnCRoute Component={Catalogs} />} />
+        )}
+        {!isAdmin && (
+          <Route path="/chat-support" element={<TnCRoute Component={ChatSupport} />} />
         )}
 
         {isAdmin && (
@@ -92,6 +97,12 @@ const RouterClass = React.memo(({ isAdmin }) => {
             element={<TnCRoute Component={MaintenanceManager} />}
           />
         )}
+        {isAdmin && (
+          <Route
+            path="/chat-admin"
+            element={<TnCRoute Component={ChatAdmin} />}
+          />
+        )}
       </Routes>
     );
 });
@@ -120,6 +131,7 @@ const App = () => {
       "/keys",
       "/feedbacks",
       "/maintenance",
+      "/chat-admin",
     ].includes(window.location.pathname)
   ) {
     window.location.href = "/login";
