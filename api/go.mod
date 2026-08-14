@@ -15,7 +15,7 @@ require (
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/golang/mock v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/onsi/ginkgo/v2 v2.32.0
+	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.42.1
 	github.com/pkg/errors v0.9.1
 	github.com/ppc64le-cloud/manageiq-client-go v0.0.0-20230320063610-157d6ef06ba5
