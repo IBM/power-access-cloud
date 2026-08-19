@@ -27,7 +27,6 @@ def call(String buildResult) {
     def state  = (result == 'SUCCESS') ? 'success' : 'failure'
     def desc   = (result == 'SUCCESS') ? 'Build passed' : 'Build failed'
 
-    // JOB_NAME = "pac/pac-test/pac-go-lint/PR-110"
     // Second-to-last segment is always the Multibranch pipeline name e.g. "pac-go-lint"
     def parts   = env.JOB_NAME?.split('/')
     def jobName = (parts && parts.size() >= 2) ? parts[parts.size() - 2] : (parts ? parts[0] : 'jenkins')
