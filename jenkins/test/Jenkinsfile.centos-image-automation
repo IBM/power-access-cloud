@@ -1,0 +1,500 @@
+// CentOS Image Automation Pipeline
+// Runs on pac-agent (ppc64le Power VM node) which has pvsadm installed.
+// Downloads the latest CentOS Stream qcow2 image, converts it to OVA using
+// pvsadm, uploads the OVA to IBM Cloud Object Storage, and imports it into
+// a PowerVS workspace.
+//
+// Scheduled flow (convert once per version, upload+import per environment):
+//   1. Convert centos-9  → /data/centos-images-9
+//   2. Upload+Import centos-9  → staging
+//   3. Upload+Import centos-9  → production
+//   4. Convert centos-10 → /data/centos-images-10
+//   5. Upload+Import centos-10 → staging
+//   6. Upload+Import centos-10 → production
+//
+// Manual: set SCHEDULED=false to build a single version + environment.
+
+@Library('pac-shared-lib') _
+
+// ── Helper: download + convert one CentOS version (shared by both environments) ─
+// workDir = /data/centos-images-<version>  (no env suffix — OVA is env-agnostic)
+def convertCentosVersion(String centosVersion) {
+    def workDir = "/data/centos-images-${centosVersion}"
+
+    echo "=== [centos-${centosVersion}] Convert: starting ==="
+
+    sh """
+        mkdir -p ${workDir}
+        cp jenkins/scripts/download-and-convert-centos.sh ${workDir}/
+        cp jenkins/scripts/cleanup-resources.sh           ${workDir}/
+        chmod +x ${workDir}/*.sh
+        [ -f hack/scripts/image-prep.template.static ] && \\
+            cp hack/scripts/image-prep.template.static ${workDir}/ || true
+    """
+
+    sh """
+        cd ${workDir}
+        export CENTOS_VERSION=${centosVersion}
+        export WORK_DIR=${workDir}
+        export IMAGE_PREP_TEMPLATE=${workDir}/image-prep.template.static
+        export IMAGE_SIZE=${params.IMAGE_SIZE}
+
+        if [ -f image-metadata.json ]; then
+            OVA_PATH=\$(jq -r '.ova_file // empty' image-metadata.json 2>/dev/null || true)
+            if [ -n "\$OVA_PATH" ] && [ ! -f "\$OVA_PATH" ]; then
+                echo "Stale metadata detected — removing to force reconversion"
+                rm -f image-metadata.json
+            fi
+        fi
+
+        ./download-and-convert-centos.sh
+    """
+
+    sh "cp ${workDir}/conversion.log conversion-${centosVersion}.log 2>/dev/null || true"
+    archiveArtifacts(artifacts: "conversion-${centosVersion}.log", allowEmptyArchive: true)
+
+    echo "=== [centos-${centosVersion}] Convert: done ==="
+    return workDir
+}
+
+// ── Helper: upload + import for one environment, using the shared converted workDir ─
+def uploadAndImport(String centosVersion, String environment, String workDir) {
+    def cosCredId    = (environment == 'staging') ? 'COS_STAGING_BUCKET_NAME'       : 'COS_PROD_BUCKET_NAME'
+    def pvsCrnCredId = (environment == 'staging') ? 'POWERVS_STAGING_WORKSPACE_CRN' : 'POWERVS_PROD_WORKSPACE_CRN'
+
+    echo "=== [${centosVersion}/${environment}] Upload+Import: starting ==="
+
+    // Copy upload/import scripts into the shared workDir
+    sh """
+        cp jenkins/scripts/upload-to-cos.sh    ${workDir}/
+        cp jenkins/scripts/import-to-powervs.sh ${workDir}/
+        chmod +x ${workDir}/upload-to-cos.sh ${workDir}/import-to-powervs.sh
+    """
+
+    // Upload + Import wrapped in try/finally:
+    //   - logs are always archived (even on failure)
+    //   - OVA cleanup only on success (preserve for retry on failure)
+    def cellSuccess = false
+    try {
+        withCredentials([
+            string(credentialsId: 'IBM_API_KEY',          variable: 'IBM_API_KEY'),
+            string(credentialsId: cosCredId,               variable: 'COS_BUCKET_NAME'),
+            string(credentialsId: 'COS_REGION',            variable: 'COS_REGION'),
+            string(credentialsId: 'COS_HMAC_ACCESS_KEY',   variable: 'COS_HMAC_ACCESS_KEY'),
+            string(credentialsId: 'COS_HMAC_SECRET_KEY',   variable: 'COS_HMAC_SECRET_KEY'),
+            string(credentialsId: pvsCrnCredId,             variable: 'POWERVS_WORKSPACE_CRN')
+        ]) {
+            sh """
+                cd ${workDir}
+                export WORK_DIR=${workDir}
+                ./upload-to-cos.sh
+            """
+            sh """
+                cd ${workDir}
+                export WORK_DIR=${workDir}
+                ./import-to-powervs.sh
+            """
+        }
+        cellSuccess = true
+    } finally {
+        // Always archive logs
+        sh """
+            cp ${workDir}/upload.log          upload-${centosVersion}-${environment}.log          2>/dev/null || true
+            cp ${workDir}/import.log          import-${centosVersion}-${environment}.log          2>/dev/null || true
+            cp ${workDir}/image-metadata.json image-metadata-${centosVersion}-${environment}.json 2>/dev/null || true
+        """
+        archiveArtifacts(
+            artifacts: "upload-${centosVersion}-${environment}.log, import-${centosVersion}-${environment}.log, image-metadata-${centosVersion}-${environment}.json",
+            allowEmptyArchive: true
+        )
+
+        if (!cellSuccess) {
+            echo "=== [${centosVersion}/${environment}] FAILED — preserving ${workDir} for next run ==="
+            sh "sudo find /tmp -maxdepth 1 -type d -name 'qcow2ova*' -exec rm -rf {} + 2>/dev/null || true"
+        }
+    }
+
+    echo "=== [${centosVersion}/${environment}] Upload+Import: done ==="
+}
+
+// ── Helper: cleanup one version's shared workDir (called after both envs succeed) ─
+def cleanupVersion(String centosVersion, String workDir) {
+    sh """
+        if [ -d ${workDir} ] && [ -f ${workDir}/cleanup-resources.sh ]; then
+            cd ${workDir}
+            export WORK_DIR=${workDir}
+            KEEP_METADATA=true KEEP_LOGS=true ./cleanup-resources.sh
+        fi
+        sudo find /tmp -maxdepth 1 -type d -name "qcow2ova*" -exec rm -rf {} + 2>/dev/null || true
+        sudo losetup -D 2>/dev/null || true
+    """
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+pipeline {
+    agent { label 'pac-agent' }
+
+    triggers {
+        // 1st and 16th of every month at 02:00 UTC ≈ every 15 days
+        cron('0 2 1,16 * *')
+    }
+
+    options {
+        timestamps()
+        // 8 h: 2 conversions (~1 h each) + 4 upload+import (~30 min each)
+        timeout(time: 480, unit: 'MINUTES')
+        buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['production', 'staging'],
+            description: 'Target environment (ignored for scheduled runs — both are built)'
+        )
+        choice(
+            name: 'CENTOS_VERSION',
+            choices: ['10', '9'],
+            description: 'CentOS Stream version (ignored for scheduled runs — both are built)'
+        )
+        string(
+            name: 'IMAGE_SIZE',
+            defaultValue: '120',
+            description: 'Image disk size in GB'
+        )
+        booleanParam(
+            name: 'SCHEDULED',
+            defaultValue: false,
+            description: 'Set to true by cron — converts each version once, uploads to both envs'
+        )
+    }
+
+    environment {
+        WORK_DIR       = '/data/centos-images'
+        CENTOS_VERSION = "${params.CENTOS_VERSION}"
+        IMAGE_SIZE     = "${params.IMAGE_SIZE}"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo "=== Checkout repository ==="
+                checkout scm
+            }
+        }
+
+        stage('Pre-flight checks') {
+            steps {
+                sh '''
+                    echo "Hostname  : $(hostname)"
+                    echo "Arch      : $(uname -m)"
+                    echo "Kernel    : $(uname -r)"
+                    df -h
+                    echo ""
+
+                    if [ "$(uname -m)" != "ppc64le" ]; then
+                        echo "ERROR: This pipeline must run on a ppc64le node (pac-agent)."
+                        exit 1
+                    fi
+
+                    if ! command -v pvsadm &>/dev/null; then
+                        echo "pvsadm not found – installing..."
+                        PVSADM_VERSION="v0.1.13"
+                        PVSADM_URL="https://github.com/ppc64le-cloud/pvsadm/releases/download/${PVSADM_VERSION}/pvsadm-linux-ppc64le.tar.gz"
+                        curl -sL "${PVSADM_URL}" -o /tmp/pvsadm.tar.gz
+                        tar -xzf /tmp/pvsadm.tar.gz -C /tmp
+                        sudo mv /tmp/pvsadm /usr/local/bin/pvsadm
+                        rm -f /tmp/pvsadm.tar.gz
+                    fi
+                    pvsadm version
+
+                    MISSING=()
+                    for tool in curl jq qemu-img; do
+                        command -v "$tool" &>/dev/null || MISSING+=("$tool")
+                    done
+                    if [ ${#MISSING[@]} -gt 0 ]; then
+                        echo "Installing missing tools: ${MISSING[*]}"
+                        if command -v dnf &>/dev/null; then
+                            sudo dnf install -y "${MISSING[@]}"
+                        else
+                            sudo yum install -y "${MISSING[@]}"
+                        fi
+                    fi
+
+                    echo "Pre-flight checks passed."
+                '''
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // SCHEDULED PATH
+        // Convert each version once → upload+import to staging then production
+        // ══════════════════════════════════════════════════════════════════════
+
+        stage('centos-9: Convert') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { convertCentosVersion('9') }
+            }
+        }
+
+        stage('centos-9: staging') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { uploadAndImport('9', 'staging', '/data/centos-images-9') }
+            }
+        }
+
+        stage('centos-9: production') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { uploadAndImport('9', 'production', '/data/centos-images-9') }
+            }
+        }
+
+        stage('centos-9: Cleanup') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { cleanupVersion('9', '/data/centos-images-9') }
+            }
+        }
+
+        stage('centos-10: Convert') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { convertCentosVersion('10') }
+            }
+        }
+
+        stage('centos-10: staging') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { uploadAndImport('10', 'staging', '/data/centos-images-10') }
+            }
+        }
+
+        stage('centos-10: production') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { uploadAndImport('10', 'production', '/data/centos-images-10') }
+            }
+        }
+
+        stage('centos-10: Cleanup') {
+            when {
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    expression { return params.SCHEDULED == true }
+                }
+            }
+            steps {
+                script { cleanupVersion('10', '/data/centos-images-10') }
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // MANUAL PATH — single version + environment from build parameters
+        // ══════════════════════════════════════════════════════════════════════
+
+        stage('Prepare work directory') {
+            when {
+                allOf {
+                    not { triggeredBy 'TimerTrigger' }
+                    expression { return params.SCHEDULED == false }
+                }
+            }
+            steps {
+                sh '''
+                    mkdir -p "${WORK_DIR}"
+                    df -h "${WORK_DIR}"
+                    cp jenkins/scripts/download-and-convert-centos.sh "${WORK_DIR}/"
+                    cp jenkins/scripts/upload-to-cos.sh               "${WORK_DIR}/"
+                    cp jenkins/scripts/import-to-powervs.sh           "${WORK_DIR}/"
+                    cp jenkins/scripts/cleanup-resources.sh           "${WORK_DIR}/"
+                    chmod +x "${WORK_DIR}"/*.sh
+                    if [ -f hack/scripts/image-prep.template.static ]; then
+                        cp hack/scripts/image-prep.template.static "${WORK_DIR}/"
+                    else
+                        echo "WARNING: image-prep.template.static not found"
+                    fi
+                    ls -lh "${WORK_DIR}/"
+                '''
+            }
+        }
+
+        stage('Download & Convert') {
+            when {
+                allOf {
+                    not { triggeredBy 'TimerTrigger' }
+                    expression { return params.SCHEDULED == false }
+                }
+            }
+            steps {
+                sh '''
+                    cd "${WORK_DIR}"
+                    export IMAGE_PREP_TEMPLATE="${WORK_DIR}/image-prep.template.static"
+                    if [ -f image-metadata.json ]; then
+                        OVA_PATH=$(jq -r '.ova_file // empty' image-metadata.json 2>/dev/null || true)
+                        if [ -n "$OVA_PATH" ] && [ ! -f "$OVA_PATH" ]; then
+                            echo "Stale metadata detected — removing to force reconversion"
+                            rm -f image-metadata.json
+                        fi
+                    fi
+                    ./download-and-convert-centos.sh
+                '''
+            }
+            post {
+                always {
+                    sh 'cp "${WORK_DIR}/conversion.log" conversion.log 2>/dev/null || true'
+                    archiveArtifacts(artifacts: 'conversion.log', allowEmptyArchive: true)
+                }
+            }
+        }
+
+        stage('Upload to COS') {
+            when {
+                allOf {
+                    not { triggeredBy 'TimerTrigger' }
+                    expression { return params.SCHEDULED == false }
+                }
+            }
+            steps {
+                script {
+                    def cosCredId = (params.ENVIRONMENT == 'staging') ? 'COS_STAGING_BUCKET_NAME' : 'COS_PROD_BUCKET_NAME'
+                    withCredentials([
+                        string(credentialsId: 'IBM_API_KEY',          variable: 'IBM_API_KEY'),
+                        string(credentialsId: cosCredId,               variable: 'COS_BUCKET_NAME'),
+                        string(credentialsId: 'COS_REGION',            variable: 'COS_REGION'),
+                        string(credentialsId: 'COS_HMAC_ACCESS_KEY',   variable: 'COS_HMAC_ACCESS_KEY'),
+                        string(credentialsId: 'COS_HMAC_SECRET_KEY',   variable: 'COS_HMAC_SECRET_KEY')
+                    ]) {
+                        sh '''
+                            cd "${WORK_DIR}"
+                            export WORK_DIR="${WORK_DIR}"
+                            ./upload-to-cos.sh
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    sh 'cp "${WORK_DIR}/upload.log" upload.log 2>/dev/null || true'
+                    archiveArtifacts(artifacts: 'upload.log', allowEmptyArchive: true)
+                }
+            }
+        }
+
+        stage('Import to PowerVS') {
+            when {
+                allOf {
+                    not { triggeredBy 'TimerTrigger' }
+                    expression { return params.SCHEDULED == false }
+                }
+            }
+            steps {
+                script {
+                    def cosCredId    = (params.ENVIRONMENT == 'staging') ? 'COS_STAGING_BUCKET_NAME'       : 'COS_PROD_BUCKET_NAME'
+                    def pvsCrnCredId = (params.ENVIRONMENT == 'staging') ? 'POWERVS_STAGING_WORKSPACE_CRN' : 'POWERVS_PROD_WORKSPACE_CRN'
+                    withCredentials([
+                        string(credentialsId: 'IBM_API_KEY',          variable: 'IBM_API_KEY'),
+                        string(credentialsId: pvsCrnCredId,            variable: 'POWERVS_WORKSPACE_CRN'),
+                        string(credentialsId: cosCredId,               variable: 'COS_BUCKET_NAME'),
+                        string(credentialsId: 'COS_REGION',            variable: 'COS_REGION'),
+                        string(credentialsId: 'COS_HMAC_ACCESS_KEY',   variable: 'COS_HMAC_ACCESS_KEY'),
+                        string(credentialsId: 'COS_HMAC_SECRET_KEY',   variable: 'COS_HMAC_SECRET_KEY')
+                    ]) {
+                        sh '''
+                            cd "${WORK_DIR}"
+                            export WORK_DIR="${WORK_DIR}"
+                            ./import-to-powervs.sh
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    sh '''
+                        cp "${WORK_DIR}/import.log"          import.log          2>/dev/null || true
+                        cp "${WORK_DIR}/image-metadata.json" image-metadata.json 2>/dev/null || true
+                    '''
+                    archiveArtifacts(artifacts: 'import.log, image-metadata.json', allowEmptyArchive: true)
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            when {
+                allOf {
+                    not { triggeredBy 'TimerTrigger' }
+                    expression { return params.SCHEDULED == false }
+                }
+            }
+            steps {
+                sh '''
+                    cd "${WORK_DIR}"
+                    export WORK_DIR="${WORK_DIR}"
+                    KEEP_METADATA=true KEEP_LOGS=true ./cleanup-resources.sh
+                    sudo find /tmp -maxdepth 1 -type d -name "qcow2ova*" -exec rm -rf {} + 2>/dev/null || true
+                    sudo losetup -D 2>/dev/null || true
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "=== CentOS Image Automation completed successfully ==="
+        }
+        failure {
+            echo "=== CentOS Image Automation FAILED ==="
+            echo "Check archived logs above for details."
+            echo ""
+            echo "Common causes:"
+            echo "  - Loop device exhaustion       → sudo losetup -D"
+            echo "  - Stale /tmp/qcow2ova dirs     → sudo rm -rf /tmp/qcow2ova*"
+            echo "  - Insufficient disk space      → df -h /data"
+            echo "  - IBM API key missing PowerVS Editor role"
+            echo "  - Expired IBM API key"
+        }
+        always {
+            pipelineTeardown()
+        }
+    }
+}
