@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-22:9.7 AS builder
+FROM registry.access.redhat.com/ubi9/nodejs-22:9.8 AS builder
 
 # Switch to root to install global tools
 USER 0
