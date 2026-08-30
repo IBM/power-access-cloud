@@ -18,7 +18,7 @@ COPY . .
 RUN yarn build
 
 # Stage 2: Production image with NGINX on UBI
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8
 
 RUN microdnf update -y && \
     microdnf install -y nginx gettext && \
