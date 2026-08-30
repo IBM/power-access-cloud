@@ -2,7 +2,8 @@ package models
 
 import (
 	"bytes"
-	"text/template"
+	"html/template"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -130,28 +131,37 @@ func (e *Event) SetLog(level EventLogLevel, message string) {
 }
 
 var bodyTemplate = `
-{{- if .Log.Message -}}
+{{- if .Event.Log.Message -}}
 Hi,
-
-{{ .Log.Message }}
-
-Please visit the IBM® Power® Access Cloud portal for more details.
-
-Note: This is an auto-generated email. Please do not reply to this email.
-Generated at: {{ .CreatedAt.Format "Jan 02, 2006 15:04:05 UTC" }}
-
-Thanks,
-IBM® Power® Access Cloud Team.
+<br><br>
+{{ .Event.Log.Message }}
+<br><br>
+Please visit the <a href="{{ .PortalURL }}">IBM® Power® Access Cloud</a> portal for more details.
+<br><br>
+Note: This is an auto-generated email. Please do not reply to this email.<br>
+Generated at: {{ .Event.CreatedAt.Format "Jan 02, 2006 15:04:05 UTC" }}
+<br><br>
+Thanks,<br>
+IBM® Power®; Access Cloud Team.
 {{- end -}}
 `
+
+type mailTemplateData struct {
+	Event     *Event
+	PortalURL string
+}
 
 func (e *Event) ComposeMailBody() (string, error) {
 	tmpl, err := template.New("pac").Parse(bodyTemplate)
 	if err != nil {
 		return "", err
 	}
+	data := mailTemplateData{
+		Event:     e,
+		PortalURL: os.Getenv("PORTAL_URL"),
+	}
 	var tpl bytes.Buffer
-	if err := tmpl.Execute(&tpl, e); err != nil {
+	if err := tmpl.Execute(&tpl, data); err != nil {
 		return "", err
 	}
 	return tpl.String(), nil
