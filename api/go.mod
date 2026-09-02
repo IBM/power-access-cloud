@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/IBM-Cloud/power-go-client v1.16.2
 	github.com/IBM/go-sdk-core/v5 v5.23.2
-	github.com/IBM/platform-services-go-sdk v0.101.0
+	github.com/IBM/platform-services-go-sdk v0.103.0
 	github.com/IBM/vpc-go-sdk v0.88.0
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/coder/websocket v1.8.15
