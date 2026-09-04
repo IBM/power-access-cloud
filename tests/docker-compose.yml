@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: pac-test-mongo
+    networks:
+      - pac-test-network
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: dummypasswd
+    volumes:
+      - mongodb_data:/data/db
+
+  backend:
+    image: localhost/e2e-api:latest
+    container_name: pac-test-backend
+    networks:
+      - pac-test-network
+      - keycloak_default  # Connect to keycloak network
+    ports:
+      - "8000:8000"
+    environment:
+      # Keycloak configuration - use localhost:8080 to match token issuer
+      KEYCLOAK_HOSTNAME: "http://localhost:8080"
+      KEYCLOAK_CLIENT_ID: "pac-go-server"
+      KEYCLOAK_CLIENT_SECRET: "6pXtLE72OKGXtbTnsONs9CXqvupZShHd"
+      KEYCLOAK_REALM: "pac"
+      KEYCLOAK_SERVICE_ACCOUNT: "ui1"
+      # MongoDB configuration
+      MONGODB_URI: "mongodb://root:dummypasswd@mongodb:27017"
+    volumes:
+      - ./kubeconfig:/root/.kube/config:ro
+    depends_on:
+      - mongodb
+    command: /pac-go-server
+
+  frontend:
+    image: localhost/e2e-web:latest
+    container_name: pac-test-frontend
+    networks:
+      - pac-test-network
+      - keycloak_default  # Connect to keycloak network
+    ports:
+      - "3000:8080"
+    environment:
+      # Frontend uses localhost for browser access (browser runs on host, not in container)
+      REACT_APP_KEYCLOAK_URL: "http://localhost:8080"
+      REACT_APP_KEYCLOAK_REALM: "pac"
+      REACT_APP_KEYCLOAK_CLIENT_ID: "pac-ui"
+      # Backend uses service name for container-to-container communication
+      REACT_APP_PAC_GO_SERVER_TARGET: "backend:8000"
+    depends_on:
+      - backend
+
+networks:
+  pac-test-network:
+    driver: bridge
+  keycloak_default:
+    external: true
+    name: keycloak_default
+
+volumes:
+  mongodb_data:
