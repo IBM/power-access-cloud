@@ -32,7 +32,7 @@ func (m *Mail) Notify(event models.Event) error {
 	if err != nil {
 		return err
 	}
-	content := mail.NewContent("text", plainTextContent)
+	content := mail.NewContent("text/html", plainTextContent)
 	m1.AddContent(content)
 
 	personalization := mail.NewPersonalization()

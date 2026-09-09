@@ -18,6 +18,7 @@ var (
 	serviceAccount         = os.Getenv("KEYCLOAK_SERVICE_ACCOUNT")
 	serviceAccountPassword = os.Getenv("KEYCLOAK_SERVICE_ACCOUNT_PASSWORD")
 	envPrefixForEmail      = os.Getenv("EMAIL_SUBJECT_PREFIX")
+	portalURL              = os.Getenv("PORTAL_URL")
 )
 
 const cappedEvents = 30000
@@ -28,6 +29,7 @@ func validateEnvVars() error {
 		"KEYCLOAK_HOSTNAME":                 hostname,
 		"KEYCLOAK_SERVICE_ACCOUNT":          serviceAccount,
 		"KEYCLOAK_SERVICE_ACCOUNT_PASSWORD": serviceAccountPassword,
+		"PORTAL_URL":                        portalURL,
 	}
 	for k, v := range globalVars {
 		if v == "" {
