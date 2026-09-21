@@ -27,7 +27,7 @@ import (
 
 var (
 	IBMResourceCRNRegexp = regexp.MustCompile(`^crn:v[0-9]:(?P<cloudName>[^:]*):(?P<cloudType>[^:]*):(?P<serviceName>[^:]*):(?P<location>[^:]*):a/(?P<account>[^:]*):(?P<guid>[^:]*)::$`)
-	availableSysType     = []string{"s922", "e980", "s1022"}
+	availableSysType     = []string{"s922", "e980", "s1022", "s1122"}
 	availableProcType    = []string{"dedicated", "shared", "capped"}
 )
 
