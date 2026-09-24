@@ -2,6 +2,12 @@
 
 ## Theme
 
+### Copy realm-export.json to the relevant folder
+
+```
+cp realm-export.json <power-access-cloud-base>/keycloak-infra/keycloak/pac
+```
+
 ### Start the keycloak via docker compose
 
 ```shell
