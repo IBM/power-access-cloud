@@ -301,6 +301,24 @@ convert_to_ova() {
     fi
     log_info "Loop device check passed: $(losetup -f)"
 
+    # CentOS Stream 9 images built from kernel 5.14.0-745.el9 onwards moved
+    # /boot onto a separate partition.  pvsadm chroots into the root partition
+    # only — it does not mount the separate /boot partition — so /boot/grub2/
+    # does not exist inside the chroot.  grub2-mkconfig then fails trying to
+    # write its temp files (grub.cfg.new, grubenv.new) into that missing dir.
+    # Earlier images (≤ 5.14.0-737.el9) had /boot on the root partition and
+    # worked fine.  CentOS Stream 10 uses a different grub2 codepath that
+    # succeeds even without /boot mounted.
+    #
+    # Fix: patch the local copy of the prep template (already in WORK_DIR) to
+    # mkdir -p /boot/grub2 before the grub2-mkconfig call, and make the call
+    # non-fatal (grub config for the final OVA is handled by pvsadm itself).
+    # The original template file is left untouched.
+    local patched_template="${WORK_DIR}/image-prep.template.patched"
+    sed 's|grub2-mkconfig -o /boot/grub2/grub.cfg|mkdir -p /boot/grub2\ngrub2-mkconfig -o /boot/grub2/grub.cfg \|\| true|' \
+        "$IMAGE_PREP_TEMPLATE" > "$patched_template"
+    log_info "Prep template patched for grub2 chroot compatibility: $patched_template"
+
     # Run pvsadm conversion (no --temp-dir: use /tmp default, same as before)
     cd "$WORK_DIR"
 
@@ -312,7 +330,7 @@ convert_to_ova() {
         --image-name "$ova_name" \
         --image-url "$qcow2_path" \
         --image-dist centos \
-        --prep-template "$IMAGE_PREP_TEMPLATE" \
+        --prep-template "$patched_template" \
         --skip-os-password \
         --image-size "$IMAGE_SIZE" \
         2>&1 | tee "${WORK_DIR}/conversion.log" >&2
