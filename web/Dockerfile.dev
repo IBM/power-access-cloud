@@ -1,15 +1,56 @@
-FROM node:16-alpine
+FROM registry.access.redhat.com/ubi9/nodejs-22:9.7 AS builder
 
+USER 0
+RUN npm install -g yarn
+
+RUN mkdir /app && chown -R 1001:0 /app
 WORKDIR /app
 
-COPY package.json ./
+# Switch to default user (recommended)
+USER 1001
 
-COPY yarn.lock ./
+COPY .env package.json yarn.lock ./
 
 RUN yarn install --frozen-lockfile
 
 COPY . .
 
-EXPOSE 3000
 
-CMD ["npm", "start"]
+RUN yarn build
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7
+
+RUN microdnf update -y && \
+    microdnf install -y nginx gettext && \
+    microdnf clean all && \
+    rm -rf /var/cache/dnf && \
+    mkdir -p /var/log/nginx && \
+    chown -R nginx:root /var/log/nginx
+
+# Nginx config
+RUN rm -rf /etc/nginx/conf.d
+COPY --chown=nginx:root conf /etc/nginx
+COPY --chown=nginx:root nginx.conf /etc/nginx
+
+# Static build
+COPY --from=builder /app/build /usr/share/nginx/html/
+
+WORKDIR /usr/share/nginx/html
+COPY ./env.sh .
+COPY .env .
+COPY ./entrypoint.sh .
+
+# Set correct permissions for nginx to serve content
+RUN chown -R nginx:root /usr/share/nginx/html
+
+USER nginx
+
+RUN export $(cat .env | xargs)
+
+EXPOSE 8081
+CMD ["/bin/bash", "/usr/share/nginx/html/entrypoint.sh"]
+#EXPOSE 3000
+
+#CMD ["yarn", "dev", "--host"]
+#CMD ["/bin/sh", "-c", "chmod +x ./env.sh && ./env.sh && yarn dev --host"]
+#CMD ["./entrypoint.sh"]
