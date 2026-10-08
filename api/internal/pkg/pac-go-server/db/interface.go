@@ -66,4 +66,12 @@ type DB interface {
 	GetChatMessages(ctx context.Context, userID string, conversationID int64) ([]models.ChatMessage, error)
 	GetUserConversations(ctx context.Context, userID string) ([]models.ConversationSummary, error)
 	GetAllConversations(ctx context.Context) ([]models.ConversationSummary, error)
+	// HasAdminRepliedSince returns true if there is at least one admin message
+	// in the conversation newer than the given time.  Used to gate email
+	// notifications: skip notifying if the admin is already actively replying.
+	HasAdminRepliedSince(ctx context.Context, userID string, conversationID int64, since time.Time) (bool, error)
+	// GetUnreadUserMessageCount returns how many user messages in the
+	// conversation have arrived after the most recent admin message.
+	// Returns the total user message count when the admin has never replied.
+	GetUnreadUserMessageCount(ctx context.Context, userID string, conversationID int64) (int64, error)
 }
