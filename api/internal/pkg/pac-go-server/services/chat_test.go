@@ -300,6 +300,11 @@ func TestAdminReply(t *testing.T) {
 				mockDB.EXPECT().
 					InsertChatMessage(gomock.Any(), gomock.Any()).
 					Return(nil).AnyTimes()
+				// NewEvent is called from a goroutine after the handler returns;
+				// the timing is non-deterministic so allow 0-1 calls.
+				mockDB.EXPECT().
+					NewEvent(gomock.Any()).
+					Return(nil).AnyTimes()
 			},
 			adminID:    "admin1",
 			userID:     "user1",

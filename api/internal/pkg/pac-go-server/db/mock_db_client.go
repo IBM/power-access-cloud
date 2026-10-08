@@ -5,9 +5,9 @@
 package db
 
 import (
-	"context"
+	context "context"
 	reflect "reflect"
-	"time"
+	time "time"
 
 	models "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
 	gomock "github.com/golang/mock/gomock"
@@ -107,6 +107,20 @@ func (mr *MockDBMockRecorder) CreateKey(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKey", reflect.TypeOf((*MockDB)(nil).CreateKey), arg0)
 }
 
+// CreateMaintenanceWindow mocks base method.
+func (m *MockDB) CreateMaintenanceWindow(arg0 *models.MaintenanceWindow) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMaintenanceWindow", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateMaintenanceWindow indicates an expected call of CreateMaintenanceWindow.
+func (mr *MockDBMockRecorder) CreateMaintenanceWindow(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).CreateMaintenanceWindow), arg0)
+}
+
 // DeleteKey mocks base method.
 func (m *MockDB) DeleteKey(arg0 string) error {
 	m.ctrl.T.Helper()
@@ -119,6 +133,20 @@ func (m *MockDB) DeleteKey(arg0 string) error {
 func (mr *MockDBMockRecorder) DeleteKey(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteKey", reflect.TypeOf((*MockDB)(nil).DeleteKey), arg0)
+}
+
+// DeleteMaintenanceWindow mocks base method.
+func (m *MockDB) DeleteMaintenanceWindow(arg0, arg1 string, arg2 *time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteMaintenanceWindow", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteMaintenanceWindow indicates an expected call of DeleteMaintenanceWindow.
+func (mr *MockDBMockRecorder) DeleteMaintenanceWindow(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).DeleteMaintenanceWindow), arg0, arg1, arg2)
 }
 
 // DeleteQuota mocks base method.
@@ -175,6 +203,81 @@ func (m *MockDB) Disconnect() error {
 func (mr *MockDBMockRecorder) Disconnect() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Disconnect", reflect.TypeOf((*MockDB)(nil).Disconnect))
+}
+
+// FeedbackAllowed mocks base method.
+func (m *MockDB) FeedbackAllowed(arg0 context.Context, arg1 string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeedbackAllowed", arg0, arg1)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FeedbackAllowed indicates an expected call of FeedbackAllowed.
+func (mr *MockDBMockRecorder) FeedbackAllowed(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeedbackAllowed", reflect.TypeOf((*MockDB)(nil).FeedbackAllowed), arg0, arg1)
+}
+
+// GetAllConversations mocks base method.
+func (m *MockDB) GetAllConversations(arg0 context.Context) ([]models.ConversationSummary, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllConversations", arg0)
+	ret0, _ := ret[0].([]models.ConversationSummary)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllConversations indicates an expected call of GetAllConversations.
+func (mr *MockDBMockRecorder) GetAllConversations(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllConversations", reflect.TypeOf((*MockDB)(nil).GetAllConversations), arg0)
+}
+
+// GetAllMaintenanceWindows mocks base method.
+func (m *MockDB) GetAllMaintenanceWindows() ([]models.MaintenanceWindow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllMaintenanceWindows")
+	ret0, _ := ret[0].([]models.MaintenanceWindow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllMaintenanceWindows indicates an expected call of GetAllMaintenanceWindows.
+func (mr *MockDBMockRecorder) GetAllMaintenanceWindows() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllMaintenanceWindows", reflect.TypeOf((*MockDB)(nil).GetAllMaintenanceWindows))
+}
+
+// GetChatMessages mocks base method.
+func (m *MockDB) GetChatMessages(arg0 context.Context, arg1 string, arg2 int64) ([]models.ChatMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChatMessages", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]models.ChatMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetChatMessages indicates an expected call of GetChatMessages.
+func (mr *MockDBMockRecorder) GetChatMessages(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChatMessages", reflect.TypeOf((*MockDB)(nil).GetChatMessages), arg0, arg1, arg2)
+}
+
+// GetCurrentConversationID mocks base method.
+func (m *MockDB) GetCurrentConversationID(arg0 context.Context, arg1 string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentConversationID", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentConversationID indicates an expected call of GetCurrentConversationID.
+func (mr *MockDBMockRecorder) GetCurrentConversationID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentConversationID", reflect.TypeOf((*MockDB)(nil).GetCurrentConversationID), arg0, arg1)
 }
 
 // GetEventsByType mocks base method.
@@ -270,6 +373,36 @@ func (mr *MockDBMockRecorder) GetKeyByUserID(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKeyByUserID", reflect.TypeOf((*MockDB)(nil).GetKeyByUserID), arg0)
 }
 
+// GetMaintenanceWindowByID mocks base method.
+func (m *MockDB) GetMaintenanceWindowByID(arg0 string) (*models.MaintenanceWindow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMaintenanceWindowByID", arg0)
+	ret0, _ := ret[0].(*models.MaintenanceWindow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMaintenanceWindowByID indicates an expected call of GetMaintenanceWindowByID.
+func (mr *MockDBMockRecorder) GetMaintenanceWindowByID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMaintenanceWindowByID", reflect.TypeOf((*MockDB)(nil).GetMaintenanceWindowByID), arg0)
+}
+
+// GetNextConversationID mocks base method.
+func (m *MockDB) GetNextConversationID(arg0 context.Context, arg1 string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNextConversationID", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNextConversationID indicates an expected call of GetNextConversationID.
+func (mr *MockDBMockRecorder) GetNextConversationID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNextConversationID", reflect.TypeOf((*MockDB)(nil).GetNextConversationID), arg0, arg1)
+}
+
 // GetQuotaForGroupID mocks base method.
 func (m *MockDB) GetQuotaForGroupID(arg0 string) (*models.Quota, error) {
 	m.ctrl.T.Helper()
@@ -360,6 +493,65 @@ func (mr *MockDBMockRecorder) GetTermsAndConditionsByUserID(arg0 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTermsAndConditionsByUserID", reflect.TypeOf((*MockDB)(nil).GetTermsAndConditionsByUserID), arg0)
 }
 
+// GetUnreadUserMessageCount mocks base method.
+func (m *MockDB) GetUnreadUserMessageCount(arg0 context.Context, arg1 string, arg2 int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUnreadUserMessageCount", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUnreadUserMessageCount indicates an expected call of GetUnreadUserMessageCount.
+func (mr *MockDBMockRecorder) GetUnreadUserMessageCount(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUnreadUserMessageCount", reflect.TypeOf((*MockDB)(nil).GetUnreadUserMessageCount), arg0, arg1, arg2)
+}
+
+// GetUserConversations mocks base method.
+func (m *MockDB) GetUserConversations(arg0 context.Context, arg1 string) ([]models.ConversationSummary, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserConversations", arg0, arg1)
+	ret0, _ := ret[0].([]models.ConversationSummary)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserConversations indicates an expected call of GetUserConversations.
+func (mr *MockDBMockRecorder) GetUserConversations(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserConversations", reflect.TypeOf((*MockDB)(nil).GetUserConversations), arg0, arg1)
+}
+
+// HasAdminRepliedSince mocks base method.
+func (m *MockDB) HasAdminRepliedSince(arg0 context.Context, arg1 string, arg2 int64, arg3 time.Time) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HasAdminRepliedSince", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HasAdminRepliedSince indicates an expected call of HasAdminRepliedSince.
+func (mr *MockDBMockRecorder) HasAdminRepliedSince(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasAdminRepliedSince", reflect.TypeOf((*MockDB)(nil).HasAdminRepliedSince), arg0, arg1, arg2, arg3)
+}
+
+// InsertChatMessage mocks base method.
+func (m *MockDB) InsertChatMessage(arg0 context.Context, arg1 *models.ChatMessage) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertChatMessage", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertChatMessage indicates an expected call of InsertChatMessage.
+func (mr *MockDBMockRecorder) InsertChatMessage(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertChatMessage", reflect.TypeOf((*MockDB)(nil).InsertChatMessage), arg0, arg1)
+}
+
 // InsertFeedback mocks base method.
 func (m *MockDB) InsertFeedback(arg0 *models.Feedback) error {
 	m.ctrl.T.Helper()
@@ -374,91 +566,33 @@ func (mr *MockDBMockRecorder) InsertFeedback(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertFeedback", reflect.TypeOf((*MockDB)(nil).InsertFeedback), arg0)
 }
 
-// FeedbackAllowed mocks base method.
-func (m *MockDB) FeedbackAllowed(arg0 context.Context, arg1 string) (bool, error) {
+// IsConversationEnded mocks base method.
+func (m *MockDB) IsConversationEnded(arg0 context.Context, arg1 string, arg2 int64) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FeedbackAllowed", arg0, arg1)
+	ret := m.ctrl.Call(m, "IsConversationEnded", arg0, arg1, arg2)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FeedbackAllowed indicates an expected call of FeedbackAllowed.
-func (mr *MockDBMockRecorder) FeedbackAllowed(arg0, arg1 interface{}) *gomock.Call {
+// IsConversationEnded indicates an expected call of IsConversationEnded.
+func (mr *MockDBMockRecorder) IsConversationEnded(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeedbackAllowed", reflect.TypeOf((*MockDB)(nil).FeedbackAllowed), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsConversationEnded", reflect.TypeOf((*MockDB)(nil).IsConversationEnded), arg0, arg1, arg2)
 }
 
-// GetAllMaintenanceWindows mocks base method.
-func (m *MockDB) GetAllMaintenanceWindows() ([]models.MaintenanceWindow, error) {
+// MarkConversationEnded mocks base method.
+func (m *MockDB) MarkConversationEnded(arg0 context.Context, arg1, arg2 string, arg3 int64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllMaintenanceWindows")
-	ret0, _ := ret[0].([]models.MaintenanceWindow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllMaintenanceWindows indicates an expected call of GetAllMaintenanceWindows.
-func (mr *MockDBMockRecorder) GetAllMaintenanceWindows() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllMaintenanceWindows", reflect.TypeOf((*MockDB)(nil).GetAllMaintenanceWindows))
-}
-
-// GetMaintenanceWindowByID mocks base method.
-func (m *MockDB) GetMaintenanceWindowByID(arg0 string) (*models.MaintenanceWindow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMaintenanceWindowByID", arg0)
-	ret0, _ := ret[0].(*models.MaintenanceWindow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetMaintenanceWindowByID indicates an expected call of GetMaintenanceWindowByID.
-func (mr *MockDBMockRecorder) GetMaintenanceWindowByID(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMaintenanceWindowByID", reflect.TypeOf((*MockDB)(nil).GetMaintenanceWindowByID), arg0)
-}
-
-// CreateMaintenanceWindow mocks base method.
-func (m *MockDB) CreateMaintenanceWindow(arg0 *models.MaintenanceWindow) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateMaintenanceWindow", arg0)
+	ret := m.ctrl.Call(m, "MarkConversationEnded", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateMaintenanceWindow indicates an expected call of CreateMaintenanceWindow.
-func (mr *MockDBMockRecorder) CreateMaintenanceWindow(arg0 interface{}) *gomock.Call {
+// MarkConversationEnded indicates an expected call of MarkConversationEnded.
+func (mr *MockDBMockRecorder) MarkConversationEnded(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).CreateMaintenanceWindow), arg0)
-}
-
-// UpdateMaintenanceWindow mocks base method.
-func (m *MockDB) UpdateMaintenanceWindow(arg0 *models.MaintenanceWindow) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateMaintenanceWindow", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateMaintenanceWindow indicates an expected call of UpdateMaintenanceWindow.
-func (mr *MockDBMockRecorder) UpdateMaintenanceWindow(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).UpdateMaintenanceWindow), arg0)
-}
-
-// DeleteMaintenanceWindow mocks base method.
-func (m *MockDB) DeleteMaintenanceWindow(arg0 string, arg1 string, arg2 *time.Time) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteMaintenanceWindow", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteMaintenanceWindow indicates an expected call of DeleteMaintenanceWindow.
-func (mr *MockDBMockRecorder) DeleteMaintenanceWindow(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).DeleteMaintenanceWindow), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkConversationEnded", reflect.TypeOf((*MockDB)(nil).MarkConversationEnded), arg0, arg1, arg2, arg3)
 }
 
 // MarkEventAsNotified mocks base method.
@@ -532,6 +666,20 @@ func (mr *MockDBMockRecorder) SetEventCapping(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetEventCapping", reflect.TypeOf((*MockDB)(nil).SetEventCapping), arg0)
 }
 
+// UpdateMaintenanceWindow mocks base method.
+func (m *MockDB) UpdateMaintenanceWindow(arg0 *models.MaintenanceWindow) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMaintenanceWindow", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMaintenanceWindow indicates an expected call of UpdateMaintenanceWindow.
+func (mr *MockDBMockRecorder) UpdateMaintenanceWindow(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMaintenanceWindow", reflect.TypeOf((*MockDB)(nil).UpdateMaintenanceWindow), arg0)
+}
+
 // UpdateQuota mocks base method.
 func (m *MockDB) UpdateQuota(arg0 *models.Quota) error {
 	m.ctrl.T.Helper()
@@ -586,122 +734,4 @@ func (m *MockDB) WatchEvents(arg0 chan<- *models.Event) error {
 func (mr *MockDBMockRecorder) WatchEvents(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchEvents", reflect.TypeOf((*MockDB)(nil).WatchEvents), arg0)
-}
-
-// InsertChatMessage mocks base method.
-func (m *MockDB) InsertChatMessage(arg0 context.Context, arg1 *models.ChatMessage) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertChatMessage", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// InsertChatMessage indicates an expected call of InsertChatMessage.
-func (mr *MockDBMockRecorder) InsertChatMessage(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertChatMessage", reflect.TypeOf((*MockDB)(nil).InsertChatMessage), arg0, arg1)
-}
-
-// MarkConversationEnded mocks base method.
-func (m *MockDB) MarkConversationEnded(arg0 context.Context, arg1 string, arg2 string, arg3 int64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MarkConversationEnded", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// MarkConversationEnded indicates an expected call of MarkConversationEnded.
-func (mr *MockDBMockRecorder) MarkConversationEnded(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkConversationEnded", reflect.TypeOf((*MockDB)(nil).MarkConversationEnded), arg0, arg1, arg2, arg3)
-}
-
-// IsConversationEnded mocks base method.
-func (m *MockDB) IsConversationEnded(arg0 context.Context, arg1 string, arg2 int64) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsConversationEnded", arg0, arg1, arg2)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// IsConversationEnded indicates an expected call of IsConversationEnded.
-func (mr *MockDBMockRecorder) IsConversationEnded(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsConversationEnded", reflect.TypeOf((*MockDB)(nil).IsConversationEnded), arg0, arg1, arg2)
-}
-
-// GetCurrentConversationID mocks base method.
-func (m *MockDB) GetCurrentConversationID(arg0 context.Context, arg1 string) (int64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCurrentConversationID", arg0, arg1)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCurrentConversationID indicates an expected call of GetCurrentConversationID.
-func (mr *MockDBMockRecorder) GetCurrentConversationID(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentConversationID", reflect.TypeOf((*MockDB)(nil).GetCurrentConversationID), arg0, arg1)
-}
-
-// GetNextConversationID mocks base method.
-func (m *MockDB) GetNextConversationID(arg0 context.Context, arg1 string) (int64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNextConversationID", arg0, arg1)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetNextConversationID indicates an expected call of GetNextConversationID.
-func (mr *MockDBMockRecorder) GetNextConversationID(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNextConversationID", reflect.TypeOf((*MockDB)(nil).GetNextConversationID), arg0, arg1)
-}
-
-// GetChatMessages mocks base method.
-func (m *MockDB) GetChatMessages(arg0 context.Context, arg1 string, arg2 int64) ([]models.ChatMessage, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChatMessages", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]models.ChatMessage)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetChatMessages indicates an expected call of GetChatMessages.
-func (mr *MockDBMockRecorder) GetChatMessages(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChatMessages", reflect.TypeOf((*MockDB)(nil).GetChatMessages), arg0, arg1, arg2)
-}
-
-// GetUserConversations mocks base method.
-func (m *MockDB) GetUserConversations(arg0 context.Context, arg1 string) ([]models.ConversationSummary, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserConversations", arg0, arg1)
-	ret0, _ := ret[0].([]models.ConversationSummary)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserConversations indicates an expected call of GetUserConversations.
-func (mr *MockDBMockRecorder) GetUserConversations(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserConversations", reflect.TypeOf((*MockDB)(nil).GetUserConversations), arg0, arg1)
-}
-
-// GetAllConversations mocks base method.
-func (m *MockDB) GetAllConversations(arg0 context.Context) ([]models.ConversationSummary, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllConversations", arg0)
-	ret0, _ := ret[0].([]models.ConversationSummary)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllConversations indicates an expected call of GetAllConversations.
-func (mr *MockDBMockRecorder) GetAllConversations(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllConversations", reflect.TypeOf((*MockDB)(nil).GetAllConversations), arg0)
 }
