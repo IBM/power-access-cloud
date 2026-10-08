@@ -23,6 +23,11 @@ import (
 // the OS TCP keepalive eventually fires (minutes to hours).
 const wsWriteTimeout = 10 * time.Second
 
+// chatNotifyQuietHours is the quiet window used for both chat notification
+// directions.  Within this window, if the other party has already replied we
+// suppress the email — the conversation is active and no nudge is needed.
+const chatNotifyQuietHours = 6
+
 // wsWrite wraps wsjson.Write with a per-call timeout derived from the
 // session context.  Using the session ctx (not a fresh Background ctx) means
 // that if the session is already cancelled the write returns immediately.
@@ -267,6 +272,9 @@ func (s *chatSession) handleUserMessage(msg string) (fatal bool, skip bool) {
 		s.history = []models.ChatMessage{{}}
 	}
 
+	// Notify admin via email — runs in a goroutine so it never blocks the WS loop.
+	go notifyAdminOfUserMessage(s.userID, s.username, s.conversationID, s.logger)
+
 	// Publish to any admin watching this conversation and to the broadcast key.
 	hubMsg := hubMessage{
 		ConversationID: s.conversationID,
@@ -439,6 +447,88 @@ func serveChat(conn *websocket.Conn, userID, username string, logger *zap.Logger
 		case <-ctx.Done():
 			return
 		}
+	}
+}
+
+// notifyAdminOfUserMessage sends an email to the admin group when a user sends
+// a chat message, subject to a rate-limit: the email is suppressed if an admin
+// has already replied to this conversation within chatNotifyQuietHours hours
+// (meaning the conversation is active and no nudge is needed).
+// It also includes how many unread user messages there are so the admin can
+// gauge urgency at a glance.
+// Must be called in its own goroutine — never call synchronously.
+func notifyAdminOfUserMessage(userID, username string, conversationID int64, logger *zap.Logger) {
+	// Use a bounded context so a hung DB never leaks this goroutine indefinitely.
+	// 30s covers up to three serial DB calls at the 10s per-call MongoDB timeout.
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	quietSince := time.Now().Add(-chatNotifyQuietHours * time.Hour)
+
+	// Skip if admin has already replied within the quiet window — the admin is
+	// actively engaged; another email would be noise.
+	replied, err := dbCon.HasAdminRepliedSince(ctx, userID, conversationID, quietSince)
+	if err != nil {
+		logger.Warn("chat: could not check admin reply status, proceeding with notify", zap.Error(err))
+	}
+	if replied {
+		logger.Debug("chat: admin replied recently, skipping admin notification",
+			zap.String("userID", userID), zap.Int64("convID", conversationID))
+		return
+	}
+
+	// Count unread user messages so admin can see urgency in the email.
+	unread, err := dbCon.GetUnreadUserMessageCount(ctx, userID, conversationID)
+	if err != nil {
+		logger.Warn("chat: could not count unread messages", zap.Error(err))
+	}
+
+	event, err := models.NewEvent(userID, userID, models.EventChatUserMessage)
+	if err != nil {
+		logger.Warn("chat: failed to create user-message event", zap.Error(err))
+		return
+	}
+	event.SetNotifyAdmin()
+
+	var body string
+	if unread > 1 {
+		body = fmt.Sprintf(
+			"There are %d unread messages from user %s in the chat support.",
+			unread, username,
+		)
+	} else {
+		body = fmt.Sprintf(
+			"There is a new message from user %s in the chat support.",
+			username,
+		)
+	}
+	event.SetLog(models.EventLogLevelINFO, body)
+
+	if err := dbCon.NewEvent(event); err != nil {
+		logger.Warn("chat: failed to persist user-message event", zap.Error(err))
+	}
+}
+
+// notifyUserOfAdminReply sends an email to the user every time an admin
+// replies.  There is no rate-limit on the user direction: the user may not be
+// watching the UI and every reply deserves a nudge.
+// Must be called in its own goroutine — never call synchronously.
+func notifyUserOfAdminReply(userID, adminID string, conversationID int64, logger *zap.Logger) {
+	// Bounded context — one DB call, 15s is generous.
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	_ = ctx // reserved for future DB calls in this function
+
+	event, err := models.NewEvent(userID, adminID, models.EventChatAdminReply)
+	if err != nil {
+		logger.Warn("chat: failed to create admin-reply event", zap.Error(err))
+		return
+	}
+	event.SetNotify()
+	event.SetLog(models.EventLogLevelINFO,
+		"An admin has replied to your chat support message. Please log in to IBM® Power® Access Cloud to view the reply and continue the conversation.",
+	)
+	if err := dbCon.NewEvent(event); err != nil {
+		logger.Warn("chat: failed to persist admin-reply event", zap.Error(err))
 	}
 }
 
@@ -659,6 +749,9 @@ func AdminReply(c *gin.Context) {
 		Message:        body.Message,
 		Timestamp:      msg.Timestamp.Format(time.RFC3339),
 	})
+
+	// Notify user via email — runs in a goroutine so it never blocks the HTTP response.
+	go notifyUserOfAdminReply(userID, adminID, convID, logger)
 
 	logger.Info("admin reply enqueued",
 		zap.String("adminID", adminID),
