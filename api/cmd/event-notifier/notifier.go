@@ -41,6 +41,8 @@ func notifier(db db.DB, mailClient mailclient.Notifier) {
 		}
 		if err = mailClient.Notify(*event); err != nil {
 			l.Error("Error notifying", zap.Error(err))
+			// Do NOT mark as notified — leave it so the next pass retries.
+			continue
 		}
 		if err = db.MarkEventAsNotified(event.ID.Hex()); err != nil {
 			l.Error("Error updating event", zap.Error(err))

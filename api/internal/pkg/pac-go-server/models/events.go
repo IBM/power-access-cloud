@@ -40,6 +40,10 @@ const (
 	EventLogLevelERROR EventLogLevel = "ERROR"
 
 	EventFeedbackCreate EventType = "FEEDBACK_CREATED"
+
+	// Chat support notifications
+	EventChatUserMessage  EventType = "CHAT_USER_MESSAGE"  // user sent a message → notify admin
+	EventChatAdminReply   EventType = "CHAT_ADMIN_REPLY"   // admin replied → notify user
 )
 
 type Event struct {

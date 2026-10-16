@@ -8,7 +8,6 @@ import (
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"go.uber.org/zap"
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/notifier/client"
 	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
@@ -32,7 +31,8 @@ func (m *Mail) Notify(event models.Event) error {
 	if err != nil {
 		return err
 	}
-	content := mail.NewContent("text", plainTextContent)
+	// SendGrid requires "text/plain", not bare "text".
+	content := mail.NewContent("text/plain", plainTextContent)
 	m1.AddContent(content)
 
 	personalization := mail.NewPersonalization()
@@ -45,8 +45,15 @@ func (m *Mail) Notify(event models.Event) error {
 		hasRecipients = true
 	}
 	if event.NotifyAdmin {
-		// TODO: Add BCC to all the admins or to the group alias when we have it
-		personalization.AddBCCs(mail.NewEmail("IBM® Power® Access Cloud", "PowerACL@ibm.com"))
+		if hasRecipients {
+			// A user To is already present — add admin as BCC so they get a
+			// copy without appearing in the user's To field.
+			personalization.AddBCCs(mail.NewEmail("IBM® Power® Access Cloud", "PowerACL@ibm.com"))
+		} else {
+			// Admin is the sole recipient. SendGrid rejects messages that have
+			// BCC but no To address (HTTP 400), so use To directly here.
+			personalization.AddTos(mail.NewEmail("IBM® Power® Access Cloud", "PowerACL@ibm.com"))
+		}
 		hasRecipients = true
 	}
 	if !hasRecipients {
@@ -61,13 +68,11 @@ func (m *Mail) Notify(event models.Event) error {
 	req := m.request
 	req.Body = mail.GetRequestBody(m1)
 	response, err := sendgrid.API(req)
-
 	if err != nil {
-		l.Error("Error sending mail", zap.Error(err))
+		return fmt.Errorf("sendgrid API call failed: %w", err)
 	}
-
 	if response.StatusCode != 202 {
-		l.Error("Error sending mail, response code is not 202", zap.Int("code", response.StatusCode))
+		return fmt.Errorf("sendgrid returned non-202 status %d: %s", response.StatusCode, response.Body)
 	}
 
 	return nil
