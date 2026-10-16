@@ -11,7 +11,7 @@ require (
 	github.com/coder/websocket v1.8.15
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-logr/logr v1.4.4
-	github.com/go-playground/validator/v10 v10.30.3
+	github.com/go-playground/validator/v10 v10.30.4
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/golang/mock v1.6.0
 	github.com/joho/godotenv v1.5.1
