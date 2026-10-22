@@ -302,3 +302,58 @@ func (db *MongoDB) GetAllConversations(ctx context.Context) ([]models.Conversati
 	}
 	return summaries, nil
 }
+
+// HasAdminRepliedSince returns true if there is at least one admin message in
+// the conversation with a timestamp strictly after `since`.
+func (db *MongoDB) HasAdminRepliedSince(ctx context.Context, userID string, conversationID int64, since time.Time) (bool, error) {
+	collection := db.Database.Collection(chatCollection)
+	filter := bson.M{
+		fieldUserID:         userID,
+		fieldConversationID: conversationID,
+		fieldSender:         models.SenderAdmin,
+		fieldTimestamp:      bson.M{"$gt": since},
+	}
+	count, err := collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, fmt.Errorf("error checking admin reply: %w", err)
+	}
+	return count > 0, nil
+}
+
+// GetUnreadUserMessageCount returns the number of user messages that arrived
+// after the most recent admin message in the conversation.
+// If the admin has never replied, it returns the total count of user messages.
+func (db *MongoDB) GetUnreadUserMessageCount(ctx context.Context, userID string, conversationID int64) (int64, error) {
+	collection := db.Database.Collection(chatCollection)
+
+	// Find the timestamp of the most recent admin message.
+	opts := options.FindOne().SetSort(bson.D{{Key: fieldTimestamp, Value: -1}})
+	filter := bson.M{
+		fieldUserID:         userID,
+		fieldConversationID: conversationID,
+		fieldSender:         models.SenderAdmin,
+	}
+	var lastAdminMsg models.ChatMessage
+	err := collection.FindOne(ctx, filter, opts).Decode(&lastAdminMsg)
+
+	var since time.Time
+	if err == nil {
+		since = lastAdminMsg.Timestamp
+	} else if err != mongo.ErrNoDocuments {
+		return 0, fmt.Errorf("error finding last admin message: %w", err)
+	}
+	// err == mongo.ErrNoDocuments means admin has never replied; since stays zero,
+	// so the query below counts all user messages.
+
+	userFilter := bson.M{
+		fieldUserID:         userID,
+		fieldConversationID: conversationID,
+		fieldSender:         models.SenderUser,
+		fieldTimestamp:      bson.M{"$gt": since},
+	}
+	count, err := collection.CountDocuments(ctx, userFilter)
+	if err != nil {
+		return 0, fmt.Errorf("error counting unread user messages: %w", err)
+	}
+	return count, nil
+}

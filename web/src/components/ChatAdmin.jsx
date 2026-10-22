@@ -342,12 +342,30 @@ const ChatAdmin = () => {
     }
   };
 
-  const formatTime = (ts) =>
-    new Date(ts).toLocaleTimeString("en-US", {
+  // Show time-only for today's messages; include the date for older ones.
+  const formatTime = (ts) => {
+    const date = new Date(ts);
+    const now = new Date();
+    const isToday =
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate();
+    if (isToday) {
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+    }
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
+  };
 
   return (
     <div className="chat-support-container chat-support-container--admin">
