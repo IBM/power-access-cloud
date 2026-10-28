@@ -70,6 +70,13 @@ func (h *chatHub) subscribe(key string, ch chan hubMessage) func() {
 	}
 }
 
+// hasSubscribers reports whether at least one channel is subscribed under key.
+func (h *chatHub) hasSubscribers(key string) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return len(h.subs[key]) > 0
+}
+
 // publish sends msg to every channel currently subscribed under key.
 // Non-blocking: if a channel's buffer is full the message is dropped for that
 // subscriber (WebSocket goroutines are assumed to drain quickly).
