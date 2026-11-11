@@ -10,6 +10,7 @@ import (
 
 	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -64,7 +65,7 @@ func TestGetAllRequest(t *testing.T) {
 
 func TestGetRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	_, mockDBClient, _, tearDown := setUp(t)
+	_, mockDBClient, mockKCClient, tearDown := setUp(t)
 	defer tearDown()
 
 	testcases := []struct {
@@ -74,11 +75,38 @@ func TestGetRequest(t *testing.T) {
 		httpStatus     int
 	}{
 		{
-			name: "get request successfully",
+			name: "owner gets own request successfully",
 			mockFunc: func() {
 				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(getResource("get-request-by-id", nil).(*models.Request), nil).Times(1)
 			},
-			httpStatus: http.StatusOK,
+			requestContext: formContext(customValues{"userid": "12345"}),
+			httpStatus:     http.StatusOK,
+		},
+		{
+			name: "manager gets another user's request successfully",
+			mockFunc: func() {
+				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(getResource("get-request-by-id", nil).(*models.Request), nil).Times(1)
+				mockKCClient.EXPECT().IsRole(utils.ManagerRole).Return(true).Times(1)
+			},
+			requestContext: formContext(customValues{"userid": "manager-id"}),
+			httpStatus:     http.StatusOK,
+		},
+		{
+			name: "non-owner non-manager is forbidden",
+			mockFunc: func() {
+				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(getResource("get-request-by-id", nil).(*models.Request), nil).Times(1)
+				mockKCClient.EXPECT().IsRole(utils.ManagerRole).Return(false).Times(1)
+			},
+			requestContext: formContext(customValues{"userid": "attacker-id"}),
+			httpStatus:     http.StatusForbidden,
+		},
+		{
+			name: "request not found",
+			mockFunc: func() {
+				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(nil, utils.ErrResourceNotFound).Times(1)
+			},
+			requestContext: formContext(customValues{"userid": "12345"}),
+			httpStatus:     http.StatusNotFound,
 		},
 	}
 	for _, tc := range testcases {
