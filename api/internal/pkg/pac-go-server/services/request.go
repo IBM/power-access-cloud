@@ -96,9 +96,20 @@ func GetRequest(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, utils.ErrResourceNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("request with id: %s not found", id)})
+			return
 		}
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	// a request can only be read by the user who created it or by a manager
+	if request.UserID != c.Request.Context().Value("userid").(string) {
+		config := client.GetConfigFromContext(c.Request.Context())
+		kc := client.NewKeyCloakClient(config, c.Request.Context())
+		if !kc.IsRole(utils.ManagerRole) {
+			logger.Error("only admin or request creator can read the request", zap.String("id", id))
+			c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to view this request."})
+			return
+		}
 	}
 	logger.Debug("fetched request", zap.Any("request", request))
 	c.JSON(http.StatusOK, request)

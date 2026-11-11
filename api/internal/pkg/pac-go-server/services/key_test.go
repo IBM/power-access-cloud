@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -52,7 +53,7 @@ func TestGetAllKeys(t *testing.T) {
 
 func TestGetKey(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	_, mockDBClient, _, tearDown := setUp(t)
+	_, mockDBClient, mockKCClient, tearDown := setUp(t)
 	defer tearDown()
 
 	testcases := []struct {
@@ -62,11 +63,30 @@ func TestGetKey(t *testing.T) {
 		httpStatus     int
 	}{
 		{
-			name: "fetched all keys successfully",
+			name: "owner gets own key successfully",
 			mockFunc: func() {
 				mockDBClient.EXPECT().GetKeyByID(gomock.Any()).Return(getResource("get-key-by-id", nil), nil).Times(1)
 			},
-			httpStatus: http.StatusOK,
+			requestContext: formContext(customValues{"userid": "12345"}),
+			httpStatus:     http.StatusOK,
+		},
+		{
+			name: "manager gets another user's key successfully",
+			mockFunc: func() {
+				mockDBClient.EXPECT().GetKeyByID(gomock.Any()).Return(getResource("get-key-by-id", nil), nil).Times(1)
+				mockKCClient.EXPECT().IsRole(utils.ManagerRole).Return(true).Times(1)
+			},
+			requestContext: formContext(customValues{"userid": "manager-id"}),
+			httpStatus:     http.StatusOK,
+		},
+		{
+			name: "non-owner non-manager is forbidden",
+			mockFunc: func() {
+				mockDBClient.EXPECT().GetKeyByID(gomock.Any()).Return(getResource("get-key-by-id", nil), nil).Times(1)
+				mockKCClient.EXPECT().IsRole(utils.ManagerRole).Return(false).Times(1)
+			},
+			requestContext: formContext(customValues{"userid": "attacker-id"}),
+			httpStatus:     http.StatusForbidden,
 		},
 	}
 	for _, tc := range testcases {
