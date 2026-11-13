@@ -9,6 +9,7 @@ import {
 import "../styles/chat-support.scss";
 import axios from "axios";
 import UserService from "../services/UserService";
+import { openAuthedWebSocket } from "../services/websocket";
 
 const api = axios.create();
 api.interceptors.request.use((config) => {
@@ -116,9 +117,9 @@ const ChatAdmin = () => {
 
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
         const token = UserService.getToken();
-        const url = `${protocol}//${window.location.host}/pac-go-server/admin/conversations/${userID}/${convID}/ws?token=${encodeURIComponent(token)}`;
+        const url = `${protocol}//${window.location.host}/pac-go-server/admin/conversations/${userID}/${convID}/ws`;
 
-        const ws = new WebSocket(url);
+        const ws = openAuthedWebSocket(url, token);
         ws._convID = convID; // tag so reconnect guards above can identify it
         watchWsRef.current = ws;
 
@@ -234,8 +235,8 @@ const ChatAdmin = () => {
         }
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
         const token = UserService.getToken();
-        const url = `${protocol}//${window.location.host}/pac-go-server/admin/watch?token=${encodeURIComponent(token)}`;
-        ws = new WebSocket(url);
+        const url = `${protocol}//${window.location.host}/pac-go-server/admin/watch`;
+        ws = openAuthedWebSocket(url, token);
 
         ws.onmessage = onMessage;
         ws.onerror = () => console.error("admin watch-all WS error");
