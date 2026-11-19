@@ -139,12 +139,24 @@ func UpdateServiceExpiryRequest(c *gin.Context) {
 		if errors.Is(err, utils.ErrResourceNotFound) {
 			logger.Error("service not found", zap.String("service name", serviceName))
 			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("service with name %s not found", serviceName)})
+			return
 		}
 		logger.Error("failed to get service", zap.String("service name", serviceName), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	logger.Debug("fetched service", zap.Any("service", service))
+
+	// only the owner of the service or a manager can request to extend its expiry
+	if service.Spec.UserID != userID {
+		config := client.GetConfigFromContext(c.Request.Context())
+		kc := client.NewKeyCloakClient(config, c.Request.Context())
+		if !kc.IsRole(utils.ManagerRole) {
+			logger.Error("only admin or service owner can request to extend the service expiry", zap.String("service name", serviceName))
+			c.JSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("You do not have permission to extend the expiry of service %s.", serviceName)})
+			return
+		}
+	}
 
 	// service shouldn't be extended it is already expired
 	now := time.Now()
@@ -880,6 +892,15 @@ func DeleteRequest(c *gin.Context) {
 		logger.Error("failed to delete request in database", zap.String("id", id), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to delete the record from the db, err: %s", err.Error())})
 		return
+	}
+
+	// A pending (NEW) service expiry request owns the PendingExtensionRequest annotation on the
+	// service. Clear it, otherwise nothing can (approve/reject need the request that was just deleted).
+	if request.RequestType == models.RequestExtendServiceExpiry && request.ServiceExpiry != nil && request.State == models.RequestStateNew {
+		if err := kubeClient.UpdateServicePendingExtensionRequestAnnotation(request.ServiceExpiry.Name, false); err != nil {
+			logger.Error("failed to clear service pending extension request annotation", zap.String("service name", request.ServiceExpiry.Name), zap.Error(err))
+			// Don't fail the deletion, just log the error
+		}
 	}
 	event, err := models.NewEvent(request.UserID, originator, models.EventTypeRequestDeleted)
 	if err != nil {

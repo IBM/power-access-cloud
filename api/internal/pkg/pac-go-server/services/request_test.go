@@ -10,6 +10,7 @@ import (
 
 	pac "github.com/IBM/power-access-cloud/api/apis/app/v1alpha1"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -100,7 +101,7 @@ func TestGetRequest(t *testing.T) {
 
 func TestUpdateServiceExpiryRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockClient, mockDBClient, _, tearDown := setUp(t)
+	mockClient, mockDBClient, mockKCClient, tearDown := setUp(t)
 	defer tearDown()
 
 	testcases := []struct {
@@ -122,9 +123,49 @@ func TestUpdateServiceExpiryRequest(t *testing.T) {
 				mockDBClient.EXPECT().NewRequest(gomock.Any()).Return("123", nil).Times(1)
 			},
 			requestContext: formContext(customValues{
-				"userid": "12345",
+				"userid": "test-user",
 			}),
 			httpStatus: http.StatusCreated,
+			request:    getResource("get-request-by-id", nil).(*models.Request),
+		},
+		{
+			name: "manager can request expiry extension for another user's service",
+			mockFunc: func() {
+				mockClient.EXPECT().GetService(gomock.Any()).Return(getResource("get-service", nil).(pac.Service), nil).Times(1)
+				mockKCClient.EXPECT().IsRole(utils.ManagerRole).Return(true).Times(1)
+				mockClient.EXPECT().GetCatalog(gomock.Any()).Return(getResource("get-catalog", nil).(pac.Catalog), nil).Times(1)
+				mockDBClient.EXPECT().GetRequestByServiceName(gomock.Any()).Return(getResource("get-request-by-service-name", nil).([]models.Request), nil).Times(1)
+				mockClient.EXPECT().UpdateServicePendingExtensionRequestAnnotation(gomock.Any(), true).Return(nil).Times(1)
+				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
+				mockDBClient.EXPECT().NewRequest(gomock.Any()).Return("123", nil).Times(1)
+			},
+			requestContext: formContext(customValues{
+				"userid": "manager-id",
+			}),
+			httpStatus: http.StatusCreated,
+			request:    getResource("get-request-by-id", nil).(*models.Request),
+		},
+		{
+			name: "non-owner non-manager cannot request expiry extension",
+			mockFunc: func() {
+				mockClient.EXPECT().GetService(gomock.Any()).Return(getResource("get-service", nil).(pac.Service), nil).Times(1)
+				mockKCClient.EXPECT().IsRole(utils.ManagerRole).Return(false).Times(1)
+			},
+			requestContext: formContext(customValues{
+				"userid": "attacker-id",
+			}),
+			httpStatus: http.StatusForbidden,
+			request:    getResource("get-request-by-id", nil).(*models.Request),
+		},
+		{
+			name: "service not found",
+			mockFunc: func() {
+				mockClient.EXPECT().GetService(gomock.Any()).Return(pac.Service{}, utils.ErrResourceNotFound).Times(1)
+			},
+			requestContext: formContext(customValues{
+				"userid": "test-user",
+			}),
+			httpStatus: http.StatusNotFound,
 			request:    getResource("get-request-by-id", nil).(*models.Request),
 		},
 		{
@@ -151,7 +192,7 @@ func TestUpdateServiceExpiryRequest(t *testing.T) {
 				mockClient.EXPECT().GetService(gomock.Any()).Return(getResource("get-service", nil).(pac.Service), nil).Times(1)
 			},
 			requestContext: formContext(customValues{
-				"userid": "12345",
+				"userid": "test-user",
 			}),
 			httpStatus: http.StatusBadRequest,
 			request:    getResource("get-request-by-id-before-expiry", nil).(*models.Request),
@@ -162,7 +203,7 @@ func TestUpdateServiceExpiryRequest(t *testing.T) {
 				mockClient.EXPECT().GetService(gomock.Any()).Return(getResource("get-service", nil).(pac.Service), nil).Times(1)
 			},
 			requestContext: formContext(customValues{
-				"userid": "12345",
+				"userid": "test-user",
 			}),
 			httpStatus: http.StatusBadRequest,
 			request:    getResource("get-request-more-than-6months", nil).(*models.Request),
@@ -490,7 +531,7 @@ func TestRejectRequest(t *testing.T) {
 
 func TestDeleteRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	_, mockDBClient, mockKCClient, tearDown := setUp(t)
+	mockClient, mockDBClient, mockKCClient, tearDown := setUp(t)
 	defer tearDown()
 
 	testcases := []struct {
@@ -506,6 +547,44 @@ func TestDeleteRequest(t *testing.T) {
 				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(getResource("get-request-by-id", nil).(*models.Request), nil).Times(1)
 				mockKCClient.EXPECT().GetUserID().Return("12345").Times(1)
 				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(true).Times(1)
+				mockDBClient.EXPECT().DeleteRequest(gomock.Any()).Return(nil).Times(1)
+				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
+			},
+			httpStatus: http.StatusNoContent,
+		},
+		{
+			name: "deleting a pending service expiry request clears the pending extension annotation",
+			mockFunc: func() {
+				req := getResource("get-request-by-id", customValues{"State": models.RequestStateNew}).(*models.Request)
+				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(req, nil).Times(1)
+				mockKCClient.EXPECT().GetUserID().Return("12345").Times(1)
+				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(false).Times(1)
+				mockDBClient.EXPECT().DeleteRequest(gomock.Any()).Return(nil).Times(1)
+				mockClient.EXPECT().UpdateServicePendingExtensionRequestAnnotation("test-service", false).Return(nil).Times(1)
+				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
+			},
+			httpStatus: http.StatusNoContent,
+		},
+		{
+			name: "annotation clear failure does not fail the deletion",
+			mockFunc: func() {
+				req := getResource("get-request-by-id", customValues{"State": models.RequestStateNew}).(*models.Request)
+				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(req, nil).Times(1)
+				mockKCClient.EXPECT().GetUserID().Return("12345").Times(1)
+				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(false).Times(1)
+				mockDBClient.EXPECT().DeleteRequest(gomock.Any()).Return(nil).Times(1)
+				mockClient.EXPECT().UpdateServicePendingExtensionRequestAnnotation("test-service", false).Return(fmt.Errorf("k8s down")).Times(1)
+				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
+			},
+			httpStatus: http.StatusNoContent,
+		},
+		{
+			name: "deleting a processed service expiry request does not touch the annotation",
+			mockFunc: func() {
+				req := getResource("get-request-by-id", customValues{"State": models.RequestStateApproved}).(*models.Request)
+				mockDBClient.EXPECT().GetRequestByID(gomock.Any()).Return(req, nil).Times(1)
+				mockKCClient.EXPECT().GetUserID().Return("12345").Times(1)
+				mockKCClient.EXPECT().IsRole(gomock.Any()).Return(false).Times(1)
 				mockDBClient.EXPECT().DeleteRequest(gomock.Any()).Return(nil).Times(1)
 				mockDBClient.EXPECT().NewEvent(gomock.Any()).Times(1)
 			},
@@ -533,6 +612,7 @@ func TestDeleteRequest(t *testing.T) {
 			ctx := getContext(tc.requestContext)
 			c.Request = req.WithContext(ctx)
 			dbCon = mockDBClient
+			kubeClient = mockClient
 			DeleteRequest(c)
 			assert.Equal(t, tc.httpStatus, c.Writer.Status())
 		})
