@@ -15,6 +15,7 @@ import (
 	pacClient "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/client"
 	log "github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/logger"
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/models"
+	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 )
 
 // wsWriteTimeout is the maximum time allowed for a single WebSocket write.
@@ -37,7 +38,7 @@ func wsWrite(ctx context.Context, conn *websocket.Conn, v interface{}) error {
 func HandleChatWebSocket(c *gin.Context) {
 	logger := log.GetLogger()
 
-	// Auth is already done by the middleware chain (InjectTokenFromQuery →
+	// Auth is already done by the middleware chain (InjectTokenFromSubprotocol →
 	// ginkeycloak.Auth → RetrospectKeycloakToken). Read userid before the
 	// upgrade since c.Request.Context() is only valid until the handler returns.
 	userID, _ := c.Request.Context().Value("userid").(string)
@@ -54,6 +55,7 @@ func HandleChatWebSocket(c *gin.Context) {
 	}
 	conn, err := websocket.Accept(rw, c.Request, &websocket.AcceptOptions{
 		OriginPatterns: []string{"*"},
+		Subprotocols:   []string{utils.WebSocketAuthSubprotocol},
 	})
 	if err != nil {
 		logger.Error("websocket upgrade failed", zap.Error(err))
@@ -728,6 +730,7 @@ func AdminWatchConversation(c *gin.Context) {
 	}
 	conn, err := websocket.Accept(rw, c.Request, &websocket.AcceptOptions{
 		OriginPatterns: []string{"*"},
+		Subprotocols:   []string{utils.WebSocketAuthSubprotocol},
 	})
 	if err != nil {
 		logger.Error("admin watch: websocket upgrade failed", zap.Error(err))
@@ -806,6 +809,7 @@ func AdminWatchAll(c *gin.Context) {
 	}
 	conn, err := websocket.Accept(rw, c.Request, &websocket.AcceptOptions{
 		OriginPatterns: []string{"*"},
+		Subprotocols:   []string{utils.WebSocketAuthSubprotocol},
 	})
 	if err != nil {
 		logger.Error("admin watch-all: websocket upgrade failed", zap.Error(err))

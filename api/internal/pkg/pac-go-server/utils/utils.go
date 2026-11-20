@@ -14,6 +14,12 @@ import (
 const (
 	ManagerRole = "manager"
 
+	// WebSocketAuthSubprotocol is the Sec-WebSocket-Protocol value that marks a
+	// WebSocket handshake carrying a bearer token. The client offers
+	// [WebSocketAuthSubprotocol, <token>]; the server only ever selects (echoes)
+	// WebSocketAuthSubprotocol, never the token.
+	WebSocketAuthSubprotocol = "pac.v1"
+
 	// DefaultExpirationDays - default expiration days set for Catalog
 	DefaultExpirationDays = 5
 )

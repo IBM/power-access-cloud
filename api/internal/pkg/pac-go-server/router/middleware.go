@@ -15,19 +15,37 @@ import (
 	"github.com/IBM/power-access-cloud/api/internal/pkg/pac-go-server/utils"
 )
 
-// InjectTokenFromQuery promotes a ?token= query parameter to an
-// "Authorization: Bearer <token>" header. This is needed for WebSocket
-// connections because browsers cannot set custom headers on the WS upgrade
-// request. Must be placed before the Keycloak auth middlewares.
-func InjectTokenFromQuery(c *gin.Context) {
-	token := c.Query("token")
+// tokenFromWebSocketSubprotocols extracts a bearer token from a
+// Sec-WebSocket-Protocol header value of the form "pac.v1, <token>".
+// It returns "" if the header does not follow that form.
+func tokenFromWebSocketSubprotocols(header string) string {
+	parts := strings.Split(header, ",")
+	if len(parts) != 2 || !strings.EqualFold(strings.TrimSpace(parts[0]), utils.WebSocketAuthSubprotocol) {
+		return ""
+	}
+	return strings.TrimSpace(parts[1])
+}
+
+// InjectTokenFromSubprotocol promotes a bearer token offered in the
+// Sec-WebSocket-Protocol header to an "Authorization: Bearer <token>" header.
+// This is needed for WebSocket connections because browsers cannot set custom
+// headers on the WS upgrade request. The token is deliberately not accepted
+// from the URL query string, which would leak it into access logs. Must be
+// placed before the Keycloak auth middlewares.
+//
+// Once extracted, the token is removed from Sec-WebSocket-Protocol (leaving
+// only the subprotocol name that the handshake must still negotiate). gin's
+// panic-recovery request dump masks Authorization but not other headers, so
+// this keeps the token from being written there.
+func InjectTokenFromSubprotocol(c *gin.Context) {
+	token := tokenFromWebSocketSubprotocols(c.GetHeader("Sec-WebSocket-Protocol"))
+	if token != "" {
+		c.Request.Header.Set("Sec-WebSocket-Protocol", utils.WebSocketAuthSubprotocol)
+	}
 	if token != "" && c.GetHeader("Authorization") == "" {
 		c.Request.Header.Set("Authorization", "Bearer "+token)
-		log.GetLogger().Debug("InjectTokenFromQuery: set Authorization header from ?token=",
-			zap.String("path", c.Request.URL.Path),
-		)
 	} else {
-		log.GetLogger().Warn("InjectTokenFromQuery: skipped",
+		log.GetLogger().Warn("InjectTokenFromSubprotocol: skipped",
 			zap.String("path", c.Request.URL.Path),
 			zap.Bool("token_present", token != ""),
 			zap.Bool("auth_header_present", c.GetHeader("Authorization") != ""),

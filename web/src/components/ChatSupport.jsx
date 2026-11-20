@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Add } from "@carbon/icons-react";
 import UserService from "../services/UserService";
+import { openAuthedWebSocket } from "../services/websocket";
 import axios from "axios";
 import "../styles/chat-support.scss";
 
@@ -71,16 +72,15 @@ const ChatSupport = () => {
 
     const buildWsUrl = () => {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const token = UserService.getToken();
-      return `${protocol}//${window.location.host}/pac-go-server/chat?token=${encodeURIComponent(token)}`;
+      return `${protocol}//${window.location.host}/pac-go-server/chat`;
     };
 
     const connect = () => {
       if (!shouldReconnect.current) return;
       // Refresh the token before every connect attempt. Keycloak on staging
-      // issues 5-minute access tokens — the token baked into the WS URL expires
+      // issues 5-minute access tokens — the token offered at handshake expires
       // mid-session and the server closes the connection. updateToken() silently
-      // fetches a new token via the refresh token so the next WS URL is fresh.
+      // fetches a new token via the refresh token so the next connect is fresh.
       UserService.updateToken(() => {
         if (!shouldReconnect.current) return;
 
@@ -92,7 +92,7 @@ const ChatSupport = () => {
           wsRef.current.close(1000, "reconnecting");
         }
 
-        const ws = new WebSocket(buildWsUrl());
+        const ws = openAuthedWebSocket(buildWsUrl(), UserService.getToken());
         wsRef.current = ws;
 
         ws.onopen = () => {

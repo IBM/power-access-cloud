@@ -139,21 +139,23 @@ func CreateRouter() *gin.Engine {
 	authorized.GET("/conversations/:conv_id/messages", services.GetUserConversationMessages)
 
 	// chat support — WebSocket endpoint for users.
-	// InjectTokenFromQuery MUST be first: browsers cannot set custom headers on
-	// a WS upgrade request, so the JWT arrives as ?token= and must be promoted
-	// to an Authorization header before the Keycloak middlewares run.
+	// InjectTokenFromSubprotocol MUST be first: browsers cannot set custom
+	// headers on a WS upgrade request, so the JWT arrives in the
+	// Sec-WebSocket-Protocol header (never the URL, which would be logged) and
+	// must be promoted to an Authorization header before the Keycloak
+	// middlewares run.
 	// All three middlewares run before HandleChatWebSocket is entered, so they
 	// only ever write HTTP error responses — never after the connection is
 	// hijacked.
 	wsGroup := router.Group("/api/v1")
-	wsGroup.Use(InjectTokenFromQuery)
+	wsGroup.Use(InjectTokenFromSubprotocol)
 	wsGroup.Use(ginkeycloak.Auth(ginkeycloak.AuthCheck(), ginkeycloak.KeycloakConfig{
 		Url:   hostname,
 		Realm: realm,
 	}))
 	wsGroup.Use(RetrospectKeycloakToken)
 	wsGroup.GET("/chat", services.HandleChatWebSocket)
-	// Admin watch WebSockets: reuse the same InjectTokenFromQuery + auth chain.
+	// Admin watch WebSockets: reuse the same InjectTokenFromSubprotocol + auth chain.
 	wsGroup.Use(AllowAdminOnly)
 	wsGroup.GET("/admin/conversations/:user_id/:conv_id/ws", services.AdminWatchConversation)
 	// Single broadcast WS — admin subscribes once to get unread indicators for all convs.
