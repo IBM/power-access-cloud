@@ -77,6 +77,15 @@ func GetKey(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	// a key can only be read by the user who owns it or by a manager
+	if key.UserID != c.Request.Context().Value("userid").(string) {
+		config := client.GetConfigFromContext(c.Request.Context())
+		kc := client.NewKeyCloakClient(config, c.Request.Context())
+		if !kc.IsRole(utils.ManagerRole) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to view this key."})
+			return
+		}
+	}
 	c.JSON(http.StatusOK, key)
 }
 
